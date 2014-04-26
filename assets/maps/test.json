@@ -13,21 +13,74 @@
         }, 
         {
          "height":32,
-         "name":"entities",
+         "name":"doods",
          "objects":[
                 {
                  "gid":65,
                  "height":0,
-                 "name":"player_spawn",
+                 "name":"player",
                  "properties":
                     {
 
                     },
-                 "type":"",
+                 "type":"player",
                  "visible":true,
                  "width":0,
-                 "x":192,
-                 "y":288
+                 "x":160,
+                 "y":256
+                }, 
+                {
+                 "gid":66,
+                 "height":0,
+                 "name":"zombie",
+                 "properties":
+                    {
+
+                    },
+                 "type":"npc",
+                 "visible":true,
+                 "width":0,
+                 "x":608,
+                 "y":384
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "width":64,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "height":32,
+         "name":"lights",
+         "objects":[
+                {
+                 "gid":67,
+                 "height":0,
+                 "name":"light0",
+                 "properties":
+                    {
+                     "size":"8"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":512
+                }, 
+                {
+                 "gid":67,
+                 "height":0,
+                 "name":"light1",
+                 "properties":
+                    {
+                     "size":"5"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":608,
+                 "y":640
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -208,22 +261,32 @@
         }, 
         {
          "firstgid":65,
-         "image":"..\/sprites\/dummy_char.png",
+         "image":"..\/sprites\/dummies.png",
          "imageheight":48,
-         "imagewidth":32,
+         "imagewidth":64,
          "margin":0,
-         "name":"Character",
+         "name":"doods",
          "properties":
             {
 
             },
          "spacing":0,
          "tileheight":48,
-         "tileoffset":
+         "tilewidth":32
+        }, 
+        {
+         "firstgid":67,
+         "image":"..\/..\/assets-src\/light.png",
+         "imageheight":32,
+         "imagewidth":32,
+         "margin":0,
+         "name":"items",
+         "properties":
             {
-             "x":0,
-             "y":16
+
             },
+         "spacing":0,
+         "tileheight":32,
          "tilewidth":32
         }],
  "tilewidth":32,
