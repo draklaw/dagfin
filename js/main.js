@@ -23,6 +23,7 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.preload = function () {
 	'use strict';
 	this.load.spritesheet("dummies", "assets/sprites/dummies.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.image("background", "assets/dummy_background.png");
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	this.load.image("defaultTileset", "assets/tilesets/test.png");
@@ -69,7 +70,7 @@ GameState.prototype.create = function () {
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
 		spawnObj = this.map.objects.doods[i];
-		this.mobs[i] = new Dood(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT, 1);
+		this.mobs[i] = new Dood(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT, "dummies");
 		this.mobs[i].body.velocity.x = ZOMBIE_VELOCITY;
 	}
 	
@@ -91,19 +92,28 @@ GameState.prototype.update = function () {
 	
 	// React to controls.
 	this.player.body.velocity.set(0, 0);
-	if (this.k_up.isDown)
-		this.player.body.velocity.y = -PLAYER_VELOCITY;
-	if (this.k_down.isDown)
+	if (this.k_down.isDown) {
 		this.player.body.velocity.y = PLAYER_VELOCITY;
-	if (this.k_left.isDown)
-		this.player.body.velocity.x = -PLAYER_VELOCITY;
-	if (this.k_right.isDown)
+		this.player.frame = 0;
+	}
+	if (this.k_up.isDown) {
+		this.player.body.velocity.y = -PLAYER_VELOCITY;
+		this.player.frame = 1;
+	}
+	if (this.k_right.isDown) {
 		this.player.body.velocity.x = PLAYER_VELOCITY;
+		this.player.frame = 2;
+	}
+	if (this.k_left.isDown) {
+		this.player.body.velocity.x = -PLAYER_VELOCITY;
+		this.player.frame = 3;
+	}
 	
 	// Shamble around aimlessly.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
 		this.game.physics.arcade.collide(this.mobs[i], this.mapLayer);
+//this.game.physics.arcade.collide(this.mobs[i], this.player);
 		var zed = this.mobs[i].body;
 		if (zed.blocked.up||zed.blocked.down||zed.blocked.left||zed.blocked.right)
 			switch (this.rnd.integer()%4) {
@@ -165,12 +175,12 @@ GameState.prototype.drawLight = function(wx, wy, variant, scale) {
 };
 
 // Dood object.
-function Dood(game, x, y, id, group) {
+function Dood(game, x, y, spritesheet, group) {
 	'use strict';
 	
 	if (typeof group === 'undefined') { group = game.world; }
 	
-	Phaser.Sprite.call(this, game, x, y, "dummies", id);
+	Phaser.Sprite.call(this, game, x, y, spritesheet, 0);
 	group.add(this);
 	
 	this.game.physics.arcade.enable(this);
@@ -183,7 +193,7 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 function Player(game, x, y) {
 	'use strict';
 	
-	Dood.call(this, game, x, y, 0);
+	Dood.call(this, game, x, y, "player");
 }
 
 Player.prototype = Object.create(Dood.prototype);
