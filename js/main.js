@@ -2,6 +2,10 @@
 var Phaser = Phaser || null;
 var Dood = Dood || null;
 
+// Constants.
+var MAX_WIDTH = 800;
+var MAX_HEIGHT = 600;
+
 // GameState object.
 function GameState() {
 	'use strict';
@@ -14,6 +18,8 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.preload = function () {
 	'use strict';
 	this.load.image("player", "assets/sprites/dummy_char.png");
+	this.load.image("background", "assets/dummy_background.png");
+	this.load.image("lantern", "assets/lantern.png");
 };
 
 GameState.prototype.create = function () {
@@ -21,18 +27,27 @@ GameState.prototype.create = function () {
 	this.time.advancedTiming = true;
 	
 	// Keyboard controls.
-	this.k_up = this.input.keyboard.addKey(Phaser.Keyboard.UP);
-	this.k_down = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-	this.k_left = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-	this.k_right = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
+	this.k_down = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+	
+	// Background.
+	this.game.add.image(0, 0, "background");
 	
 	// People.
 	this.player = new Dood(this.game, 0, 0, "player");
+	
+	// Lighting.
+	this.i_lantern = this.cache.getImage("lantern");
+	
+	this.i_mask = this.game.make.bitmapData(MAX_WIDTH, MAX_HEIGHT);
+	this.game.add.image(0,0,this.i_mask);
 };
 
 GameState.prototype.update = function () {
 	'use strict';
-
+	
 	// React to controls.
 	if (this.k_up.isDown)
 		this.player.y -= 1;
@@ -42,6 +57,14 @@ GameState.prototype.update = function () {
 		this.player.x -= 1;
 	if (this.k_right.isDown)
 		this.player.x += 1;
+	
+	// Update lighting.
+	this.i_mask.context.fillStyle = "rgba(0,0,0,1.0)";
+	this.i_mask.context.globalCompositeOperation = 'source-over';
+	this.i_mask.context.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+	this.i_mask.context.globalCompositeOperation = 'destination-out';
+	this.i_mask.context.drawImage(this.i_lantern, this.player.x - this.i_lantern.width/2, this.player.y - this.i_lantern.height/2);
+	this.i_mask.dirty = true;
 };
 
 GameState.prototype.render = function () {
@@ -67,5 +90,5 @@ function Player() {
 }
 
 // Actual main.
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', GameState);
+var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, '', GameState);
 
