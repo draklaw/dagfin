@@ -5,7 +5,7 @@ var Dood = Dood || null;
 // GameState object.
 function GameState() {
 	'use strict';
-    
+	
 	Phaser.State.call(this);
 }
 
@@ -34,12 +34,14 @@ GameState.prototype.update = function () {
 	'use strict';
 
 	// React to controls.
-	if (this.k_up.isDown) {
+	if (this.k_up.isDown)
 		this.player.y -= 1;
-	}
-	if (this.k_down.isDown) {this.player.y += 1; }
-	if (this.k_left.isDown) {this.player.x -= 1; }
-	if (this.k_right.isDown) {this.player.x += 1; }
+	if (this.k_down.isDown)
+		this.player.y += 1;
+	if (this.k_left.isDown)
+		this.player.x -= 1;
+	if (this.k_right.isDown)
+		this.player.x += 1;
 };
 
 GameState.prototype.render = function () {
