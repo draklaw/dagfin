@@ -14,11 +14,17 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.preload = function () {
 	'use strict';
 	this.load.image("player", "assets/sprites/dummy_char.png");
+	this.load.image("defaultTileset", "assets/tilesets/test.png");
+	
+	this.load.tilemap("map", "assets/maps/test.json", null,
+					  Phaser.Tilemap.TILED_JSON);
 };
 
 GameState.prototype.create = function () {
 	'use strict';
 	this.time.advancedTiming = true;
+	
+//	this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	
 	// Keyboard controls.
 	this.k_up = this.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -26,8 +32,24 @@ GameState.prototype.create = function () {
 	this.k_left = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 	
+	// Map.
+	this.map = this.game.add.tilemap("map");
+	this.map.addTilesetImage("default", "defaultTileset");
+	this.map.setCollision([
+		10, 13, 14,
+		18, 21, 22,
+		26,
+		49, 51
+	]);
+	
+	this.mapLayer = this.map.createLayer("map");
+	this.mapLayer.resizeWorld();
+//	this.mapLayer.debug = true;
+	
 	// People.
-	this.player = new Dood(this.game, 0, 0, "player");
+	var spawnObj = this.map.objects.entities[0];
+	var playerHeight = this.cache.getImage("player").height;
+	this.player = new Dood(this.game, spawnObj.x, spawnObj.y-playerHeight, "player");
 };
 
 GameState.prototype.update = function () {
