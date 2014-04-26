@@ -20,13 +20,26 @@ GameState.prototype.create = function () {
 	'use strict';
 	this.time.advancedTiming = true;
 	
+	// Keyboard controls.
+	this.k_up = this.input.keyboard.addKey(Phaser.Keyboard.UP);
+	this.k_down = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+	this.k_left = this.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+	this.k_right = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+	
+	// People.
 	this.player = new Dood(this.game, 0, 0, "player");
 };
 
 GameState.prototype.update = function () {
 	'use strict';
-	
-	
+
+	// React to controls.
+	if (this.k_up.isDown) {
+		this.player.y -= 1;
+	}
+	if (this.k_down.isDown) {this.player.y += 1; }
+	if (this.k_left.isDown) {this.player.x -= 1; }
+	if (this.k_right.isDown) {this.player.x += 1; }
 };
 
 GameState.prototype.render = function () {
