@@ -2,6 +2,8 @@
 var Phaser = Phaser || null;
 var Dood = Dood || null;
 
+var PLAYER_VELOCITY = 140;
+
 // GameState object.
 function GameState() {
 	'use strict';
@@ -50,20 +52,25 @@ GameState.prototype.create = function () {
 	var spawnObj = this.map.objects.entities[0];
 	var playerHeight = this.cache.getImage("player").height;
 	this.player = new Dood(this.game, spawnObj.x, spawnObj.y-playerHeight, "player");
+	
+	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 };
 
 GameState.prototype.update = function () {
 	'use strict';
 
+	this.game.physics.arcade.collide(this.player, this.mapLayer);
+	
 	// React to controls.
+	this.player.body.velocity.set(0, 0);
 	if (this.k_up.isDown)
-		this.player.y -= 1;
+		this.player.body.velocity.y = -PLAYER_VELOCITY;
 	if (this.k_down.isDown)
-		this.player.y += 1;
+		this.player.body.velocity.y = PLAYER_VELOCITY;
 	if (this.k_left.isDown)
-		this.player.x -= 1;
+		this.player.body.velocity.x = -PLAYER_VELOCITY;
 	if (this.k_right.isDown)
-		this.player.x += 1;
+		this.player.body.velocity.x = PLAYER_VELOCITY;
 };
 
 GameState.prototype.render = function () {
@@ -79,6 +86,9 @@ function Dood(game, x, y, img, group) {
 	
 	Phaser.Sprite.call(this, game, x, y, img);
 	group.add(this);
+	
+	this.game.physics.arcade.enable(this);
+	this.body.setSize(32, 32, 0, 16);
 }
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
