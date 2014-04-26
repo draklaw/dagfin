@@ -1,15 +1,15 @@
-// "Global" variables.
-var Phaser = Phaser || null;
-var Dood = Dood || null;
-
 // Constants.
 var MAX_WIDTH = 800;
 var MAX_HEIGHT = 600;
+
+var DOOD_WIDTH = 32;
+var DOOD_HEIGHT = 48;
 
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 
 var PLAYER_VELOCITY = 140;
+var ZOMBIE_VELOCITY = 40;
 
 // GameState object.
 function GameState() {
@@ -22,7 +22,7 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.preload = function () {
 	'use strict';
-	this.load.image("dummies", "assets/sprites/dummies.png");
+	this.load.spritesheet("dummies", "assets/sprites/dummies.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.image("background", "assets/dummy_background.png");
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	this.load.image("defaultTileset", "assets/tilesets/test.png");
@@ -62,10 +62,16 @@ GameState.prototype.create = function () {
 	
 	// People.
 	var spawnObj = this.map.objects.doods[0];
-	var playerHeight = this.cache.getImage("dummies").height;
-	this.player = new Dood(this.game, spawnObj.x, spawnObj.y-playerHeight, "player");
-	
+	this.player = new Player(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
+	
+	this.mobs = new Array();
+	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
+	{
+		spawnObj = this.map.objects.doods[i];
+		this.mobs[i] = new Dood(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT, 1);
+		this.mobs[i].body.velocity.x = ZOMBIE_VELOCITY;
+	}
 	
 	// Lighting.
 	this.i_lantern = this.cache.getImage("radial_light");
@@ -80,7 +86,7 @@ GameState.prototype.create = function () {
 
 GameState.prototype.update = function () {
 	'use strict';
-
+	
 	this.game.physics.arcade.collide(this.player, this.mapLayer);
 	
 	// React to controls.
@@ -94,12 +100,38 @@ GameState.prototype.update = function () {
 	if (this.k_right.isDown)
 		this.player.body.velocity.x = PLAYER_VELOCITY;
 	
+	// Shamble around aimlessly.
+	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
+	{
+		this.game.physics.arcade.collide(this.mobs[i], this.mapLayer);
+		var zed = this.mobs[i].body;
+		if (zed.blocked.up||zed.blocked.down||zed.blocked.left||zed.blocked.right)
+			switch (this.rnd.integer()%4) {
+				case 0:
+					zed.velocity.x = 0;
+					zed.velocity.y = -ZOMBIE_VELOCITY;
+					break;
+				case 1:
+					zed.velocity.x = 0;
+					zed.velocity.y = ZOMBIE_VELOCITY;
+					break;
+				case 2:
+					zed.velocity.y = 0;
+					zed.velocity.x = -ZOMBIE_VELOCITY;
+					break;
+				case 3:
+					zed.velocity.y = 0;
+					zed.velocity.x = ZOMBIE_VELOCITY;
+					break;
+			}
+	}
+	
 	// Update lighting.
 	this.i_mask.context.fillStyle = "rgba(0,0,0,1.0)";
 	this.i_mask.context.globalCompositeOperation = 'source-over';
 	this.i_mask.context.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
 	this.i_mask.context.globalCompositeOperation = 'destination-out';
-
+	
 	this.drawLight(this.player.x + this.player.width / 2,
 				   this.player.y + this.player.height / 2,
 				   this.lightVariant, LIGHT_SCALE);
@@ -133,12 +165,12 @@ GameState.prototype.drawLight = function(wx, wy, variant, scale) {
 };
 
 // Dood object.
-function Dood(game, x, y, img, group) {
+function Dood(game, x, y, id, group) {
 	'use strict';
 	
 	if (typeof group === 'undefined') { group = game.world; }
 	
-	Phaser.Sprite.call(this, game, x, y, img);
+	Phaser.Sprite.call(this, game, x, y, "dummies", id);
 	group.add(this);
 	
 	this.game.physics.arcade.enable(this);
@@ -148,9 +180,13 @@ function Dood(game, x, y, img, group) {
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 // Player object.
-function Player() {
+function Player(game, x, y) {
 	'use strict';
+	
+	Dood.call(this, game, x, y, 0);
 }
+
+Player.prototype = Object.create(Dood.prototype);
 
 // Actual main.
 var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, '', GameState);
