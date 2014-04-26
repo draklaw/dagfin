@@ -8,6 +8,7 @@ var MAX_HEIGHT = 600;
 
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
+var LIGHT_RAND = .01;
 
 var PLAYER_VELOCITY = 140;
 
@@ -22,9 +23,10 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.preload = function () {
 	'use strict';
+	this.load.image("black", "assets/sprites/black.png");
 	this.load.image("player", "assets/sprites/dummy_char.png");
 	this.load.image("background", "assets/dummy_background.png");
-	this.load.image("radial_light", "assets/sprites/radial_light.png");
+	this.load.spritesheet("radial_light", "assets/sprites/radial_light.png", 32, 32);
 	this.load.image("defaultTileset", "assets/tilesets/test.png");
 	
 	this.load.tilemap("map", "assets/maps/test.json", null,
@@ -68,14 +70,36 @@ GameState.prototype.create = function () {
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 	
 	// Lighting.
-	this.i_lantern = this.cache.getImage("radial_light");
+	this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
+	this.lightLayer = this.add.sprite(0, 0, this.lightmap);
+	this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
 	
-	this.i_mask = this.game.make.bitmapData(MAX_WIDTH, MAX_HEIGHT);
-	this.lightmap = this.game.add.image(0,0,this.i_mask);
-//	this.lightmap.scale.set(LIGHT_SCALE, LIGHT_SCALE);
-	this.lightVariant = 0;
+	// Contains all the stuff renderer to the lightmap.
+	this.lightLayerGroup = this.make.group();
+
+	this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
+	this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
+
+	this.lightGroup = this.add.group(this.lightLayerGroup);
+
+	var mapLights = this.map.objects.lights;
+	for(var i=0; i<mapLights.length; ++i) {
+		this.addLight(mapLights[i].x, mapLights[i].y,
+					  mapLights[i].properties.size,
+					  this.stringToColor(mapLights[i].properties.color));
+	}
+	
+	this.playerLight = this.addLight(this.player.x + this.player.width / 2,
+									 this.player.y + this.player.height / 2,
+					  				 LIGHT_SCALE);
+
 	this.time.events.loop(LIGHT_DELAY, function() {
-		this.lightVariant = (this.lightVariant+1) % 8; }, this);
+		this.lightGroup.forEach(function(light) {
+			light.frame = (light.frame+1) % 8;
+			var scale = light.lightSize * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);
+			light.scale.set(scale, scale);
+		}, this);
+	}, this);
 };
 
 GameState.prototype.update = function () {
@@ -95,26 +119,15 @@ GameState.prototype.update = function () {
 		this.player.body.velocity.x = PLAYER_VELOCITY;
 	
 	// Update lighting.
-	this.i_mask.context.fillStyle = "rgba(0,0,0,1.0)";
-	this.i_mask.context.globalCompositeOperation = 'source-over';
-	this.i_mask.context.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
-	this.i_mask.context.globalCompositeOperation = 'destination-out';
-
-	this.drawLight(this.player.x + this.player.width / 2,
-				   this.player.y + this.player.height / 2,
-				   this.lightVariant, LIGHT_SCALE);
-	var mapLights = this.map.objects.lights;
-	for(var i=0; i<mapLights.length; ++i) {
-		this.drawLight(mapLights[i].x + 16,
-					   mapLights[i].y - 16,
-					   this.lightVariant,
-					   mapLights[i].properties.size);
-	}
-
-	this.i_mask.dirty = true;
+	this.playerLight.x = this.player.x + 16;
+	this.playerLight.y = this.player.y + 24;
 	
-	this.lightmap.x = this.camera.x;
-	this.lightmap.y = this.camera.y;
+	this.lightmap.renderXY(this.lightLayerGroup,
+						   -this.camera.x,
+						   -this.camera.y);
+	
+	this.lightLayer.x = this.camera.x;
+	this.lightLayer.y = this.camera.y;
 };
 
 GameState.prototype.render = function () {
@@ -122,14 +135,31 @@ GameState.prototype.render = function () {
 	this.game.debug.text("FPS: " + String(this.time.fps), 8, 16);
 };
 
-GameState.prototype.drawLight = function(wx, wy, variant, scale) {
-	var lx = (variant % 4) * 32;
-	var ly = this.math.truncate(variant / 4) * 32;
-	this.i_mask.context.drawImage(this.i_lantern,
-		lx, ly, 32, 32,		  
-		(wx - this.camera.x) - 16 * scale,
-		(wy - this.camera.y) - 16 * scale,
-		32 * scale, 32 * scale);
+GameState.prototype.addLight = function(x, y, size, color) {
+	if(typeof color === 'undefined') { color = 0xffffff; }
+	
+	var light = this.add.sprite(x + 16,
+								y - 16,
+								'radial_light',
+								this.rnd.integer() % 8,
+								this.lightGroup);
+
+	light.anchor.set(.5, .5);
+	light.lightSize = size;
+	var scale = size * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);;
+	light.scale.set(scale);
+
+	light.blendMode = PIXI.blendModes.ADD;
+	light.tint = color;
+	
+	return light;
+};
+
+GameState.prototype.stringToColor = function(str) {
+	if(!str) {
+		return 0xffffff;
+	}
+	return parseInt(str, 16);
 };
 
 // Dood object.
