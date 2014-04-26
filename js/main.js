@@ -22,7 +22,7 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.preload = function () {
 	'use strict';
-	this.load.image("player", "assets/sprites/dummy_char.png");
+	this.load.image("dummies", "assets/sprites/dummies.png");
 	this.load.image("background", "assets/dummy_background.png");
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	this.load.image("defaultTileset", "assets/tilesets/test.png");
@@ -61,8 +61,8 @@ GameState.prototype.create = function () {
 //	this.mapLayer.debug = true;
 	
 	// People.
-	var spawnObj = this.map.objects.player_spawn[0];
-	var playerHeight = this.cache.getImage("player").height;
+	var spawnObj = this.map.objects.doods[0];
+	var playerHeight = this.cache.getImage("dummies").height;
 	this.player = new Dood(this.game, spawnObj.x, spawnObj.y-playerHeight, "player");
 	
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
