@@ -6,6 +6,9 @@ var Dood = Dood || null;
 var MAX_WIDTH = 800;
 var MAX_HEIGHT = 600;
 
+var LIGHT_SCALE = 8;
+var LIGHT_DELAY = 80;
+
 var PLAYER_VELOCITY = 140;
 
 // GameState object.
@@ -21,7 +24,7 @@ GameState.prototype.preload = function () {
 	'use strict';
 	this.load.image("player", "assets/sprites/dummy_char.png");
 	this.load.image("background", "assets/dummy_background.png");
-	this.load.image("lantern", "assets/lantern.png");
+	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	this.load.image("defaultTileset", "assets/tilesets/test.png");
 	
 	this.load.tilemap("map", "assets/maps/test.json", null,
@@ -32,7 +35,7 @@ GameState.prototype.create = function () {
 	'use strict';
 	this.time.advancedTiming = true;
 	
-//	this.game.physics.startSystem(Phaser.Physics.ARCADE);
+	this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	
 	// Keyboard controls.
 	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -65,10 +68,14 @@ GameState.prototype.create = function () {
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 	
 	// Lighting.
-	this.i_lantern = this.cache.getImage("lantern");
+	this.i_lantern = this.cache.getImage("radial_light");
 	
 	this.i_mask = this.game.make.bitmapData(MAX_WIDTH, MAX_HEIGHT);
-	this.game.add.image(0,0,this.i_mask);
+	this.lightmap = this.game.add.image(0,0,this.i_mask);
+	this.lightmap.scale.set(LIGHT_SCALE, LIGHT_SCALE);
+	this.lightVariant = 0;
+	this.time.events.loop(LIGHT_DELAY, function() {
+		this.lightVariant = (this.lightVariant+1) % 8; }, this);
 };
 
 GameState.prototype.update = function () {
@@ -90,15 +97,32 @@ GameState.prototype.update = function () {
 	// Update lighting.
 	this.i_mask.context.fillStyle = "rgba(0,0,0,1.0)";
 	this.i_mask.context.globalCompositeOperation = 'source-over';
-	this.i_mask.context.fillRect(0, 0, MAX_WIDTH, MAX_HEIGHT);
+	this.i_mask.context.fillRect(0, 0, MAX_WIDTH/LIGHT_SCALE, MAX_HEIGHT/LIGHT_SCALE);
 	this.i_mask.context.globalCompositeOperation = 'destination-out';
-	this.i_mask.context.drawImage(this.i_lantern, this.player.x - this.i_lantern.width/3, this.player.y - this.i_lantern.height/4);
+
+	this.drawLight(this.player.x + this.player.width / 2,
+				   this.player.y + this.player.height / 2,
+				   this.lightVariant);
+	
 	this.i_mask.dirty = true;
+	
+	this.lightmap.x = this.camera.x;
+	this.lightmap.y = this.camera.y;
 };
 
 GameState.prototype.render = function () {
 	'use strict';
 	this.game.debug.text("FPS: " + String(this.time.fps), 8, 16);
+};
+
+GameState.prototype.drawLight = function(wx, wy, variant) {
+	var lx = (variant % 4) * 32;
+	var ly = this.math.truncate(variant / 4) * 32;
+	this.i_mask.context.drawImage(this.i_lantern,
+		lx, ly, 32, 32,		  
+		(wx - this.camera.x) / LIGHT_SCALE - 16,
+		(wy - this.camera.y) / LIGHT_SCALE - 16,
+		32, 32);
 };
 
 // Dood object.
