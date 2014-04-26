@@ -13,7 +13,7 @@
         }, 
         {
          "height":32,
-         "name":"entities",
+         "name":"player_spawn",
          "objects":[
                 {
                  "gid":65,
@@ -23,11 +23,50 @@
                     {
 
                     },
-                 "type":"",
+                 "type":"player_spawn",
                  "visible":true,
                  "width":0,
                  "x":192,
                  "y":288
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "width":64,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "height":32,
+         "name":"lights",
+         "objects":[
+                {
+                 "gid":66,
+                 "height":0,
+                 "name":"light0",
+                 "properties":
+                    {
+                     "size":"8"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":512
+                }, 
+                {
+                 "gid":66,
+                 "height":0,
+                 "name":"light1",
+                 "properties":
+                    {
+                     "size":"5"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":608,
+                 "y":640
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -224,6 +263,21 @@
              "x":0,
              "y":16
             },
+         "tilewidth":32
+        }, 
+        {
+         "firstgid":66,
+         "image":"..\/..\/assets-src\/light.png",
+         "imageheight":32,
+         "imagewidth":32,
+         "margin":0,
+         "name":"items",
+         "properties":
+            {
+
+            },
+         "spacing":0,
+         "tileheight":32,
          "tilewidth":32
         }],
  "tilewidth":32,
