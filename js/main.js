@@ -14,6 +14,9 @@ var ZOMBIE_SPOTTING_RANGE = 160;
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_IDEA_DELAY = 5000;
 
+var Z_NORMAL  = 0;
+var Z_BERZERK = 1;
+
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
@@ -85,23 +88,27 @@ GameState.prototype.create = function () {
 
 		var that = this, j = i;
 		this.mobs[i].shamble = function () {
-			var zed = that.mobs[j].body;
+			var zed = that.mobs[j];
 			switch (that.rnd.integer()%4) {
 				case 0:
-					zed.velocity.x = 0;
-					zed.velocity.y = -ZOMBIE_SHAMBLE_VELOCITY;
+					zed.body.velocity.x = 0;
+					zed.body.velocity.y = ZOMBIE_SHAMBLE_VELOCITY;
+					zed.frame = zed.looks*4 + 0;
 					break;
 				case 1:
-					zed.velocity.x = 0;
-					zed.velocity.y = ZOMBIE_SHAMBLE_VELOCITY;
+					zed.body.velocity.x = 0;
+					zed.body.velocity.y = -ZOMBIE_SHAMBLE_VELOCITY;
+					zed.frame = zed.looks*4 + 1;
 					break;
 				case 2:
-					zed.velocity.y = 0;
-					zed.velocity.x = -ZOMBIE_SHAMBLE_VELOCITY;
+					zed.body.velocity.y = 0;
+					zed.body.velocity.x = ZOMBIE_SHAMBLE_VELOCITY;
+					zed.frame = zed.looks*4 + 2;
 					break;
 				case 3:
-					zed.velocity.y = 0;
-					zed.velocity.x = ZOMBIE_SHAMBLE_VELOCITY;
+					zed.body.velocity.y = 0;
+					zed.body.velocity.x = -ZOMBIE_SHAMBLE_VELOCITY;
+					zed.frame = zed.looks*4 + 3;
 					break;
 			};
 		};
@@ -112,11 +119,10 @@ GameState.prototype.create = function () {
 			var glance = new Phaser.Line(zed.x, zed.y, that.player.x, that.player.y);
 			if (glance.length < ZOMBIE_SPOTTING_RANGE && !that.obstructed(glance))
 			{
-				// ...GET MAD !
-				zed.frame = 1;
+				zed.looks = Z_BERZERK;
 			}
 			else
-				zed.frame = 0;
+				zed.looks = Z_NORMAL;
 		};
 		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, this.mobs[i].spot, this);
 	}
@@ -265,7 +271,7 @@ function Dood(game, x, y, spritesheet, group) {
 	group.add(this);
 	this.anchor.set(.5, .6666667);
 	
-	this.berzerk = 0;
+	this.looks = Z_NORMAL;
 	
 	this.game.physics.arcade.enable(this);
 	this.body.setSize(32, 32, 0, 16);
