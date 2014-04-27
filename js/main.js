@@ -75,6 +75,8 @@ GameState.prototype.preload = function () {
 	this.load.tilemap("map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
 	
+	//this.load.audio("sounds", ["foo.mp3", "foo.ogg"]);
+	
 	this.level.preload();
 };
 
@@ -256,6 +258,13 @@ GameState.prototype.create = function () {
 	if(!this.level.enableNoisePass) {
 		this.noiseSprite.kill();
 	}
+	
+	/*
+	// Noises pass
+	this.sounds = game.add.audio("sounds");
+	this.sounds.addMarker("grunt", 0, 0.8);
+	this.sounds.addMarger("growling", 1, 1.6);
+	//... */
 };
 
 
