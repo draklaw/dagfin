@@ -263,7 +263,8 @@ GameState.prototype.update = function () {
 				//console.log("In your face !");
 			} else if (!zed.hitCooldown)  {
 				zed.looks = BERZERK;
-				pc.body.velocity.set(0,0);
+				zed.body.velocity.set(0, 0);
+				pc.body.velocity.set(0, 0);
 				zed.hitCooldown = true;
 				this.time.events.add(HIT_COOLDOWN, function () { zed.hitCooldown = false; }, this);
 				//console.log("HULK SMASH !");
