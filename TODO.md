@@ -10,3 +10,7 @@
 * Character animations
 * Enemies sprites
 * Map tileset(s)
+
+### Sound
+* Enemies sounds
+* Ambience
