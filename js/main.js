@@ -47,6 +47,9 @@ GameState.prototype.create = function () {
 	'use strict';
 	this.time.advancedTiming = true;
 	
+	// Cap at 30fps to try to avoid people going through walls.
+	this.time.deltaCap = 0.033333;
+	
 	this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	
 	// Keyboard controls.
