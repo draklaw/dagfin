@@ -3,7 +3,7 @@
 A small horror game made for Ludum Dare 29 #LD48
 First attempt for our team.
 
-Play online : (soon)
+Play online : http://gammanu.github.io/dagfin/
 
 ## Controls
 **directionnal arrows** for move
