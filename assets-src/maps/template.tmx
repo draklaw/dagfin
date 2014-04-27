@@ -72,10 +72,23 @@
 </data>
  </layer>
  <objectgroup name="templates" width="64" height="64">
-  <object name="Light" type="light" gid="1" x="32" y="64"/>
-  <object name="Player" type="player_spawn" gid="2" x="32" y="128"/>
+  <object name="Light" type="light" gid="1" x="32" y="64">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="size" value="8"/>
+    <property name="woobling" value=".2"/>
+   </properties>
+  </object>
   <object name="Zombie" type="zombie_spawn" gid="3" x="64" y="128"/>
   <object name="VDoor" type="vdoor" gid="5" x="32" y="192"/>
   <object name="HDoor" type="hdoor" gid="4" x="64" y="192"/>
+  <object name="Item" type="item" gid="6" x="64" y="64"/>
  </objectgroup>
+ <objectgroup name="doods" width="64" height="64">
+  <object name="Player" type="player_spawn" gid="2" x="32" y="128"/>
+ </objectgroup>
+ <objectgroup name="lights" width="64" height="64"/>
+ <objectgroup name="doors" width="64" height="64"/>
+ <objectgroup name="items" width="64" height="64"/>
+ <objectgroup name="triggers" width="64" height="64"/>
 </map>
