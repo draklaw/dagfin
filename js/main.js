@@ -99,6 +99,12 @@ GameState.prototype.create = function () {
 			};
 		};
 		this.time.events.loop(ZOMBIE_IDEA_DELAY, this.mobs[i].shamble, this);
+		
+		var spot = function () {
+			// If the player is in sight...
+			// ...GET MAD !
+		};
+		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, spot, this);
 	}
 	
 	// Lighting.
