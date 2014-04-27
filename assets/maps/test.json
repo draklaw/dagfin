@@ -74,6 +74,7 @@
                  "name":"light1",
                  "properties":
                     {
+                     "color":"ffeecc",
                      "size":"5"
                     },
                  "type":"light",

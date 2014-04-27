@@ -64,6 +64,7 @@
   </object>
   <object name="light1" type="light" gid="67" x="608" y="640">
    <properties>
+    <property name="color" value="ffeecc"/>
     <property name="size" value="5"/>
    </properties>
   </object>
