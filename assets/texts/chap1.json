@@ -1,7 +1,7 @@
 {
 	//Dans chaque niveau, on peut trouver quelques "indices" écrits par Matt
 	intro: [ //si possible un fond genre "parchemin", sinon un fond noir, texte sur tout l'écran
-		"Chapter One : The Odd One \n\nAt the begining there was nothing, and nothing was all.\nThe elements laid still.\nThen The Odd One came, and The Odd One brought the Chaos. The Chaos created movement, and the elements melted.\nIt pleased The Odd One and The Odd One molded the Chaos.\nThe Earth and the other realms were created.\nThe Odd One chose the inner realm for himself, and left the others to the other Ones.\nThe Odd One named himself Dagfin, and the realm Yl'her."
+		"Chapter One : The Odd One\n\nAt the begining there was nothing, and nothing was all.\nThe elements laid still.\nThen The Odd One came, and The Odd One brought the Chaos. The Chaos created movement, and the elements melted.\nIt pleased The Odd One and The Odd One molded the Chaos.\nThe Earth and the other realms were created.\nThe Odd One chose the inner realm for himself, and left the others to the other Ones.\nThe Odd One named himself Dagfin, and the realm Yl'her."
 	],
 	
 	indice1 :[
@@ -9,7 +9,7 @@
 	],
 	
 	indice2 :[
-	"I should have taken my charm\n it may have been usefull."
+	"I should have taken my charm.\nIt may have been useful."
 	],	
 
 	indice3 :[
