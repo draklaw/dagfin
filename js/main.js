@@ -34,14 +34,27 @@ var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
 
-// GameState object.
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// GAME STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
 function GameState() {
 	'use strict';
 	
 	Phaser.State.call(this);
+	
+	this.level = new TestLevel(this);
+//	this.level = new IntroLevel(this);
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
+
+
+////////////////////////////////////////////////////////////////////////////
+// Preload
 
 GameState.prototype.preload = function () {
 	'use strict';
@@ -57,23 +70,17 @@ GameState.prototype.preload = function () {
 	this.load.spritesheet("dummies", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 
-	this.load.image("background", "assets/dummy_background.png");
-	this.load.image("defaultTileset", "assets/tilesets/test.png");
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
 	this.load.tilemap("map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
 
-	// Intro map
-	this.load.tilemap("intro_map", "assets/maps/intro.json", null,
-	                  Phaser.Tilemap.TILED_JSON);
-	this.load.image("intro_tileset", "assets/tilesets/intro.png");
-	this.load.image("pillar_item", "assets/sprites/pillar.png");
-	this.load.image("carpet_item", "assets/sprites/carpet.png");
-	this.load.image("blood_item", "assets/sprites/blood.png");
-	this.load.image("femur_item", "assets/sprites/femur.png");
-	this.load.image("collar_item", "assets/sprites/collar.png");
+	this.level.preload();
 };
+
+
+////////////////////////////////////////////////////////////////////////////
+// Create
 
 GameState.prototype.create = function () {
 	'use strict';
@@ -88,8 +95,7 @@ GameState.prototype.create = function () {
 	
 	
 	// Some settings...
-	var enablePlayerLight = true;
-	var enableNoisePass = true;
+	this.enableLighting = true;
 	
 	
 	// Keyboard controls.
@@ -101,30 +107,8 @@ GameState.prototype.create = function () {
 	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
 	this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 	
-	// Background.
-	this.game.add.image(0, 0, "background");
-	
 	// Map.
-	this.level = 'intro';
-	this.level = 'test';
-	if(this.level === 'intro') {
-		this.map = this.game.add.tilemap("intro_map");
-		this.map.addTilesetImage("intro_tileset", "intro_tileset");
-		this.map.setCollision([ 6, 9, 18, 24, 30 ]);
-
-		enablePlayerLight = false;
-		enableNoisePass = false;
-	}
-	else if(this.level === 'test') {
-		this.map = this.game.add.tilemap("map");
-		this.map.addTilesetImage("default", "defaultTileset");
-		this.map.setCollision([
-			10, 13, 14,
-			18, 21, 22,
-			26,
-			49, 51
-		]);
-	}
+	this.level.create();
 
 	this.mapLayer = this.map.createLayer("map");
 	this.mapLayer.resizeWorld();
@@ -200,8 +184,6 @@ GameState.prototype.create = function () {
 	this.postProcessGroup = this.add.group();
 	
 	// Lighting.
-	this.enableLighting = true;
-	
 	if(this.enableLighting) {
 		this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
 		this.lightLayer = this.add.sprite(0, 0, this.lightmap, 0, this.postProcessGroup);
@@ -217,22 +199,43 @@ GameState.prototype.create = function () {
 
 		var mapLights = this.map.objects.lights;
 		for(var i=0; i<mapLights.length; ++i) {
+			var color = this.stringToColor(mapLights[i].properties.color);
+			var colorWooble = parseInt(mapLights[i].properties.color_wooble, 10);
+			if(isNaN(colorWooble)) {
+				colorWooble = LIGHT_COLOR_RAND;
+			}
+			var sizeWooble = parseInt(mapLights[i].properties.size_wooble, 10);
+			if(isNaN(sizeWooble)) {
+				sizeWooble = LIGHT_RAND;
+			}
 			this.addLight(mapLights[i].x, mapLights[i].y,
 						  mapLights[i].properties.size,
-						  this.stringToColor(mapLights[i].properties.color));
-//						  Phaser.Color.hexToRGB(mapLights[i].properties.color));
+						  sizeWooble,
+						  color,
+						  colorWooble);
 		}
 
 		this.playerLight = this.addLight(this.player.x,
 										 this.player.y - 16,
-										 LIGHT_SCALE);
-		if(!enablePlayerLight) { this.playerLight.kill(); }
+										 LIGHT_SCALE,
+										 LIGHT_RAND,
+										 0xd0d0d0,
+										 LIGHT_COLOR_RAND);
+		if(!this.level.enablePlayerLight) {
+			this.playerLight.kill();
+		}
 
 		this.time.events.loop(LIGHT_DELAY, function() {
 			this.lightGroup.forEach(function(light) {
-				var scale = light.lightSize * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);
+				var scale = light.lightSize * this.rnd.realInRange(
+					1. - light.lightSizeWooble,
+					1. + light.lightSizeWooble);
 				light.scale.set(scale, scale);
-				light.tint = this.multColor(light.lightColor, this.rnd.realInRange(1-LIGHT_COLOR_RAND, 1));
+				light.tint = this.multColor(
+					light.lightColor,
+					this.rnd.realInRange(
+						1. - light.lightColorWooble,
+						1. + light.lightColorWooble));
 			}, this);
 		}, this);
 	}
@@ -250,8 +253,14 @@ GameState.prototype.create = function () {
 	this.noiseSprite.animations.play("noise");
 	this.noiseSprite.scale.set(4, 4);
 	this.noiseSprite.alpha = .2;
-	if(!enableNoisePass) { this.noiseSprite.kill(); }
+	if(!this.level.enableNoisePass) {
+		this.noiseSprite.kill();
+	}
 };
+
+
+////////////////////////////////////////////////////////////////////////////
+// Update
 
 GameState.prototype.update = function () {
 	'use strict';
@@ -328,6 +337,8 @@ GameState.prototype.update = function () {
 		}
 	}
 	
+	this.level.update();
+	
 	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
@@ -344,6 +355,10 @@ GameState.prototype.update = function () {
 							   -this.camera.y);
 	}
 };
+
+
+////////////////////////////////////////////////////////////////////////////
+// Render
 
 GameState.prototype.render = function () {
 	'use strict';
@@ -362,8 +377,14 @@ GameState.prototype.render = function () {
 	*/
 };
 
-GameState.prototype.addLight = function(x, y, size, color) {
+
+////////////////////////////////////////////////////////////////////////////
+// Other stuff
+
+GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWooble) {
+	if(typeof sizeWooble === 'undefined') { sizeWooble = LIGHT_RAND; }
 	if(typeof color === 'undefined') { color = 0xffffff; }
+	if(typeof colorWooble === 'undefined') { colorWooble = LIGHT_COLOR_RAND; }
 	
 	var light = this.add.sprite(x + 16,
 								y - 16,
@@ -371,13 +392,18 @@ GameState.prototype.addLight = function(x, y, size, color) {
 								0,
 								this.lightGroup);
 
-	light.anchor.set(.5, .5);
 	light.lightSize = size / 2;
-	var scale = size * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);;
+	light.lightSizeWooble = sizeWooble;
+	light.lightColor = color;
+	light.lightColorWooble = colorWooble;
+
+	light.anchor.set(.5, .5);
+	var scale = size * this.rnd.realInRange(
+		1. - light.lightSizeWooble,
+		1. + light.lightSizeWooble);
 	light.scale.set(scale);
 
 	light.blendMode = PIXI.blendModes.ADD;
-	light.lightColor = color;
 	light.tint = color;
 	
 	return light;
@@ -399,6 +425,10 @@ GameState.prototype.multColor = function(color, mult) {
 	r *= mult;
 	g *= mult;
 	b *= mult;
+	
+	r = this.math.clamp(r, 0, 255);
+	g = this.math.clamp(g, 0, 255);
+	b = this.math.clamp(b, 0, 255);
 	
 	return (
 		(a & 0xff) << 24 |
@@ -443,7 +473,13 @@ GameState.prototype.lineOfSight = function(stalker, victim) {
 	Math.cos(staring_angle) > 0 && Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE;
 };
 
-// Dood object.
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// DOODS !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
 function Dood(game, x, y, spritesheet, group) {
 	'use strict';
 	
@@ -465,7 +501,10 @@ function Dood(game, x, y, spritesheet, group) {
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
-// Player object.
+
+////////////////////////////////////////////////////////////////////////////
+// Player
+
 function Player(game, x, y) {
 	'use strict';
 	
@@ -474,6 +513,102 @@ function Player(game, x, y) {
 
 Player.prototype = Object.create(Dood.prototype);
 
-// Actual main.
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// LEVELS !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function Level(gameState) {
+	this.gameState = gameState;
+
+	this.enablePlayerLight = true;
+	this.enableNoisePass = true;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Test level
+
+function TestLevel(gameState) {
+	Level.call(this, gameState);
+}
+
+TestLevel.prototype = Object.create(Level.prototype);
+
+TestLevel.prototype.preload = function() {
+	var gs = this.gameState;
+	
+	gs.load.tilemap("map", "assets/maps/test.json", null,
+	                  Phaser.Tilemap.TILED_JSON);
+	gs.load.image("defaultTileset", "assets/tilesets/test.png");
+}
+
+TestLevel.prototype.create = function() {
+	var gs = this.gameState;
+
+	gs.map = gs.game.add.tilemap("map");
+	gs.map.addTilesetImage("default", "defaultTileset");
+	gs.map.setCollision([
+		10, 13, 14,
+		18, 21, 22,
+		26,
+		49, 51
+	]);
+}
+
+TestLevel.prototype.update = function() {
+	var gs = this.gameState;
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Intro
+
+function IntroLevel(gameState) {
+	Level.call(this, gameState);
+}
+
+IntroLevel.prototype = Object.create(Level.prototype);
+
+IntroLevel.prototype.preload = function() {
+	var gs = this.gameState;
+
+	gs.load.tilemap("intro_map", "assets/maps/intro.json", null,
+	                  Phaser.Tilemap.TILED_JSON);
+	
+	gs.load.image("intro_tileset", "assets/tilesets/intro.png");
+	gs.load.image("pillar_item", "assets/sprites/pillar.png");
+	gs.load.image("carpet_item", "assets/sprites/carpet.png");
+	gs.load.image("blood_item", "assets/sprites/blood.png");
+	gs.load.image("femur_item", "assets/sprites/femur.png");
+	gs.load.image("collar_item", "assets/sprites/collar.png");
+}
+
+IntroLevel.prototype.create = function() {
+	var gs = this.gameState;
+
+	gs.map = gs.game.add.tilemap("intro_map");
+	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
+	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = false;
+}
+
+IntroLevel.prototype.update = function() {
+	var gs = this.gameState;
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// MAIN !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
 var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, '', GameState);
 

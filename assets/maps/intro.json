@@ -128,7 +128,9 @@
                  "properties":
                     {
                      "color":"d0d0d0",
-                     "size":"24"
+                     "color_wooble":"0",
+                     "size":"24",
+                     "size_wooble":"0"
                     },
                  "type":"light",
                  "visible":true,

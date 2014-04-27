@@ -43,7 +43,9 @@
   <object name="Light" type="light" gid="31" x="288" y="320">
    <properties>
     <property name="color" value="d0d0d0"/>
+    <property name="color_wooble" value="0"/>
     <property name="size" value="24"/>
+    <property name="size_wooble" value="0"/>
    </properties>
   </object>
  </objectgroup>
