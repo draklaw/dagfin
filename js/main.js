@@ -4,15 +4,17 @@ var MAX_HEIGHT = 600;
 
 var DOOD_WIDTH = 32;
 var DOOD_HEIGHT = 48;
-
+var DOOD_OFFSET_X = 16;
+var DOOD_OFFSET_Y = -16;
 var PLAYER_VELOCITY = 140;
 
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
-var ZOMBIE_SPOTTING_DELAY = 500;
+var ZOMBIE_SPOTTING_RANGE = 160;
+var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_IDEA_DELAY = 5000;
 
-var LIGHT_SCALE = 8;
+var LIGHT_SCALE = 40;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 
@@ -72,14 +74,14 @@ GameState.prototype.create = function () {
 	
 	// People.
 	var spawnObj = this.map.objects.doods[0];
-	this.player = new Player(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT);
+	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 	
 	this.mobs = new Array();
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
 		spawnObj = this.map.objects.doods[i];
-		this.mobs[i] = new Dood(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT, "dummies");
+		this.mobs[i] = new Dood(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "dummies");
 
 		var that = this, j = i;
 		this.mobs[i].shamble = function () {
@@ -105,11 +107,18 @@ GameState.prototype.create = function () {
 		};
 		this.time.events.loop(ZOMBIE_IDEA_DELAY, this.mobs[i].shamble, this);
 		
-		var spot = function () {
-			// If the player is in sight...
-			// ...GET MAD !
+		this.mobs[i].spot = function () {
+			var zed = that.mobs[j];
+			var glance = new Phaser.Line(zed.x, zed.y, that.player.x, that.player.y);
+			if (glance.length < ZOMBIE_SPOTTING_RANGE && !that.obstructed(glance))
+			{
+				// ...GET MAD !
+				zed.frame = 1;
+			}
+			else
+				zed.frame = 0;
 		};
-		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, spot, this);
+		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, this.mobs[i].spot, this);
 	}
 	
 	// Lighting.
@@ -196,6 +205,18 @@ GameState.prototype.update = function () {
 GameState.prototype.render = function () {
 	'use strict';
 	this.game.debug.text("FPS: " + String(this.time.fps), 8, 16);
+	/* CHECK LINE OF SIGHT OF ZOMBIE 1
+	var line = new Phaser.Line(this.player.x, this.player.y, this.mobs[1].x, this.mobs[1].y);
+	this.game.debug.geom(line, "rgb(0, 255, 255)");
+
+	var tiles = this.mapLayer.getRayCastTiles(line);
+	for (var i = 0 ; i < tiles.length ; i++) {
+		var color = "rgba(0, 0, 255, .5)";
+		if (tiles[i].canCollide)
+			color = "rgba(255, 0, 0, .5)";
+		this.game.debug.geom(new Phaser.Rectangle(tiles[i].x*32, tiles[i].y*32, tiles[i].width, tiles[i].height), color);
+	}
+	*/
 };
 
 GameState.prototype.addLight = function(x, y, size, color) {
@@ -225,6 +246,15 @@ GameState.prototype.stringToColor = function(str) {
 	return parseInt(str, 16);
 };
 
+GameState.prototype.obstructed = function(line) {
+	tiles = this.mapLayer.getRayCastTiles(line);
+	
+	for (var i = 0 ; i < tiles.length ; i++)
+		if (tiles[i].canCollide)
+			return true;
+	return false;
+}
+
 // Dood object.
 function Dood(game, x, y, spritesheet, group) {
 	'use strict';
@@ -233,6 +263,7 @@ function Dood(game, x, y, spritesheet, group) {
 	
 	Phaser.Sprite.call(this, game, x, y, spritesheet, 0);
 	group.add(this);
+	this.anchor.set(.5, .6666667);
 	
 	this.game.physics.arcade.enable(this);
 	this.body.setSize(32, 32, 0, 16);
