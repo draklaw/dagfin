@@ -328,6 +328,9 @@ GameState.prototype.update = function () {
 		}
 	}
 	
+	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
+	
+	// Move full-screen sprite with the camera.
 	this.postProcessGroup.x = this.camera.x;
 	this.postProcessGroup.y = this.camera.y;
 
