@@ -14,7 +14,7 @@ var ZOMBIE_SPOTTING_RANGE = 160;
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_IDEA_DELAY = 5000;
 
-var LIGHT_SCALE = 40;
+var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
@@ -34,7 +34,7 @@ GameState.prototype.preload = function () {
 	this.load.image("black", "assets/sprites/black.png");
 	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
 
-	this.load.spritesheet("dummies", "assets/sprites/dummies.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.load.spritesheet("dummies", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 
 	this.load.image("background", "assets/dummy_background.png");
@@ -301,6 +301,8 @@ function Dood(game, x, y, spritesheet, group) {
 	Phaser.Sprite.call(this, game, x, y, spritesheet, 0);
 	group.add(this);
 	this.anchor.set(.5, .6666667);
+	
+	this.berzerk = 0;
 	
 	this.game.physics.arcade.enable(this);
 	this.body.setSize(32, 32, 0, 16);
