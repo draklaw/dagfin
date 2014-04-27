@@ -6,12 +6,15 @@ var DOOD_WIDTH = 32;
 var DOOD_HEIGHT = 48;
 var DOOD_OFFSET_X = 16;
 var DOOD_OFFSET_Y = -16;
-var PLAYER_VELOCITY = 140;
 
 var DOWN  = 0;
 var UP    = 1;
 var RIGHT = 2;
 var LEFT  = 3;
+
+var PLAYER_VELOCITY = 140;
+
+var HIT_COOLDOWN = 250;
 
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
@@ -19,10 +22,12 @@ var ZOMBIE_SPOTTING_RANGE = 160;
 var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_CHARGE_DELAY = 0;
+var ZOMBIE_STUN_DELAY = 1000;
 var ZOMBIE_IDEA_DELAY = 5000;
 
 var NORMAL  = 0;
-var BERZERK = 1;
+var STUNNED = 1;
+var BERZERK = 2;
 
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
@@ -92,7 +97,9 @@ GameState.prototype.create = function () {
 	this.k_down = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
 	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-	this.k_space = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	this.k_punch = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
+	this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 	
 	// Background.
 	this.game.add.image(0, 0, "background");
@@ -155,6 +162,8 @@ GameState.prototype.create = function () {
 		var that = this, j = i;
 		this.mobs[i].shamble = function () {
 			var zed = that.mobs[j];
+			if (zed.looks == STUNNED)
+				return;
 			zed.facing = that.rnd.integer()%4;
 			switch (zed.facing) {
 				case DOWN:
@@ -179,7 +188,7 @@ GameState.prototype.create = function () {
 		
 		this.mobs[i].spot = function () {
 			var zed = that.mobs[j];
-			if (!zed.looks == BERZERK && that.lineOfSight(zed, that.player)) {
+			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				//TODO: Make a scary noise.
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
@@ -270,10 +279,19 @@ GameState.prototype.update = function () {
 	}
 	pc.frame = pc.looks*4 + pc.facing;
 	
-	if(this.k_space.justPressed(1)) {
+	if(this.k_read.justPressed(1)) {
 		this.nextMessage();
 	}
 	
+	var punch = false;
+	if (this.k_punch.isDown && !pc.hitCooldown)
+	{
+		punch = true;
+		pc.hitCooldown = true;
+		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
+		//console.log("Take that !");
+	}
+
 	// Everyday I'm shambling.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
@@ -287,10 +305,21 @@ GameState.prototype.update = function () {
 		zed.frame = zed.looks*4 + zed.facing;
 		
 		// EXTERMINATE ! EXTERMINATE !
-		if (zed.body.hitTest(this.player.x, this.player.y)) {
-			zed.looks = BERZERK;
-			pc.body.velocity.set(0,0);
-			//console.log("HULK SMASH !");
+		if (zed.looks != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
+		{
+			if(punch) {
+				zed.looks = STUNNED;
+				zed.body.velocity.set(0, 0);
+				this.time.events.add(ZOMBIE_STUN_DELAY, function () { zed.looks = NORMAL; }, this);
+				//console.log("In your face !");
+			} else if (!zed.hitCooldown)  {
+				zed.looks = BERZERK;
+				zed.body.velocity.set(0, 0);
+				pc.body.velocity.set(0, 0);
+				zed.hitCooldown = true;
+				this.time.events.add(HIT_COOLDOWN, function () { zed.hitCooldown = false; }, this);
+				//console.log("HULK SMASH !");
+			}
 		}
 		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player)) {
 			// We lost him, boss !
@@ -425,6 +454,7 @@ function Dood(game, x, y, spritesheet, group) {
 	
 	this.looks = NORMAL;
 	this.facing = DOWN;
+	this.hitCooldown = false;
 	
 	this.game.physics.arcade.enable(this);
 	this.body.setSize(32, 32, 0, 16);
