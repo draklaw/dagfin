@@ -13,21 +13,35 @@
         }, 
         {
          "height":32,
-         "name":"player_spawn",
+         "name":"doods",
          "objects":[
                 {
                  "gid":65,
                  "height":0,
-                 "name":"player_spawn",
+                 "name":"player",
                  "properties":
                     {
 
                     },
-                 "type":"player_spawn",
+                 "type":"player",
                  "visible":true,
                  "width":0,
-                 "x":192,
-                 "y":288
+                 "x":160,
+                 "y":256
+                }, 
+                {
+                 "gid":66,
+                 "height":0,
+                 "name":"zombie",
+                 "properties":
+                    {
+
+                    },
+                 "type":"npc",
+                 "visible":true,
+                 "width":0,
+                 "x":608,
+                 "y":384
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -41,7 +55,7 @@
          "name":"lights",
          "objects":[
                 {
-                 "gid":66,
+                 "gid":67,
                  "height":0,
                  "name":"light0",
                  "properties":
@@ -55,7 +69,7 @@
                  "y":512
                 }, 
                 {
-                 "gid":66,
+                 "gid":67,
                  "height":0,
                  "name":"light1",
                  "properties":
@@ -247,26 +261,21 @@
         }, 
         {
          "firstgid":65,
-         "image":"..\/sprites\/dummy_char.png",
+         "image":"..\/sprites\/dummies.png",
          "imageheight":48,
-         "imagewidth":32,
+         "imagewidth":64,
          "margin":0,
-         "name":"Character",
+         "name":"doods",
          "properties":
             {
 
             },
          "spacing":0,
          "tileheight":48,
-         "tileoffset":
-            {
-             "x":0,
-             "y":16
-            },
          "tilewidth":32
         }, 
         {
-         "firstgid":66,
+         "firstgid":67,
          "image":"..\/..\/assets-src\/light.png",
          "imageheight":32,
          "imagewidth":32,
