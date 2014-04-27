@@ -3,8 +3,7 @@
 * Some gameplay
 
 ### Code
-* Notes system
-* Noise post-processing
+* The gameplay !
 
 ### Graphics
 * Character animations
