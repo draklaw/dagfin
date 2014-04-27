@@ -307,15 +307,15 @@ GameState.prototype.update = function () {
 		// EXTERMINATE ! EXTERMINATE !
 		if (zed.looks != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
 		{
+			pc.body.velocity.set(0, 0);
 			if(punch) {
 				zed.looks = STUNNED;
 				zed.body.velocity.set(0, 0);
 				this.time.events.add(ZOMBIE_STUN_DELAY, function () { zed.looks = NORMAL; }, this);
 				//console.log("In your face !");
-			} else if (!zed.hitCooldown)  {
+			} else if (!zed.hitCooldown) {
 				zed.looks = BERZERK;
 				zed.body.velocity.set(0, 0);
-				pc.body.velocity.set(0, 0);
 				zed.hitCooldown = true;
 				this.time.events.add(HIT_COOLDOWN, function () { zed.hitCooldown = false; }, this);
 				//console.log("HULK SMASH !");
