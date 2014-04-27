@@ -58,16 +58,34 @@ GameState.prototype.preload = function () {
 	
 	this.load.tilemap("map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
+
+	// Intro map
+	this.load.tilemap("intro_map", "assets/maps/intro.json", null,
+	                  Phaser.Tilemap.TILED_JSON);
+	this.load.image("intro_tileset", "assets/tilesets/intro.png");
+	this.load.image("pillar_item", "assets/sprites/pillar.png");
+	this.load.image("carpet_item", "assets/sprites/carpet.png");
+	this.load.image("blood_item", "assets/sprites/blood.png");
+	this.load.image("femur_item", "assets/sprites/femur.png");
+	this.load.image("collar_item", "assets/sprites/collar.png");
 };
 
 GameState.prototype.create = function () {
 	'use strict';
+	
+	// System stuff...
 	this.time.advancedTiming = true;
 	
 	// Cap at 30fps to try to avoid people going through walls.
 	this.time.deltaCap = 0.033333;
 	
 	this.game.physics.startSystem(Phaser.Physics.ARCADE);
+	
+	
+	// Some settings...
+	var enablePlayerLight = true;
+	var enableNoisePass = true;
+	
 	
 	// Keyboard controls.
 	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -80,18 +98,48 @@ GameState.prototype.create = function () {
 	this.game.add.image(0, 0, "background");
 	
 	// Map.
-	this.map = this.game.add.tilemap("map");
-	this.map.addTilesetImage("default", "defaultTileset");
-	this.map.setCollision([
-		10, 13, 14,
-		18, 21, 22,
-		26,
-		49, 51
-	]);
-	
+	this.level = 'intro';
+	this.level = 'test';
+	if(this.level === 'intro') {
+		this.map = this.game.add.tilemap("intro_map");
+		this.map.addTilesetImage("intro_tileset", "intro_tileset");
+		this.map.setCollision([ 6, 9, 18, 24, 30 ]);
+
+		enablePlayerLight = false;
+		enableNoisePass = false;
+	}
+	else if(this.level === 'test') {
+		this.map = this.game.add.tilemap("map");
+		this.map.addTilesetImage("default", "defaultTileset");
+		this.map.setCollision([
+			10, 13, 14,
+			18, 21, 22,
+			26,
+			49, 51
+		]);
+	}
+
 	this.mapLayer = this.map.createLayer("map");
 	this.mapLayer.resizeWorld();
 //	this.mapLayer.debug = true;
+	
+	// Group all the stuff on the ground (always in background)
+	this.objects = this.add.group();
+	// Group all the stuff that should be sorted by depth.
+	this.characters = this.add.group();	
+	
+	// Items in the map
+	if(this.map.objects.items) {
+		for(var i = 0 ; i < this.map.objects.items.length ; i++) {
+			var item = this.map.objects.items[i];
+			var offset_x = parseInt(item.properties.offset_x, 10) || 0;
+			var offset_y = parseInt(item.properties.offset_y, 10) || 0;
+			var sprite = this.add.sprite(item.x + offset_x + 16,
+										 item.y + offset_y - 16,
+										 item.name+"_item", 0, this.objects);
+			sprite.anchor.set(.5, .5);
+		}
+	}
 	
 	// People.
 	var spawnObj = this.map.objects.doods[0];
@@ -163,11 +211,13 @@ GameState.prototype.create = function () {
 			this.addLight(mapLights[i].x, mapLights[i].y,
 						  mapLights[i].properties.size,
 						  this.stringToColor(mapLights[i].properties.color));
+//						  Phaser.Color.hexToRGB(mapLights[i].properties.color));
 		}
 
 		this.playerLight = this.addLight(this.player.x,
 										 this.player.y - 16,
 										 LIGHT_SCALE);
+		if(!enablePlayerLight) { this.playerLight.kill(); }
 
 		this.time.events.loop(LIGHT_DELAY, function() {
 			this.lightGroup.forEach(function(light) {
@@ -191,6 +241,7 @@ GameState.prototype.create = function () {
 	this.noiseSprite.animations.play("noise");
 	this.noiseSprite.scale.set(4, 4);
 	this.noiseSprite.alpha = .2;
+	if(!enableNoisePass) { this.noiseSprite.kill(); }
 };
 
 GameState.prototype.update = function () {
@@ -364,7 +415,9 @@ GameState.prototype.lineOfSight = function(stalker, victim) {
 function Dood(game, x, y, spritesheet, group) {
 	'use strict';
 	
-	if (typeof group === 'undefined') { group = game.world; }
+	if (typeof group === 'undefined') {
+		group = game.state.getCurrentState().characters;
+	}
 	
 	Phaser.Sprite.call(this, game, x, y, spritesheet, 0);
 	group.add(this);
