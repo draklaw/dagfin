@@ -16,7 +16,7 @@ var LEFT  = 3;
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
 var ZOMBIE_SPOTTING_RANGE = 160;
-var ZOMBIE_SPOTTING_ANGLE = Math.PI / 12;
+var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_IDEA_DELAY = 5000;
 
@@ -125,9 +125,10 @@ GameState.prototype.create = function () {
 		this.mobs[i].spot = function () {
 			var zed = that.mobs[j];
 			var glance = new Phaser.Line(zed.x, zed.y, that.player.x, that.player.y);
-			// Don't ask, lest the zombie glance at YOU instead.
+			// Don't ask, lest the zombie stare at YOU instead.
+			var staring_angle = (glance.angle+3*Math.PI/2)-(2*Math.PI-zed.body.angle);
 			if (glance.length < ZOMBIE_SPOTTING_RANGE && !that.obstructed(glance)
-			&& Math.abs((glance.angle+3*Math.PI/2)-(2*Math.PI-zed.body.angle)) < ZOMBIE_SPOTTING_ANGLE)
+			&& Math.cos(staring_angle) > 0 && Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE)
 			{
 				zed.looks = BERZERK;
 			}
