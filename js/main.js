@@ -58,7 +58,7 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.preload = function () {
 	'use strict';
-
+	
 	this.load.image("black", "assets/sprites/black.png");
 	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
 	
@@ -66,15 +66,15 @@ GameState.prototype.preload = function () {
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
 	this.load.json("message_test", "assets/texts/test.json");
-
-	this.load.spritesheet("dummies", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
+	
+	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
-
+	
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
 	this.load.tilemap("map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
-
+	
 	this.level.preload();
 };
 
@@ -109,7 +109,7 @@ GameState.prototype.create = function () {
 	
 	// Map.
 	this.level.create();
-
+	
 	this.mapLayer = this.map.createLayer("map");
 	this.mapLayer.resizeWorld();
 //	this.mapLayer.debug = true;
@@ -141,8 +141,8 @@ GameState.prototype.create = function () {
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
 		spawnObj = this.map.objects.doods[i];
-		this.mobs[i] = new Dood(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "dummies");
-
+		this.mobs[i] = new Dood(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
+		
 		var that = this, j = i;
 		this.mobs[i].shamble = function () {
 			var zed = that.mobs[j];
@@ -188,15 +188,15 @@ GameState.prototype.create = function () {
 		this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
 		this.lightLayer = this.add.sprite(0, 0, this.lightmap, 0, this.postProcessGroup);
 		this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
-
+		
 		// Contains all the stuff renderer to the lightmap.
 		this.lightLayerGroup = this.make.group();
-
+		
 		this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
 		this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
-
+		
 		this.lightGroup = this.add.group(this.lightLayerGroup);
-
+		
 		var mapLights = this.map.objects.lights;
 		for(var i=0; i<mapLights.length; ++i) {
 			var color = this.stringToColor(mapLights[i].properties.color);
@@ -214,7 +214,7 @@ GameState.prototype.create = function () {
 						  color,
 						  colorWooble);
 		}
-
+		
 		this.playerLight = this.addLight(this.player.x,
 										 this.player.y - 16,
 										 LIGHT_SCALE,
@@ -224,7 +224,7 @@ GameState.prototype.create = function () {
 		if(!this.level.enablePlayerLight) {
 			this.playerLight.kill();
 		}
-
+		
 		this.time.events.loop(LIGHT_DELAY, function() {
 			this.lightGroup.forEach(function(light) {
 				var scale = light.lightSize * this.rnd.realInRange(
@@ -239,7 +239,7 @@ GameState.prototype.create = function () {
 			}, this);
 		}, this);
 	}
-
+	
 	// Message box !
 	this.messageGroup = this.add.group(this.postProcessGroup);
 	this.messageBg = this.add.sprite(24, 384, "message_bg", 0, this.messageGroup);
@@ -300,7 +300,7 @@ GameState.prototype.update = function () {
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
 		//console.log("Take that !");
 	}
-
+	
 	// Everyday I'm shambling.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
@@ -344,12 +344,12 @@ GameState.prototype.update = function () {
 	// Move full-screen sprite with the camera.
 	this.postProcessGroup.x = this.camera.x;
 	this.postProcessGroup.y = this.camera.y;
-
+	
 	// Update lighting.
 	if(this.enableLighting) {
 		this.playerLight.x = this.player.x;
 		this.playerLight.y = this.player.y - 16;
-
+		
 		this.lightmap.renderXY(this.lightLayerGroup,
 							   -this.camera.x,
 							   -this.camera.y);
@@ -366,7 +366,7 @@ GameState.prototype.render = function () {
 	/* CHECK LINE OF SIGHT OF ZOMBIE 1
 	var line = new Phaser.Line(this.player.x, this.player.y, this.mobs[1].x, this.mobs[1].y);
 	this.game.debug.geom(line, "rgb(0, 255, 255)");
-
+	
 	var tiles = this.mapLayer.getRayCastTiles(line);
 	for (var i = 0 ; i < tiles.length ; i++) {
 		var color = "rgba(0, 0, 255, .5)";
@@ -391,18 +391,18 @@ GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWoob
 								'radial_light',
 								0,
 								this.lightGroup);
-
+	
 	light.lightSize = size / 2;
 	light.lightSizeWooble = sizeWooble;
 	light.lightColor = color;
 	light.lightColorWooble = colorWooble;
-
+	
 	light.anchor.set(.5, .5);
 	var scale = size * this.rnd.realInRange(
 		1. - light.lightSizeWooble,
 		1. + light.lightSizeWooble);
 	light.scale.set(scale);
-
+	
 	light.blendMode = PIXI.blendModes.ADD;
 	light.tint = color;
 	
@@ -473,7 +473,6 @@ GameState.prototype.lineOfSight = function(stalker, victim) {
 	Math.cos(staring_angle) > 0 && Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE;
 };
 
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // DOODS !
@@ -513,7 +512,6 @@ function Player(game, x, y) {
 
 Player.prototype = Object.create(Dood.prototype);
 
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // LEVELS !
@@ -522,11 +520,10 @@ Player.prototype = Object.create(Dood.prototype);
 
 function Level(gameState) {
 	this.gameState = gameState;
-
+	
 	this.enablePlayerLight = true;
 	this.enableNoisePass = true;
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Test level
@@ -547,7 +544,7 @@ TestLevel.prototype.preload = function() {
 
 TestLevel.prototype.create = function() {
 	var gs = this.gameState;
-
+	
 	gs.map = gs.game.add.tilemap("map");
 	gs.map.addTilesetImage("default", "defaultTileset");
 	gs.map.setCollision([
@@ -560,9 +557,7 @@ TestLevel.prototype.create = function() {
 
 TestLevel.prototype.update = function() {
 	var gs = this.gameState;
-
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Intro
@@ -589,20 +584,18 @@ IntroLevel.prototype.preload = function() {
 
 IntroLevel.prototype.create = function() {
 	var gs = this.gameState;
-
+	
 	gs.map = gs.game.add.tilemap("intro_map");
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
-
+	
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
 }
 
 IntroLevel.prototype.update = function() {
 	var gs = this.gameState;
-
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
