@@ -18,6 +18,7 @@ var ZOMBIE_CHARGE_VELOCITY = 400;
 var ZOMBIE_SPOTTING_RANGE = 160;
 var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
+var ZOMBIE_CHARGE_DELAY = 0;
 var ZOMBIE_IDEA_DELAY = 5000;
 
 var NORMAL  = 0;
@@ -130,16 +131,11 @@ GameState.prototype.create = function () {
 		
 		this.mobs[i].spot = function () {
 			var zed = that.mobs[j];
-			var glance = new Phaser.Line(zed.x, zed.y, that.player.x, that.player.y);
-			// Don't ask, lest the zombie stare at YOU instead.
-			var staring_angle = (glance.angle+3*Math.PI/2)-(2*Math.PI-zed.body.angle);
-			if (glance.length < ZOMBIE_SPOTTING_RANGE && !that.obstructed(glance)
-			&& Math.cos(staring_angle) > 0 && Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE)
-			{
+			if (!zed.looks == BERZERK && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
+				//TODO: Make a scary noise.
+				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
-			else
-				zed.looks = NORMAL;
 		};
 		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, this.mobs[i].spot, this);
 	}
@@ -227,19 +223,29 @@ GameState.prototype.update = function () {
 		this.nextMessage();
 	}
 	
-	// Shamble around aimlessly.
+	// Everyday I'm shambling.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
 		var zed = this.mobs[i];
-
+		
+		// Stumble against the walls.
 		this.game.physics.arcade.collide(zed, this.mapLayer);
-		//this.game.physics.arcade.collide(zed, this.pc);
-
 		var zblock = zed.body.blocked;
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
-		
 		zed.frame = zed.looks*4 + zed.facing;
+		
+		// EXTERMINATE ! EXTERMINATE !
+		if (zed.body.hitTest(this.player.x, this.player.y)) {
+			zed.looks = BERZERK;
+			pc.body.velocity.set(0,0);
+			//console.log("HULK SMASH !");
+		}
+		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player)) {
+			// We lost him, boss !
+			//console.log("Huh ?");
+			zed.looks = NORMAL;
+		}
 	}
 	
 	this.postProcessGroup.x = this.camera.x;
@@ -343,6 +349,15 @@ GameState.prototype.displayMessage = function(key) {
 	if(typeof this.messageQueue === 'undefined') {
 		console.warn("displayMessage: key '"+key+"' does not exist.");
 	}
+};
+
+// Kind of assumes the stalker is a zombie.
+GameState.prototype.lineOfSight = function(stalker, victim) {
+	var glance = new Phaser.Line(stalker.x, stalker.y, victim.x, victim.y);
+	var staring_angle = (glance.angle+3*Math.PI/2)-(2*Math.PI-stalker.body.angle);
+	// Don't ask, lest the zombie stare at YOU instead.
+	return glance.length < ZOMBIE_SPOTTING_RANGE && !this.obstructed(glance) &&
+	Math.cos(staring_angle) > 0 && Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE;
 };
 
 // Dood object.
