@@ -42,6 +42,10 @@ GameState.prototype.preload = function () {
 
 	this.load.image("black", "assets/sprites/black.png");
 	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
+	
+	this.load.image("message_bg", "assets/message_bg.png");
+	this.load.bitmapFont("message_font", "assets/fonts/font.png",
+						 "assets/fonts/font.fnt");
 
 	this.load.spritesheet("dummies", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
@@ -68,6 +72,7 @@ GameState.prototype.create = function () {
 	this.k_down = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
 	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+	this.k_space = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
 	// Background.
 	this.game.add.image(0, 0, "background");
@@ -175,7 +180,15 @@ GameState.prototype.create = function () {
 			}, this);
 		}, this);
 	}
+
+	// Message box !
+	this.messageGroup = this.add.group(this.postProcessGroup);
+	this.messageBg = this.add.sprite(24, 384, "message_bg", 0, this.messageGroup);
+	this.message = this.add.bitmapText(40, 400, "message_font", "", 24, this.messageGroup);
+	this.messageQueue = [ "Test !", "Plop.", "Coin !" ];
+	this.nextMessage();
 	
+	// Noise pass
 	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
 	this.noiseSprite.animations.add("noise", null, 24, true);
 	this.noiseSprite.animations.play("noise");
@@ -208,6 +221,10 @@ GameState.prototype.update = function () {
 		pc.facing = LEFT;
 	}
 	pc.frame = pc.looks*4 + pc.facing;
+	
+	if(this.k_space.justPressed(1)) {
+		this.nextMessage();
+	}
 	
 	// Shamble around aimlessly.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
@@ -308,6 +325,17 @@ GameState.prototype.obstructed = function(line) {
 			return true;
 	return false;
 };
+
+GameState.prototype.nextMessage = function() {
+	if(this.messageQueue.length === 0) {
+		this.messageGroup.callAll('kill');
+		this.message.text = "";
+	}
+	else {
+		this.messageGroup.callAll('revive');
+		this.message.text = this.messageQueue.shift();
+	}
+}
 
 // Dood object.
 function Dood(game, x, y, spritesheet, group) {
