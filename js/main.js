@@ -31,7 +31,7 @@ GameState.prototype.preload = function () {
 
 	this.load.image("background", "assets/dummy_background.png");
 	this.load.image("defaultTileset", "assets/tilesets/test.png");
-	this.load.spritesheet("radial_light", "assets/sprites/radial_light.png", 32, 32);
+	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
 	this.load.tilemap("map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
@@ -105,7 +105,6 @@ GameState.prototype.create = function () {
 
 	this.time.events.loop(LIGHT_DELAY, function() {
 		this.lightGroup.forEach(function(light) {
-			light.frame = (light.frame+1) % 8;
 			var scale = light.lightSize * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);
 			light.scale.set(scale, scale);
 		}, this);
@@ -186,11 +185,11 @@ GameState.prototype.addLight = function(x, y, size, color) {
 	var light = this.add.sprite(x + 16,
 								y - 16,
 								'radial_light',
-								this.rnd.integer() % 8,
+								0,
 								this.lightGroup);
 
 	light.anchor.set(.5, .5);
-	light.lightSize = size;
+	light.lightSize = size / 2;
 	var scale = size * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);;
 	light.scale.set(scale);
 
