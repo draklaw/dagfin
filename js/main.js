@@ -46,6 +46,7 @@ GameState.prototype.preload = function () {
 	this.load.image("message_bg", "assets/message_bg.png");
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
+	this.load.json("message_test", "assets/texts/test.json");
 
 	this.load.spritesheet("dummies", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
@@ -184,7 +185,7 @@ GameState.prototype.create = function () {
 	this.messageGroup = this.add.group(this.postProcessGroup);
 	this.messageBg = this.add.sprite(24, 384, "message_bg", 0, this.messageGroup);
 	this.message = this.add.bitmapText(40, 400, "message_font", "", 24, this.messageGroup);
-	this.messageQueue = [ "Test !", "Plop.", "Coin !" ];
+	this.messageQueue = [];
 	this.nextMessage();
 	
 	// Noise pass
@@ -334,7 +335,14 @@ GameState.prototype.nextMessage = function() {
 		this.messageGroup.callAll('revive');
 		this.message.text = this.messageQueue.shift();
 	}
-}
+};
+
+GameState.prototype.displayMessage = function(key) {
+	this.messageQueue = this.cache.getJSON(key);
+	if(typeof this.messageQueue === 'undefined') {
+		console.warn("displayMessage: key '"+key+"' does not exist.");
+	}
+};
 
 // Dood object.
 function Dood(game, x, y, spritesheet, group) {
