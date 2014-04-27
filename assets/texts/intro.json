@@ -1,0 +1,64 @@
+{
+	intro: [ //Sur l'écran de titre / un fond noir ?
+		"It's been two years since Matt diseapered. \n The police gave up long ago, but not myself.",
+		"I've finally won the right to search the house. \n I've not much hope, but at least...",
+		"I won't give up."
+	],
+	
+	salle : [// en arrivant dans la salle.
+		"It's the room where Matt did his researches. \n I did not imagine them like that. \n It's quite unusual for a physician.", 
+		"I should begin the search..."
+	],
+	
+	bouquin : [
+		"The book seems ancient and precious.\n I cannot read the whole title,\n I can only read \"Dagfin\"",
+		"\"Help me, please !\"",
+		"It's the handwritting of Matt !\n It's dated of yesterday !\nI knew Matt was still alive !",
+		"There's is also… A reciepe ?",
+		"Deep blood of a Wrecked \n Eye of the fortuneteller \n Center of the One",
+		"I should search for these objects."
+	],
+	
+	sang : [//avant le bouquin
+		"The smell... ew ! looks like it's blood.",
+		"It's still liquid, surprisingly."
+	],
+
+	sang2 : [//après le bouquin
+		"I don't even know what is a Wrecked, but it seems to be blood."
+	],
+		
+	femur : [//avant le bouquin
+		"It's not even human !"
+	],
+	
+	femur2 : [//après le bouquin
+		"I don't want to cross the path of the beast which has such bones"
+	],
+
+	collier : [//avant le bouquin
+		"The stone has an eery glow..."
+	],
+
+	collier2 : [//après le bouquin
+		"At least, this one is not so twisted."
+	],
+	
+	tapis : [//quand Andrew passe sur le tapis la première fois
+		"This one does not fit with the room.\n I knew Matt had strange taste."
+		"It seems there's something on the floor, under this awfull carpet !"
+	],//retrait du tapis
+	
+	pentacle : [//sans le bouquin 
+		"I don't know the matter used to draw this.\n It seems freshly drawed."
+	],
+	
+	invoc : [//Après avoir récupéré le bouquin et les autres ingrédients, ainsi que retiré le tapis
+		"There's something more written on the bottom of the first page... \n Let's see that !",
+		" \"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
+	],
+	
+	invoc2 :[//toute la pièce noire sauf le pentacle
+		"What the...!"
+	]
+}
