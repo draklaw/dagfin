@@ -1,0 +1,41 @@
+{
+	d1: [ //En arrivant devant Dagfin, qui a Matt à sa droite
+		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
+		"Matt : Oh, it's you Andrew !\nYou too were tired of this eldery world ?",
+		"Andrew: Don't worry Matt, I'll take you back home !",
+		"Matt : But we're together home, now…\nDagfin : MAy I intErUpt yoU ? I sEE You hAVe mY cEnTEr.\n Give it to me.",
+		"> Give the bone to Dagfin\n> Don't give it"	
+	],
+	
+	d2 : [//Si fémur donné
+		"Dagfin : GoOd ! LeT The fUN beGIN !"
+		//combat !
+	],
+	
+	d3 : [//Si fémur pas donné
+		"Dagfin : YoU LiEd To mE.\nGiVE yOUr wIlL tO The ChaOS."
+	],
+	
+	d4 : [// Si touché par une attaque de Dagfin ou après d3
+		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\n CoME tO ME, hUmAn",
+		//Andrew va se placer à la gauche de Dagfin, écran de gameover/rechargement
+	],
+	
+	
+	d5 : [//Défaite de Dagfin
+		"Dagfin : I CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\n I Am thE pUpIL oF yOUr EyE\n I aM tHe iNexTIngUiSHablE rED-hAiReD tORch\n I am The StAR oF ChAoS.\n",
+		"Dagfin : WiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
+		// Disparaît et Matt vient vers le joueur
+	],
+	
+	d6 : [//Après avoir récupéré Matt
+		"Matt : Andrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\nAndrew : hear what ?\n Matt : ... never mind.",
+		"Andrew : Do you know how to come back ?\n Matt : Come back ? Where ?We're fine here, no ?\nAndrew: ...",
+		"Andrew: To our world. Matt: Oh, This One ! Wait, you didn't get the last formula ?",
+		"Andrew : Which formula ?\n Matt : The one at the end of the book.\nDon't say to me that you didn't record it.", 
+		"Andrew : So, you had it all the time ?",
+		"Matt : It would have been foolish to come here without it !" 	
+	],
+	
+	
+}
