@@ -8,14 +8,19 @@ var DOOD_OFFSET_X = 16;
 var DOOD_OFFSET_Y = -16;
 var PLAYER_VELOCITY = 140;
 
+var DOWN  = 0;
+var UP    = 1;
+var RIGHT = 2;
+var LEFT  = 3;
+
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
 var ZOMBIE_SPOTTING_RANGE = 160;
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_IDEA_DELAY = 5000;
 
-var Z_NORMAL  = 0;
-var Z_BERZERK = 1;
+var NORMAL  = 0;
+var BERZERK = 1;
 
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
@@ -94,26 +99,23 @@ GameState.prototype.create = function () {
 		var that = this, j = i;
 		this.mobs[i].shamble = function () {
 			var zed = that.mobs[j];
-			switch (that.rnd.integer()%4) {
-				case 0:
+			zed.facing = that.rnd.integer()%4;
+			switch (zed.facing) {
+				case DOWN:
 					zed.body.velocity.x = 0;
 					zed.body.velocity.y = ZOMBIE_SHAMBLE_VELOCITY;
-					zed.frame = zed.looks*4 + 0;
 					break;
-				case 1:
+				case UP:
 					zed.body.velocity.x = 0;
 					zed.body.velocity.y = -ZOMBIE_SHAMBLE_VELOCITY;
-					zed.frame = zed.looks*4 + 1;
 					break;
-				case 2:
+				case RIGHT:
 					zed.body.velocity.y = 0;
 					zed.body.velocity.x = ZOMBIE_SHAMBLE_VELOCITY;
-					zed.frame = zed.looks*4 + 2;
 					break;
-				case 3:
+				case LEFT:
 					zed.body.velocity.y = 0;
 					zed.body.velocity.x = -ZOMBIE_SHAMBLE_VELOCITY;
-					zed.frame = zed.looks*4 + 3;
 					break;
 			};
 		};
@@ -124,10 +126,10 @@ GameState.prototype.create = function () {
 			var glance = new Phaser.Line(zed.x, zed.y, that.player.x, that.player.y);
 			if (glance.length < ZOMBIE_SPOTTING_RANGE && !that.obstructed(glance))
 			{
-				zed.looks = Z_BERZERK;
+				zed.looks = BERZERK;
 			}
 			else
-				zed.looks = Z_NORMAL;
+				zed.looks = NORMAL;
 		};
 		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, this.mobs[i].spot, this);
 	}
@@ -157,8 +159,8 @@ GameState.prototype.create = function () {
 						  this.stringToColor(mapLights[i].properties.color));
 		}
 
-		this.playerLight = this.addLight(this.player.x + this.player.width / 2,
-										 this.player.y + this.player.height / 2,
+		this.playerLight = this.addLight(this.player.x,
+										 this.player.y - 16,
 										 LIGHT_SCALE);
 
 		this.time.events.loop(LIGHT_DELAY, function() {
@@ -180,26 +182,28 @@ GameState.prototype.create = function () {
 GameState.prototype.update = function () {
 	'use strict';
 	
-	this.game.physics.arcade.collide(this.player, this.mapLayer);
+	var pc = this.player;
+	this.game.physics.arcade.collide(pc, this.mapLayer);
 	
 	// React to controls.
-	this.player.body.velocity.set(0, 0);
+	pc.body.velocity.set(0, 0);
 	if (this.k_down.isDown) {
-		this.player.body.velocity.y = PLAYER_VELOCITY;
-		this.player.frame = 0;
+		pc.body.velocity.y = PLAYER_VELOCITY;
+		pc.facing = DOWN;
 	}
 	if (this.k_up.isDown) {
-		this.player.body.velocity.y = -PLAYER_VELOCITY;
-		this.player.frame = 1;
+		pc.body.velocity.y = -PLAYER_VELOCITY;
+		pc.facing = UP;
 	}
 	if (this.k_right.isDown) {
-		this.player.body.velocity.x = PLAYER_VELOCITY;
-		this.player.frame = 2;
+		pc.body.velocity.x = PLAYER_VELOCITY;
+		pc.facing = RIGHT;
 	}
 	if (this.k_left.isDown) {
-		this.player.body.velocity.x = -PLAYER_VELOCITY;
-		this.player.frame = 3;
+		pc.body.velocity.x = -PLAYER_VELOCITY;
+		pc.facing = LEFT;
 	}
+	pc.frame = pc.looks*4 + pc.facing;
 	
 	// Shamble around aimlessly.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
@@ -207,11 +211,13 @@ GameState.prototype.update = function () {
 		var zed = this.mobs[i];
 
 		this.game.physics.arcade.collide(zed, this.mapLayer);
-		//this.game.physics.arcade.collide(zed, this.player);
+		//this.game.physics.arcade.collide(zed, this.pc);
 
 		var zblock = zed.body.blocked;
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
+		
+		zed.frame = zed.looks*4 + zed.facing;
 	}
 	
 	this.postProcessGroup.x = this.camera.x;
@@ -219,8 +225,8 @@ GameState.prototype.update = function () {
 
 	// Update lighting.
 	if(this.enableLighting) {
-		this.playerLight.x = this.player.x + 16;
-		this.playerLight.y = this.player.y + 24;
+		this.playerLight.x = this.player.x;
+		this.playerLight.y = this.player.y - 16;
 
 		this.lightmap.renderXY(this.lightLayerGroup,
 							   -this.camera.x,
@@ -289,6 +295,7 @@ GameState.prototype.multColor = function(color, mult) {
 		(g & 0xff) << 8 |
 		(b & 0xff));
 };
+
 GameState.prototype.obstructed = function(line) {
 	tiles = this.mapLayer.getRayCastTiles(line);
 	
@@ -296,7 +303,7 @@ GameState.prototype.obstructed = function(line) {
 		if (tiles[i].canCollide)
 			return true;
 	return false;
-}
+};
 
 // Dood object.
 function Dood(game, x, y, spritesheet, group) {
@@ -308,7 +315,8 @@ function Dood(game, x, y, spritesheet, group) {
 	group.add(this);
 	this.anchor.set(.5, .6666667);
 	
-	this.looks = Z_NORMAL;
+	this.looks = NORMAL;
+	this.facing = DOWN;
 	
 	this.game.physics.arcade.enable(this);
 	this.body.setSize(32, 32, 0, 16);
