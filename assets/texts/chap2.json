@@ -1,7 +1,7 @@
 {
 	//Dans chaque niveau, on peut trouver quelques "indices" écrits par Matt
 	intro: [ //si possible un fond genre "parchemin", sinon un fond noir, texte sur tout l'écran
-		"Chapter Two : The Wreckeds\n\nThe realm of Yl'her was empty, and Dagfin was bored of it.\nHe called back the Chaos, and once again the Chaos melted.\nIt obeyed to The Odd One, and the wreckeds appeared.\nBut the Chaos cannot create from scratch.\nThe Odd One made a pact with Brims, The Moisty One.\nBut the Moisty One sent its dead ones to Dagfin.\nThe chaos could not create true life from the dead.\n And the Wreckeds sprang."
+		"Chapter Two : The Wreckeds\n\nThe realm of Yl'her was empty, and Dagfin was bored of it.\nHe called back the Chaos, and once again the Chaos melted.\nIt obeyed The Odd One, and the Wreckeds appeared.\nBut the Chaos cannot create from scratch.\nThe Odd One made a pact with Brims, The Moisty One.\nBut the Moisty One sent its dead ones to Dagfin.\nThe chaos could not create true life from the dead.\nAnd the Wreckeds sprang."
 	],
 	
 	indice1 :[//très tôt dans le niveau
@@ -9,10 +9,10 @@
 	],
 	
 	indice2 :[
-	"THEY'RE REAL !!."
+	"THEY'RE REAL !!!"
 	],	
 
 	indice3 :[
-	"They bite, also.\n It hurts a lot."
+	"They bite, too.\nIt hurts a lot."
 	],	
 }
