@@ -20,6 +20,7 @@ var Z_BERZERK = 1;
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
+var LIGHT_COLOR_RAND = .2;
 
 // GameState object.
 function GameState() {
@@ -34,6 +35,7 @@ GameState.prototype.preload = function () {
 	'use strict';
 
 	this.load.image("black", "assets/sprites/black.png");
+	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
 
 	this.load.spritesheet("dummies", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
@@ -49,6 +51,9 @@ GameState.prototype.preload = function () {
 GameState.prototype.create = function () {
 	'use strict';
 	this.time.advancedTiming = true;
+	
+	// Cap at 30fps to try to avoid people going through walls.
+	this.time.deltaCap = 0.033333;
 	
 	this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	
@@ -127,36 +132,49 @@ GameState.prototype.create = function () {
 		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, this.mobs[i].spot, this);
 	}
 	
-	// Lighting.
-	this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
-	this.lightLayer = this.add.sprite(0, 0, this.lightmap);
-	this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
+	this.postProcessGroup = this.add.group();
 	
-	// Contains all the stuff renderer to the lightmap.
-	this.lightLayerGroup = this.make.group();
+	// Lighting.
+	this.enableLighting = true;
+	
+	if(this.enableLighting) {
+		this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
+		this.lightLayer = this.add.sprite(0, 0, this.lightmap, 0, this.postProcessGroup);
+		this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
 
-	this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
-	this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
+		// Contains all the stuff renderer to the lightmap.
+		this.lightLayerGroup = this.make.group();
 
-	this.lightGroup = this.add.group(this.lightLayerGroup);
+		this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
+		this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
 
-	var mapLights = this.map.objects.lights;
-	for(var i=0; i<mapLights.length; ++i) {
-		this.addLight(mapLights[i].x, mapLights[i].y,
-					  mapLights[i].properties.size,
-					  this.stringToColor(mapLights[i].properties.color));
+		this.lightGroup = this.add.group(this.lightLayerGroup);
+
+		var mapLights = this.map.objects.lights;
+		for(var i=0; i<mapLights.length; ++i) {
+			this.addLight(mapLights[i].x, mapLights[i].y,
+						  mapLights[i].properties.size,
+						  this.stringToColor(mapLights[i].properties.color));
+		}
+
+		this.playerLight = this.addLight(this.player.x + this.player.width / 2,
+										 this.player.y + this.player.height / 2,
+										 LIGHT_SCALE);
+
+		this.time.events.loop(LIGHT_DELAY, function() {
+			this.lightGroup.forEach(function(light) {
+				var scale = light.lightSize * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);
+				light.scale.set(scale, scale);
+				light.tint = this.multColor(light.lightColor, this.rnd.realInRange(1-LIGHT_COLOR_RAND, 1));
+			}, this);
+		}, this);
 	}
 	
-	this.playerLight = this.addLight(this.player.x + this.player.width / 2,
-									 this.player.y + this.player.height / 2,
-					  				 LIGHT_SCALE);
-
-	this.time.events.loop(LIGHT_DELAY, function() {
-		this.lightGroup.forEach(function(light) {
-			var scale = light.lightSize * this.rnd.realInRange(1.-LIGHT_RAND, 1.+LIGHT_RAND);
-			light.scale.set(scale, scale);
-		}, this);
-	}, this);
+	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
+	this.noiseSprite.animations.add("noise", null, 24, true);
+	this.noiseSprite.animations.play("noise");
+	this.noiseSprite.scale.set(4, 4);
+	this.noiseSprite.alpha = .2;
 };
 
 GameState.prototype.update = function () {
@@ -196,16 +214,18 @@ GameState.prototype.update = function () {
 			zed.shamble();
 	}
 	
+	this.postProcessGroup.x = this.camera.x;
+	this.postProcessGroup.y = this.camera.y;
+
 	// Update lighting.
-	this.playerLight.x = this.player.x + 16;
-	this.playerLight.y = this.player.y + 24;
-	
-	this.lightmap.renderXY(this.lightLayerGroup,
-						   -this.camera.x,
-						   -this.camera.y);
-	
-	this.lightLayer.x = this.camera.x;
-	this.lightLayer.y = this.camera.y;
+	if(this.enableLighting) {
+		this.playerLight.x = this.player.x + 16;
+		this.playerLight.y = this.player.y + 24;
+
+		this.lightmap.renderXY(this.lightLayerGroup,
+							   -this.camera.x,
+							   -this.camera.y);
+	}
 };
 
 GameState.prototype.render = function () {
@@ -240,6 +260,7 @@ GameState.prototype.addLight = function(x, y, size, color) {
 	light.scale.set(scale);
 
 	light.blendMode = PIXI.blendModes.ADD;
+	light.lightColor = color;
 	light.tint = color;
 	
 	return light;
@@ -252,6 +273,22 @@ GameState.prototype.stringToColor = function(str) {
 	return parseInt(str, 16);
 };
 
+GameState.prototype.multColor = function(color, mult) {
+	var a = (color >> 24) & 0xff;
+	var r = (color >> 16) & 0xff;
+	var g = (color >> 8) & 0xff;
+	var b = (color >> 0) & 0xff;
+	
+	r *= mult;
+	g *= mult;
+	b *= mult;
+	
+	return (
+		(a & 0xff) << 24 |
+		(r & 0xff) << 16 |
+		(g & 0xff) << 8 |
+		(b & 0xff));
+};
 GameState.prototype.obstructed = function(line) {
 	tiles = this.mapLayer.getRayCastTiles(line);
 	
