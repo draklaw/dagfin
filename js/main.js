@@ -80,6 +80,7 @@ GameState.prototype.create = function () {
 	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 	this.k_punch = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
 	this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 	
 	// Background.
