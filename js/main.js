@@ -5,11 +5,15 @@ var MAX_HEIGHT = 600;
 var DOOD_WIDTH = 32;
 var DOOD_HEIGHT = 48;
 
+var PLAYER_VELOCITY = 140;
+
+var ZOMBIE_SHAMBLE_VELOCITY = 40;
+var ZOMBIE_CHARGE_VELOCITY = 400;
+var ZOMBIE_SPOTTING_DELAY = 500;
+var ZOMBIE_IDEA_DELAY = 5000;
+
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
-
-var PLAYER_VELOCITY = 140;
-var ZOMBIE_VELOCITY = 40;
 
 // GameState object.
 function GameState() {
@@ -71,7 +75,30 @@ GameState.prototype.create = function () {
 	{
 		spawnObj = this.map.objects.doods[i];
 		this.mobs[i] = new Dood(this.game, spawnObj.x, spawnObj.y-DOOD_HEIGHT, "dummies");
-		this.mobs[i].body.velocity.x = ZOMBIE_VELOCITY;
+
+		var that = this, j = i;
+		this.mobs[i].shamble = function () {
+			var zed = that.mobs[j].body;
+			switch (that.rnd.integer()%4) {
+				case 0:
+					zed.velocity.x = 0;
+					zed.velocity.y = -ZOMBIE_SHAMBLE_VELOCITY;
+					break;
+				case 1:
+					zed.velocity.x = 0;
+					zed.velocity.y = ZOMBIE_SHAMBLE_VELOCITY;
+					break;
+				case 2:
+					zed.velocity.y = 0;
+					zed.velocity.x = -ZOMBIE_SHAMBLE_VELOCITY;
+					break;
+				case 3:
+					zed.velocity.y = 0;
+					zed.velocity.x = ZOMBIE_SHAMBLE_VELOCITY;
+					break;
+			};
+		};
+		this.time.events.loop(ZOMBIE_IDEA_DELAY, this.mobs[i].shamble, this);
 	}
 	
 	// Lighting.
@@ -112,28 +139,14 @@ GameState.prototype.update = function () {
 	// Shamble around aimlessly.
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
-		this.game.physics.arcade.collide(this.mobs[i], this.mapLayer);
-//this.game.physics.arcade.collide(this.mobs[i], this.player);
-		var zed = this.mobs[i].body;
-		if (zed.blocked.up||zed.blocked.down||zed.blocked.left||zed.blocked.right)
-			switch (this.rnd.integer()%4) {
-				case 0:
-					zed.velocity.x = 0;
-					zed.velocity.y = -ZOMBIE_VELOCITY;
-					break;
-				case 1:
-					zed.velocity.x = 0;
-					zed.velocity.y = ZOMBIE_VELOCITY;
-					break;
-				case 2:
-					zed.velocity.y = 0;
-					zed.velocity.x = -ZOMBIE_VELOCITY;
-					break;
-				case 3:
-					zed.velocity.y = 0;
-					zed.velocity.x = ZOMBIE_VELOCITY;
-					break;
-			}
+		var zed = this.mobs[i];
+
+		this.game.physics.arcade.collide(zed, this.mapLayer);
+		//this.game.physics.arcade.collide(zed, this.player);
+
+		var zblock = zed.body.blocked;
+		if (zblock.up || zblock.down || zblock.left || zblock.right)
+			zed.shamble();
 	}
 	
 	// Update lighting.
