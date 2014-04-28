@@ -48,8 +48,6 @@ function GameState() {
 	
 	Phaser.State.call(this);
 	
-//	this.level = new TestLevel(this);
-	this.level = new IntroLevel(this);
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -62,10 +60,15 @@ GameState.prototype.init = function(levelId) {
 	'use strict';
 	
 	console.log("Load level: "+levelId);
-	levelId = levelId || 'intro';
+	levelId = levelId || location.href.split('level=')[1] || 'intro';
+//	levelId = levelId || 'chap1';
+//	levelId = levelId || 'test';
 	
 	if(levelId === 'intro') {
 		this.level = new IntroLevel(this);
+	}
+	else if(levelId === 'chap1') {
+		this.level = new Chap1Level(this);
 	}
 	else if(levelId === 'test') {
 		this.level = new TestLevel(this);
@@ -97,9 +100,6 @@ GameState.prototype.preload = function () {
 	
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
-	this.load.tilemap("map", "assets/maps/test.json", null,
-	                  Phaser.Tilemap.TILED_JSON);
-
 	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
     	//this.load.audio('sfx', this.cache.getJSON("sfxInfo").resources);
 	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
@@ -330,6 +330,9 @@ GameState.prototype.create = function () {
 GameState.prototype.update = function () {
 	'use strict';
 	
+	// Hack use key !
+	this.k_use.triggered = this.k_use.justPressed(1);
+	
 	var pc = this.player;
 	this.game.physics.arcade.collide(pc, this.mapLayer);
 	
@@ -337,41 +340,43 @@ GameState.prototype.update = function () {
 	pc.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
 		if (this.k_down.isDown) {
-			pc.body.velocity.y = PLAYER_VELOCITY;
+			pc.body.velocity.y = 1;
 			pc.facing = DOWN;
 		}
 		if (this.k_up.isDown) {
-			pc.body.velocity.y = -PLAYER_VELOCITY;
+			pc.body.velocity.y = -1;
 			pc.facing = UP;
 		}
 		if (this.k_right.isDown) {
-			pc.body.velocity.x = PLAYER_VELOCITY;
+			pc.body.velocity.x = 1;
 			pc.facing = RIGHT;
 		}
 		if (this.k_left.isDown) {
-			pc.body.velocity.x = -PLAYER_VELOCITY;
+			pc.body.velocity.x = -1;
 			pc.facing = LEFT;
 		}
+		pc.body.velocity.setMagnitude(PLAYER_VELOCITY);
 	}
 	pc.frame = pc.looks*4 + pc.facing;
 
 	// bruit de pas
 	if(pc.body.velocity.x || pc.body.velocity.y){
-		//this.sfx.play('footstep',0,1,true,false);
+		this.sfx.play('footstep', 0, 1, true, false);
 	} else this.sfx.stop('footstep');
 	
-	if(this.k_use.justPressed(1)) {
+	if(this.k_use.triggered && this.hasMessageDisplayed()) {
+		this.k_use.triggered = false;
 		this.nextMessage();
 	}
 	
 	var punch = false;
 	if (this.k_punch.isDown && !pc.hitCooldown)
 	{
-		// Play stun zombie
+		// Player stun zombie
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
-		this.sfx.play('hit',0,1,false,true);
+		this.sfx.play('hit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
 		//console.log("Take that !");
 	}
 	
@@ -401,7 +406,7 @@ GameState.prototype.update = function () {
 				zed.body.velocity.set(0, 0);
 				zed.hitCooldown = true;
 				this.time.events.add(HIT_COOLDOWN, function () { zed.hitCooldown = false; }, this);
-				this.sfx.play('hit',0,1,false,true); //don't work ??!
+				this.sfx.play('hit',0,1,false,true); //hit by zombie
 				//console.log("HULK SMASH !");
 			}
 		}
@@ -550,6 +555,10 @@ GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, pa
 	if(!Array.isArray(this.messageQueue)) {
 		console.warn("displayMessage: message '"+key+"."+msg+"' does not exist or is not an array.");
 	}
+};
+
+GameState.prototype.hasMessageDisplayed = function() {
+	return this.messageBg.alive;
 };
 
 // Kind of assumes the stalker is a zombie.
@@ -829,8 +838,8 @@ IntroLevel.prototype.create = function() {
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
 
-    	gs.music = game.add.audio('intro');
-	gs.music.play('',0,0.2);
+	gs.music = game.add.audio('intro');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
@@ -856,7 +865,7 @@ IntroLevel.prototype.update = function() {
 		this.carpetFound = true;
 	}
 		
-	if(gs.messageQueue.length === 0 && gs.k_use.justPressed(1)) {
+	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
 		var x = gs.player.x;
 		var y = gs.player.y;
 
@@ -918,7 +927,7 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				gs.game.state.restart(true, false, null, 'expe');
+				gs.game.state.restart(true, false, null, 'chap1');
 			});
 		});
 	}
@@ -928,7 +937,90 @@ IntroLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-	gs.game.debug.text("exit: "+this.triggers['exit'].rect.contains(gs.player.x, gs.player.y), 10, 32);
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Chapter I
+
+function Chap1Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap1Level.prototype = Object.create(Level.prototype);
+
+Chap1Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
+	gs.load.json("messages", "assets/texts/chap1.json");
+	
+	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap1Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Defered loading here. But as we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap1_map_json");
+	gs.load.tilemap("chap1_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	this.triggersLayer = null;
+	for(var i=0; i<this.mapJson.layers.length; ++i) {
+		var layer = this.mapJson.layers[i];
+		if(layer.name === 'triggers') {
+			this.triggersLayer = layer;
+			break;
+		}
+	}
+	if(!this.triggersLayer) {
+		console.warn("Triggers not found !");
+	}
+	
+	this.triggers = {};
+	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
+		var tri = this.triggersLayer.objects[i];
+		tri.rect = new Phaser.Rectangle(
+			tri.x, tri.y, tri.width, tri.height);
+		this.triggers[tri.name] = tri;
+	}
+
+	gs.map = gs.game.add.tilemap("chap1_map");
+	gs.map.addTilesetImage("basic", "chap1_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+
+   	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+}
+
+Chap1Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+}
+
+Chap1Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
 }
 
 
