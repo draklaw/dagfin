@@ -1509,12 +1509,10 @@ Chap2Level.prototype.create = function() {
 	this.triggers.doorSwitch.onEnter = function() {
 		that.triggers.doorSwitch.onEnter = null;
 		//TODO: Open all doors with trigger="one".
-		//FIXME: Add a line of dialog in the JSON file to advise player to avoid zed's LoS.
 		gs.displayMessage("messages", "doorSwitch", true);
 	};
 	
 	this.triggers.carnivorousPlant.onEnter = function() {
-		//TODO: Make a multiple choice dialog or alter JSON source to remove choice.
 		that.triggers.carnivorousPlant.onEnter = null;
 		gs.askQuestion("messages", "carnivorousPlant", [
 			function () { gs.objects.carnivorousPlant.kill(); },

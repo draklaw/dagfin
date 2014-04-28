@@ -13,7 +13,8 @@
 	],
 	
 	"doorSwitch" : [
-		"It sounds like a door just opened.\nI'm not sure that's a good thing."
+		"It sounds like a door just opened.\nI'm not sure that's a good thing...",
+		"If the creature I saw is on the loose now,\nI should try to stay out of its sight."
 	],
 	
 	"hourglassNoteFirst" : [
@@ -57,5 +58,5 @@
 				"message": [ "I don't want to pet a flower." ]
 			}
 		]
-	]
+	}
 }
