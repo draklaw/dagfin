@@ -60,8 +60,8 @@ GameState.prototype.init = function(levelId) {
 	'use strict';
 	
 	console.log("Load level: "+levelId);
-//	levelId = levelId || 'intro';
-	levelId = levelId || 'chap1';
+	levelId = levelId || 'intro';
+//	levelId = levelId || 'chap1';
 	
 	if(levelId === 'intro') {
 		this.level = new IntroLevel(this);
@@ -329,27 +329,28 @@ GameState.prototype.update = function () {
 	pc.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
 		if (this.k_down.isDown) {
-			pc.body.velocity.y = PLAYER_VELOCITY;
+			pc.body.velocity.y = 1;
 			pc.facing = DOWN;
 		}
 		if (this.k_up.isDown) {
-			pc.body.velocity.y = -PLAYER_VELOCITY;
+			pc.body.velocity.y = -1;
 			pc.facing = UP;
 		}
 		if (this.k_right.isDown) {
-			pc.body.velocity.x = PLAYER_VELOCITY;
+			pc.body.velocity.x = 1;
 			pc.facing = RIGHT;
 		}
 		if (this.k_left.isDown) {
-			pc.body.velocity.x = -PLAYER_VELOCITY;
+			pc.body.velocity.x = -1;
 			pc.facing = LEFT;
 		}
+		pc.body.velocity.setMagnitude(PLAYER_VELOCITY);
 	}
 	pc.frame = pc.looks*4 + pc.facing;
 
 	// bruit de pas
 	if(pc.body.velocity.x || pc.body.velocity.y){
-		this.sfx.play('footstep',0,1,true,false);
+		this.sfx.play('footstep', 0, 1, true, false);
 	} else this.sfx.stop('footstep');
 	
 	if(this.k_use.justPressed(1)) {
@@ -362,7 +363,7 @@ GameState.prototype.update = function () {
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
-		this.sfx.play('hit',0,1,false,false); //don't work ??!
+		this.sfx.play('hit', 0, 1, false, false); //don't work ??!
 		//console.log("Take that !");
 	}
 	
@@ -819,8 +820,8 @@ IntroLevel.prototype.create = function() {
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
 
-    	gs.music = game.add.audio('intro');
-	gs.music.play('',0,0.2);
+	gs.music = game.add.audio('intro');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
