@@ -6,11 +6,11 @@
  <tileset firstgid="17" name="items" tilewidth="32" tileheight="32">
   <image source="../items.png" width="128" height="128"/>
  </tileset>
- <tileset firstgid="33" name="dagfin" tilewidth="32" tileheight="32">
-  <image source="../../assets/sprites/dagfin.png" width="3264" height="128"/>
+ <tileset firstgid="33" name="spawn2" tilewidth="32" tileheight="32">
+  <image source="../../assets/tilesets/spawn2.png" width="160" height="160"/>
  </tileset>
- <tileset firstgid="441" name="Spawn" tilewidth="32" tileheight="32">
-  <image source="../spawn.png" width="160" height="160"/>
+ <tileset firstgid="58" name="trone" tilewidth="32" tileheight="32">
+  <image source="../../assets/sprites/trone.png" width="224" height="160"/>
  </tileset>
  <layer name="map" width="64" height="64">
   <data encoding="csv">
@@ -21,10 +21,10 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,34,35,35,36,37,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,10,2,136,137,137,138,139,2,10,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,238,239,239,240,241,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,10,2,340,341,341,342,343,2,10,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,10,2,2,2,2,2,2,2,10,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,10,2,2,2,2,2,2,2,10,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,2,2,2,2,2,2,2,2,2,8,8,8,8,8,8,8,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -90,6 +90,11 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,58,59,60,61,62,63,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,66,67,68,69,70,71,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,72,73,74,75,76,77,78,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,79,80,81,82,83,84,85,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,87,88,89,90,91,92,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -119,11 +124,6 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,441,442,443,444,445,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,446,447,448,449,450,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,451,452,453,454,455,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,456,457,458,459,460,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,461,462,463,464,465,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -166,7 +166,7 @@
   <object name="Player" type="player_spawn" gid="18" x="384" y="1280"/>
  </objectgroup>
  <objectgroup name="lights" width="64" height="64">
-  <object name="LightAqua" type="light" gid="17" x="640" y="416">
+  <object name="LightAqua" type="light" gid="17" x="704" y="416">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>
@@ -246,31 +246,7 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="1184" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="1216" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1248" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1280" y="416">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>
@@ -286,94 +262,6 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="1312" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1376" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1408" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="640" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="608" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="576" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="672" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="704" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="736" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="768" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="800" y="416">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="832" y="416">
    <properties>
     <property name="color" value="2ab7ff"/>
@@ -382,7 +270,7 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="864" y="416">
+  <object name="LightAqua" type="light" gid="17" x="736" y="1184">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>
@@ -391,54 +279,6 @@
    </properties>
   </object>
   <object name="LightAqua" type="light" gid="17" x="864" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="896" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1216">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="832" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="928" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="928" y="1152">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1152">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>
@@ -462,38 +302,6 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="928" y="1088">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="928" y="1056">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1088">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1056">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="1120" y="1024">
    <properties>
     <property name="color" value="2ab7ff"/>
@@ -510,14 +318,6 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="640" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="608" y="1376">
    <properties>
     <property name="color" value="2ab7ff"/>
@@ -526,7 +326,7 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="576" y="1376">
+  <object name="LightAqua" type="light" gid="17" x="608" y="1184">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>
@@ -542,95 +342,7 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="672" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="704" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="736" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="768" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="800" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1184">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="928" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="960" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="992" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1024" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1056" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1088" y="1376">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>
@@ -646,46 +358,6 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1344">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1312">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="1120" y="1280">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="800" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="768" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="736" y="1376">
    <properties>
     <property name="color" value="2ab7ff"/>
@@ -694,39 +366,7 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
-  <object name="LightAqua" type="light" gid="17" x="704" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="672" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="832" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
   <object name="LightAqua" type="light" gid="17" x="864" y="1376">
-   <properties>
-    <property name="color" value="2ab7ff"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="LightAqua" type="light" gid="17" x="896" y="1376">
    <properties>
     <property name="color" value="2ab7ff"/>
     <property name="color_woobling" value=".2"/>

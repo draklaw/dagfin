@@ -323,9 +323,9 @@ GameState.prototype.create = function () {
 		
 		this.playerLight = this.addLight(this.player.x + 16,
 										 this.player.y - 32,
-										 LIGHT_SCALE,
+										 7,
 										 LIGHT_RAND,
-										 0xd0d0d0,
+										 0xa0c0e0,
 										 LIGHT_COLOR_RAND);
 		if(!this.level.enablePlayerLight) {
 			this.playerLight.kill();
@@ -817,12 +817,13 @@ Level.prototype.parseLevel = function(mapJson) {
 	var gs = this.gameState;
 		
 	this.triggersLayer = null;
+	this.mapLayers = {}
 	for(var i=0; i<mapJson.layers.length; ++i) {
 		var layer = mapJson.layers[i];
 		if(layer.name === 'triggers') {
 			this.triggersLayer = layer;
-			break;
 		}
+		this.mapLayers[layer.name] = layer;
 	}
 	if(!this.triggersLayer) {
 		console.warn("Triggers not found !");
@@ -1396,14 +1397,15 @@ Chap3Level.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("chap3_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/chap1.json");
+	gs.load.json("chap3_map_json", "assets/maps/chap3.json");
+	gs.load.json("messages", "assets/texts/chap3.json");
 	
 	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
 	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
 
 	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("flame", "assets/sprites/flame.png");
 
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1426,23 +1428,44 @@ Chap3Level.prototype.create = function() {
 	gs.map.addTilesetImage("basic", "chap3_tileset");
 	gs.map.addTilesetImage("spawn", "spawn");
 	gs.map.addTilesetImage("spawn2", "spawn2");
-	gs.map.setCollision([ 1, 8 ]);
+	gs.map.setCollision([ 1, 8, 10 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
-	
+
+	gs.overlayLayer = gs.map.createLayer("overlay");
+
+	for(var i=0; i<this.mapLayers.crystals.objects.length; ++i) {
+		var crystal = this.mapLayers.crystals.objects[i];
+		crystal.rect = new Phaser.Rectangle(crystal.x, crystal.y, crystal.width, crystal.height);
+	}
+	this.crystals = this.mapLayers.crystals.objects;
+
 	gs.music = game.add.audio('intro');
 	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
 
 	gs.displayMessage("messages", "intro", true);
 	
 	var that = this;
 
+	this.triggers.flame.onEnter = function() {
+		that.triggers.flame.onEnter = null;
+		gs.displayMessage("messages", "flame", true, function() {
+			gs.objects.flame.kill();
+			gs.playerLight.revive();
+			gs.toggleLights('flame');
+		});
+	}
+	
 //	this.triggers.exit.onEnter = function() {
 //		gs.game.state.restart(true, false, null, 'boss');
 //	}
-	
+
+
 }
 
 Chap3Level.prototype.update = function() {
@@ -1452,6 +1475,39 @@ Chap3Level.prototype.update = function() {
 	
 	this.processTriggers();
 	
+	if(gs.playerLight.alive) {
+		gs.playerLight.lightSize -= gs.time.elapsed / 4000;
+		if(gs.playerLight.lightSize < 1) {
+			gs.playerLight.lightSize = 1;
+		}
+	}
+	
+	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
+		var x = gs.player.x;
+		var y = gs.player.y;
+
+		switch(gs.player.facing) {
+			case DOWN:
+				y += 32;
+				break;
+			case UP:
+				y -= 32;
+				break;
+			case RIGHT:
+				x += 32;
+				break;
+			case LEFT:
+				x -= 32;
+				break;
+		};
+		
+		for(var i=0; i<this.crystals.length; ++i) {
+			if(this.crystals[i].rect.contains(x, y)) {
+				gs.playerLight.lightSize = 3;
+				break;
+			}
+		}
+	}
 }
 
 Chap3Level.prototype.render = function() {
