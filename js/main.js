@@ -14,7 +14,7 @@ var LEFT  = 3;
 
 var PLAYER_VELOCITY = 140;
 
-var HIT_COOLDOWN = 250;
+var HIT_COOLDOWN = 500;
 
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
@@ -24,6 +24,8 @@ var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_CHARGE_DELAY = 0;
 var ZOMBIE_STUN_DELAY = 1000;
 var ZOMBIE_IDEA_DELAY = 5000;
+var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
+var FAR_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*2;
 
 var NORMAL  = 0;
 var STUNNED = 1;
@@ -35,6 +37,7 @@ var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
+
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -59,7 +62,7 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.init = function(levelId) {
 	'use strict';
 	
-	console.log("Load level: "+levelId);
+	//console.log("Load level: "+levelId);
 	levelId = levelId || location.href.split('level=')[1] || 'intro';
 //	levelId = levelId || 'chap1';
 //	levelId = levelId || 'test';
@@ -116,6 +119,7 @@ GameState.prototype.preload = function () {
 
 GameState.prototype.create = function () {
 	'use strict';
+	var gs = this;
 	
 	// System stuff...
 	this.time.advancedTiming = true;
@@ -157,13 +161,6 @@ GameState.prototype.create = function () {
 		this.scale.startFullScreen();
 	}
 
-	// Sound effects
-	var soundSprite = this.cache.getJSON("sfxInfo").spritemap;
-	this.sfx = this.add.audio('sfx');
-	for (var key in soundSprite){
-		this.sfx.addMarker(key, soundSprite[key].start, soundSprite[key].end - soundSprite[key].start, 1, soundSprite[key].loop);
-	}
-
 	// Map.
 	this.level.create();
 	
@@ -198,6 +195,23 @@ GameState.prototype.create = function () {
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 	
+	// Sound effects
+	addSfx(this.player);
+	function addSfx(entity){
+		var soundSprite = gs.cache.getJSON("sfxInfo").spritemap;
+		entity.sfx = gs.add.audio('sfx');
+		for (var key in soundSprite){
+			entity.sfx.addMarker(
+				key,
+				soundSprite[key].start,
+				soundSprite[key].end - soundSprite[key].start,
+				1,
+				soundSprite[key].loop
+			);
+		}
+	}
+
+	
 	this.mobs = new Array();
 	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
 	{
@@ -205,6 +219,7 @@ GameState.prototype.create = function () {
 		this.mobs[i] = new Dood(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
 		
 		var that = this, j = i;
+		addSfx(this.mobs[i])
 		this.mobs[i].shamble = function () {
 			var zed = that.mobs[j];
 			if (zed.looks == STUNNED)
@@ -236,7 +251,7 @@ GameState.prototype.create = function () {
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				//TODO: Make a scary noise.
-				this.sfx.play('zombi',0,1,false,true); //don't work ??!
+				zed.sfx.play('zombi',0,1,false,true); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
@@ -329,6 +344,7 @@ GameState.prototype.create = function () {
 
 GameState.prototype.update = function () {
 	'use strict';
+	var gs = this;
 	
 	// Hack use key !
 	this.k_use.triggered = this.k_use.justPressed(1);
@@ -361,8 +377,8 @@ GameState.prototype.update = function () {
 
 	// bruit de pas
 	if(pc.body.velocity.x || pc.body.velocity.y){
-		this.sfx.play('footstep', 0, 1, true, false);
-	} else this.sfx.stop('footstep');
+		pc.sfx.play('playerFootStep', 0, 1, true, false);
+	} else pc.sfx.stop();
 	
 	if(this.k_use.triggered && this.hasMessageDisplayed()) {
 		this.k_use.triggered = false;
@@ -376,7 +392,7 @@ GameState.prototype.update = function () {
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
-		this.sfx.play('hit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
+		pc.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
 		//console.log("Take that !");
 	}
 	
@@ -391,6 +407,13 @@ GameState.prototype.update = function () {
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
 		zed.frame = zed.looks*4 + zed.facing;
+
+		if(zed.body.velocity.x || zed.body.velocity.y) {
+			zed.sfx.play(
+				'zombiFootStep',0,
+				intensityDistanceDependant(zed),
+				false,false);
+		}
 		
 		// EXTERMINATE ! EXTERMINATE !
 		if (zed.looks != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
@@ -399,14 +422,22 @@ GameState.prototype.update = function () {
 			if(punch) {
 				zed.looks = STUNNED;
 				zed.body.velocity.set(0, 0);
-				this.time.events.add(ZOMBIE_STUN_DELAY, function () { zed.looks = NORMAL; }, this);
+				this.time.events.add(
+					ZOMBIE_STUN_DELAY,
+					function () {
+						zed.looks = NORMAL;
+					}, this);
 				//console.log("In your face !");
 			} else if (!zed.hitCooldown) {
 				zed.looks = BERZERK;
 				zed.body.velocity.set(0, 0);
 				zed.hitCooldown = true;
-				this.time.events.add(HIT_COOLDOWN, function () { zed.hitCooldown = false; }, this);
-				this.sfx.play('hit',0,1,false,true); //hit by zombie
+				this.time.events.add(
+					HIT_COOLDOWN,
+					function () {
+						zed.hitCooldown = false;
+					}, this);
+				zed.sfx.play('zombiHit',0,1,false,true); //hit by zombie
 				//console.log("HULK SMASH !");
 			}
 		}
@@ -416,7 +447,17 @@ GameState.prototype.update = function () {
 			zed.looks = NORMAL;
 		}
 	}
-	
+	function intensityDistanceDependant(mob){
+		var distance = gs.game.physics.arcade.distanceBetween(pc, mob);
+		var intensity = Math.max(0,Math.min(1,
+			1 - ( 
+					( distance - FULL_SOUND_RANGE )
+				/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
+			)
+		));
+		//console.log(distance, intensity);
+		return intensity;
+	}
 	this.level.update();
 	
 	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
