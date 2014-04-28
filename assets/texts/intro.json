@@ -1,17 +1,17 @@
 {
-	intro: [ //Sur l'écran de titre / un fond noir ?
+	"intro": [
 		"It's been two years since Matt diseapered.\nThe police gave up long ago, but not myself.",
 		"I've finally been granted the rights to search the house.\nI don't have much hope, but...",
 		"I won't give up."
 	],
 	
-	salle : [// en arrivant dans la salle.
+	"room" : [
 		"It's the room where Matt did his researches.\nI did not imagine it like that.\nIt's quite unusual for a physician.", 
 		"I should begin searching..."
 	],
 	
-	bouquin : [
-		"The book seems ancient and precious.\nI cannot read the whole title,\nI can only read\"Dagfin\"",
+	"book" : [
+		"The book seems ancient and precious.\nI cannot read the whole title,\nI can only read \"Dagfin\"",
 		"\"Help me, please !\"",
 		"It's the handwritting of Matt !\nIt's dated of yesterday !\nI knew Matt was still alive !",
 		"There's also... a recipe ?",
@@ -19,46 +19,46 @@
 		"I should search for these objects."
 	],
 	
-	sang : [//avant le bouquin
+	"blood" : [
 		"The smell... ew ! Looks like it's blood.",
 		"It's still liquid, surprisingly."
 	],
 
-	sang2 : [//après le bouquin
+	"blood2" : [
 		"I don't even know what is a Wrecked, but it seems to be blood."
 	],
 		
-	femur : [//avant le bouquin
+	"femur" : [
 		"It's not even human !"
 	],
 	
-	femur2 : [//après le bouquin
+	"femur2" : [
 		"I wouldn't want to cross the path of the beast which had such bones."
 	],
 
-	collier : [//avant le bouquin
+	"collar" : [
 		"The stone has an eery glow..."
 	],
 
-	collier2 : [//après le bouquin
+	"collar2" : [
 		"At least, this one is not so twisted."
 	],
 	
-	tapis : [//quand Andrew passe sur le tapis la première fois
-		"This carpet doesn't fit with the room.\nMatt always had strange taste."
+	"carpet" : [
+		"This carpet doesn't fit with the room.\nMatt always had strange taste.",
 		"It seems there's something on the floor, under this awful carpet !"
-	],//retrait du tapis
+	],
 	
-	pentacle : [//sans le bouquin 
+	"pentacle" : [
 		"I don't know what matter was used to draw this.\nIt seems freshly drawn."
 	],
 	
-	invoc : [//Après avoir récupéré le bouquin et les autres ingrédients, ainsi que retiré le tapis
+	"invoc" : [
 		"There's something else written at the bottom of the first page...\nLet's see that !",
 		" \"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
 	],
 	
-	invoc2 :[//toute la pièce noire sauf le pentacle
+	"invoc2" :[
 		"What the !..."
 	]
 }

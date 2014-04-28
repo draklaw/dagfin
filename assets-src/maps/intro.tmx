@@ -63,6 +63,6 @@
   <object name="collar" gid="36" x="480" y="384"/>
  </objectgroup>
  <objectgroup name="triggers" width="25" height="19">
-  <object name="exit" x="384" y="448" width="32" height="32"/>
+  <object name="exit" x="384" y="320" width="32" height="32"/>
  </objectgroup>
 </map>
