@@ -1483,6 +1483,8 @@ BossLevel.prototype.preload = function() {
 //	gs.load.json("messages", "assets/texts/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	gs.load.image("trone", "assets/sprites/trone.png");
 
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1501,6 +1503,8 @@ BossLevel.prototype.create = function() {
 	
 	gs.map = gs.game.add.tilemap("boss_map");
 	gs.map.addTilesetImage("basic", "boss_tileset");
+	gs.map.addTilesetImage("spawn2", "spawn2");
+	gs.map.addTilesetImage("trone", "trone");
 	gs.map.setCollision([ 1, 8 ]);
 	
 	gs.mapLayer = gs.map.createLayer("map");
