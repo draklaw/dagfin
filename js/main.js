@@ -60,10 +60,14 @@ GameState.prototype.init = function(levelId) {
 	'use strict';
 	
 	console.log("Load level: "+levelId);
-	levelId = levelId || 'intro';
+//	levelId = levelId || 'intro';
+	levelId = levelId || 'chap1';
 	
 	if(levelId === 'intro') {
 		this.level = new IntroLevel(this);
+	}
+	else if(levelId === 'chap1') {
+		this.level = new Chap1Level(this);
 	}
 	else if(levelId === 'test') {
 		this.level = new TestLevel(this);
@@ -902,13 +906,97 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				gs.game.state.restart(true, false, null, 'expe');
+				gs.game.state.restart(true, false, null, 'chap1');
 			});
 		});
 	}
 }
 
 IntroLevel.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Chapter I
+
+function Chap1Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap1Level.prototype = Object.create(Level.prototype);
+
+Chap1Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
+	gs.load.json("messages", "assets/texts/chap1.json");
+	
+	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap1Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Defered loading here. But as we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap1_map_json");
+	gs.load.tilemap("chap1_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	this.triggersLayer = null;
+	for(var i=0; i<this.mapJson.layers.length; ++i) {
+		var layer = this.mapJson.layers[i];
+		if(layer.name === 'triggers') {
+			this.triggersLayer = layer;
+			break;
+		}
+	}
+	if(!this.triggersLayer) {
+		console.warn("Triggers not found !");
+	}
+	
+	this.triggers = {};
+	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
+		var tri = this.triggersLayer.objects[i];
+		tri.rect = new Phaser.Rectangle(
+			tri.x, tri.y, tri.width, tri.height);
+		this.triggers[tri.name] = tri;
+	}
+
+	gs.map = gs.game.add.tilemap("chap1_map");
+	gs.map.addTilesetImage("basic", "chap1_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+
+   	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+}
+
+Chap1Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+}
+
+Chap1Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
