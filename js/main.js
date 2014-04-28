@@ -213,7 +213,24 @@ GameState.prototype.create = function () {
 		}
 	}
 	
-	// People.
+	// Doors in the map
+	this.doors = {};
+	if(this.map.objects.doors) {
+		for(var i = 0 ; i < this.map.objects.doors.length ; i++) {
+			var door = this.map.objects.doors[i];
+			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
+			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
+			var key = door.properties.type;
+			var sprite = this.add.sprite(door.x + offset_x + 16,
+			                             door.y + offset_y - 16,
+			                             key, 0, this.objectsGroup);
+			sprite.anchor.set(.5, .5);
+			this.objects[door.name] = sprite;
+			sprite.objName = door.name;
+			this.game.physics.arcade.enable(sprite);
+		}
+	}
+		// People.
 	var spawnObj = this.map.objects.doods[0];
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
@@ -1442,6 +1459,7 @@ Chap2Level.prototype.create = function() {
 	gs.displayMessage("messages", "intro", true);
 	
 	var that = this;
+	//TODO: Disable zombie freezing power.
 	
 	this.triggers.dialog1.onEnter = function() {
 		that.triggers.dialog1.onEnter = null;
@@ -1467,6 +1485,7 @@ Chap2Level.prototype.create = function() {
 	this.hourglassLast = function() {
 		that.triggers.hourglass.onEnter = null;
 		//TODO: Open all doors with trigger="two".
+		//TODO: Add zombie freezing power.
 		gs.displayMessage("messages", "hourglassLast", true, function() {
 			gs.objects.hourglass.kill();
 		});
@@ -1484,6 +1503,7 @@ Chap2Level.prototype.create = function() {
 		that.triggers.hourglass.onEnter = null;
 		that.triggers.hourglassNote.onEnter = that.noteLast;
 		//TODO: Open all doors with trigger="two".
+		//TODO: Add zombie freezing power.
 		gs.displayMessage("messages", "hourglassFirst", true, function() {
 			gs.objects.hourglass.kill();
 		});

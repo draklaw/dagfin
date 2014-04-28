@@ -13,8 +13,7 @@
 	],
 	
 	"doorSwitch" : [
-		"It sounds like a door just opened.\nI'm not sure that's a good thing...",
-		"If the creature I saw is on the loose now,\nI should try to stay out of its sight."
+		"It sounds like a door just opened.\nI'm not sure that's a good thing...\n\nIf the creature I saw is on the loose now,\nI should try to stay out of its sight."
 	],
 	
 	"hourglassNoteFirst" : [
