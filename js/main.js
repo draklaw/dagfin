@@ -46,8 +46,8 @@ function GameState() {
 	
 	Phaser.State.call(this);
 	
-	this.level = new TestLevel(this);
-//	this.level = new IntroLevel(this);
+//	this.level = new TestLevel(this);
+	this.level = new IntroLevel(this);
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -585,6 +585,10 @@ IntroLevel.prototype.preload = function() {
 	gs.load.image("blood_item", "assets/sprites/blood.png");
 	gs.load.image("femur_item", "assets/sprites/femur.png");
 	gs.load.image("collar_item", "assets/sprites/collar.png");
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+
 }
 
 IntroLevel.prototype.create = function() {
@@ -593,6 +597,9 @@ IntroLevel.prototype.create = function() {
 	gs.map = gs.game.add.tilemap("intro_map");
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
+    	gs.music = game.add.audio('intro');
+	gs.music.play();
+
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
