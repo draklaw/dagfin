@@ -4,6 +4,7 @@
 
 ### Code
 * The gameplay !
+* Fix diagonal speed.
 
 ### Graphics
 * Character animations

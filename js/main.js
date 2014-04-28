@@ -46,8 +46,8 @@ function GameState() {
 	
 	Phaser.State.call(this);
 	
-	this.level = new TestLevel(this);
-//	this.level = new IntroLevel(this);
+//	this.level = new TestLevel(this);
+	this.level = new IntroLevel(this);
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -96,7 +96,15 @@ GameState.prototype.create = function () {
 	
 	// Some settings...
 	this.enableLighting = true;
-	
+
+	// Message box ! (Needed before level.create())
+	this.messageGroup = this.make.group(this.postProcessGroup);
+	this.messageBg = this.add.sprite(24, 384, "message_bg", 0, this.messageGroup);
+	this.message = this.add.bitmapText(40, 400, "message_font", "", 24, this.messageGroup);
+	this.messageQueue = [];
+	this.blocPlayerWhileMsg = true;
+	this.messageCallback = null;
+	this.nextMessage();
 	
 	// Keyboard controls.
 	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -106,6 +114,7 @@ GameState.prototype.create = function () {
 	this.k_punch = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
 	this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+	this.k_debug = this.game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
 	
 	// Map.
 	this.level.create();
@@ -115,11 +124,12 @@ GameState.prototype.create = function () {
 //	this.mapLayer.debug = true;
 	
 	// Group all the stuff on the ground (always in background)
-	this.objects = this.add.group();
+	this.objectsGroup = this.add.group();
 	// Group all the stuff that should be sorted by depth.
 	this.characters = this.add.group();	
 	
 	// Items in the map
+	this.objects = {};
 	if(this.map.objects.items) {
 		for(var i = 0 ; i < this.map.objects.items.length ; i++) {
 			var item = this.map.objects.items[i];
@@ -127,8 +137,11 @@ GameState.prototype.create = function () {
 			var offset_y = parseInt(item.properties.offset_y, 10) || 0;
 			var sprite = this.add.sprite(item.x + offset_x + 16,
 										 item.y + offset_y - 16,
-										 item.name+"_item", 0, this.objects);
+										 item.name+"_item", 0, this.objectsGroup);
 			sprite.anchor.set(.5, .5);
+			this.objects[item.name] = sprite;
+			sprite.objName = item.name;
+			this.game.physics.arcade.enable(sprite);
 		}
 	}
 	
@@ -208,15 +221,15 @@ GameState.prototype.create = function () {
 			if(isNaN(sizeWooble)) {
 				sizeWooble = LIGHT_RAND;
 			}
-			this.addLight(mapLights[i].x, mapLights[i].y,
+			this.addLight(mapLights[i].x + 16, mapLights[i].y - 16,
 						  mapLights[i].properties.size,
 						  sizeWooble,
 						  color,
 						  colorWooble);
 		}
 		
-		this.playerLight = this.addLight(this.player.x,
-										 this.player.y - 16,
+		this.playerLight = this.addLight(this.player.x + 16,
+										 this.player.y - 32,
 										 LIGHT_SCALE,
 										 LIGHT_RAND,
 										 0xd0d0d0,
@@ -240,12 +253,8 @@ GameState.prototype.create = function () {
 		}, this);
 	}
 	
-	// Message box !
-	this.messageGroup = this.add.group(this.postProcessGroup);
-	this.messageBg = this.add.sprite(24, 384, "message_bg", 0, this.messageGroup);
-	this.message = this.add.bitmapText(40, 400, "message_font", "", 24, this.messageGroup);
-	this.messageQueue = [];
-	this.nextMessage();
+	// Add Message box
+	this.postProcessGroup.add(this.messageGroup);
 	
 	// Noise pass
 	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
@@ -270,21 +279,23 @@ GameState.prototype.update = function () {
 	
 	// React to controls.
 	pc.body.velocity.set(0, 0);
-	if (this.k_down.isDown) {
-		pc.body.velocity.y = PLAYER_VELOCITY;
-		pc.facing = DOWN;
-	}
-	if (this.k_up.isDown) {
-		pc.body.velocity.y = -PLAYER_VELOCITY;
-		pc.facing = UP;
-	}
-	if (this.k_right.isDown) {
-		pc.body.velocity.x = PLAYER_VELOCITY;
-		pc.facing = RIGHT;
-	}
-	if (this.k_left.isDown) {
-		pc.body.velocity.x = -PLAYER_VELOCITY;
-		pc.facing = LEFT;
+	if(!this.blocPlayerWhileMsg) {
+		if (this.k_down.isDown) {
+			pc.body.velocity.y = PLAYER_VELOCITY;
+			pc.facing = DOWN;
+		}
+		if (this.k_up.isDown) {
+			pc.body.velocity.y = -PLAYER_VELOCITY;
+			pc.facing = UP;
+		}
+		if (this.k_right.isDown) {
+			pc.body.velocity.x = PLAYER_VELOCITY;
+			pc.facing = RIGHT;
+		}
+		if (this.k_left.isDown) {
+			pc.body.velocity.x = -PLAYER_VELOCITY;
+			pc.facing = LEFT;
+		}
 	}
 	pc.frame = pc.looks*4 + pc.facing;
 	
@@ -375,6 +386,7 @@ GameState.prototype.render = function () {
 		this.game.debug.geom(new Phaser.Rectangle(tiles[i].x*32, tiles[i].y*32, tiles[i].width, tiles[i].height), color);
 	}
 	*/
+	this.level.render();
 };
 
 
@@ -386,8 +398,8 @@ GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWoob
 	if(typeof color === 'undefined') { color = 0xffffff; }
 	if(typeof colorWooble === 'undefined') { colorWooble = LIGHT_COLOR_RAND; }
 	
-	var light = this.add.sprite(x + 16,
-								y - 16,
+	var light = this.add.sprite(x,
+								y,
 								'radial_light',
 								0,
 								this.lightGroup);
@@ -450,6 +462,14 @@ GameState.prototype.nextMessage = function() {
 	if(this.messageQueue.length === 0) {
 		this.messageGroup.callAll('kill');
 		this.message.text = "";
+		
+		this.blocPlayerWhileMsg = false;
+		if(this.messageCallback) {
+			// reset callback before calling it allow to reset it in the callback.
+			var callback = this.messageCallback;
+			this.messageCallback = null;
+			callback(this.messageCallbackParam);
+		}
 	}
 	else {
 		this.messageGroup.callAll('revive');
@@ -457,10 +477,14 @@ GameState.prototype.nextMessage = function() {
 	}
 };
 
-GameState.prototype.displayMessage = function(key) {
-	this.messageQueue = this.cache.getJSON(key);
-	if(typeof this.messageQueue === 'undefined') {
-		console.warn("displayMessage: key '"+key+"' does not exist.");
+GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, param) {
+	this.blocPlayerWhileMsg = blocPlayer || false;
+	this.messageCallback = callback || null;
+	this.messageCallbackParam = param;
+	this.messageQueue = this.cache.getJSON(key)[msg].slice();
+	this.nextMessage();
+	if(!Array.isArray(this.messageQueue)) {
+		console.warn("displayMessage: message '"+key+"."+msg+"' does not exist or is not an array.");
 	}
 };
 
@@ -519,6 +543,8 @@ Player.prototype = Object.create(Dood.prototype);
 ////////////////////////////////////////////////////////////////////////////
 
 function Level(gameState) {
+	'use strict';
+	
 	this.gameState = gameState;
 	
 	this.enablePlayerLight = true;
@@ -529,12 +555,16 @@ function Level(gameState) {
 // Test level
 
 function TestLevel(gameState) {
+	'use strict';
+	
 	Level.call(this, gameState);
 }
 
 TestLevel.prototype = Object.create(Level.prototype);
 
 TestLevel.prototype.preload = function() {
+	'use strict';
+	
 	var gs = this.gameState;
 	
 	gs.load.tilemap("map", "assets/maps/test.json", null,
@@ -543,6 +573,8 @@ TestLevel.prototype.preload = function() {
 }
 
 TestLevel.prototype.create = function() {
+	'use strict';
+	
 	var gs = this.gameState;
 	
 	gs.map = gs.game.add.tilemap("map");
@@ -556,6 +588,14 @@ TestLevel.prototype.create = function() {
 }
 
 TestLevel.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
+
+TestLevel.prototype.render = function() {
+	'use strict';
+	
 	var gs = this.gameState;
 }
 
@@ -563,39 +603,163 @@ TestLevel.prototype.update = function() {
 // Intro
 
 function IntroLevel(gameState) {
+	'use strict';
+	
 	Level.call(this, gameState);
 }
 
 IntroLevel.prototype = Object.create(Level.prototype);
 
 IntroLevel.prototype.preload = function() {
+	'use strict';
+	
 	var gs = this.gameState;
 
-	gs.load.tilemap("intro_map", "assets/maps/intro.json", null,
-	                  Phaser.Tilemap.TILED_JSON);
+	gs.load.json("intro_map_json", "assets/maps/intro.json");
 	
 	gs.load.image("intro_tileset", "assets/tilesets/intro.png");
-	gs.load.image("pillar_item", "assets/sprites/pillar.png");
+	gs.load.spritesheet("pillar_item", "assets/sprites/pillar.png", 32, 64);
 	gs.load.image("carpet_item", "assets/sprites/carpet.png");
 	gs.load.image("blood_item", "assets/sprites/blood.png");
 	gs.load.image("femur_item", "assets/sprites/femur.png");
 	gs.load.image("collar_item", "assets/sprites/collar.png");
+	
+	gs.load.json("messages", "assets/texts/intro.json");
 }
 
 IntroLevel.prototype.create = function() {
-	var gs = this.gameState;
+	'use strict';
 	
+	var gs = this.gameState;
+
+	// Defered loading here. But as we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("intro_map_json");
+	gs.load.tilemap("intro_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	this.triggersLayer = null;
+	for(var i=0; i<this.mapJson.layers.length; ++i) {
+		var layer = this.mapJson.layers[i];
+		if(layer.name === 'triggers') {
+			this.triggersLayer = layer;
+			break;
+		}
+	}
+	if(!this.triggersLayer) {
+		console.warn("Triggers not found !");
+	}
+	
+	this.triggers = {};
+	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
+		var tri = this.triggersLayer.objects[i];
+		tri.rect = new Phaser.Rectangle(
+			tri.x, tri.y, tri.width, tri.height);
+		this.triggers[tri.name] = tri;
+	}
+
 	gs.map = gs.game.add.tilemap("intro_map");
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
 	
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+	this.pentacleFound = false;
+	this.carpetFound = false;
+	this.found = {};
+	this.exiting = false;
 }
 
 IntroLevel.prototype.update = function() {
+	'use strict';
+	
 	var gs = this.gameState;
+	
+	if(!this.carpetFound &&
+	   gs.physics.arcade.overlap(gs.player, gs.objects.carpet)) {
+		gs.displayMessage("messages", "carpet", true, function(obj) {
+			gs.objects.carpet.kill();
+		}, obj);
+		this.carpetFound = true;
+	}
+		
+	if(gs.messageQueue.length === 0 && gs.k_use.justPressed(1)) {
+		var x = gs.player.x;
+		var y = gs.player.y;
+
+		switch(gs.player.facing) {
+			case DOWN:
+				y += 32;
+				break;
+			case UP:
+				y -= 32;
+				break;
+			case RIGHT:
+				x += 32;
+				break;
+			case LEFT:
+				x -= 32;
+				break;
+		};
+		
+		for(var id in gs.objects) {
+			var obj = gs.objects[id];
+			var name = obj.objName;
+			if(!this.found[name] && obj.body.hitTest(x, y)) {
+				switch(name) {
+				case "blood":
+				case "femur":
+				case "collar":
+					if(this.found['pillar']) {
+						this.found[name] = true;
+						gs.displayMessage("messages", name+"2", true, function(obj) {
+							obj.kill();
+						}, obj);
+					}
+					else {
+						gs.displayMessage("messages", name, true);
+					}
+					break;
+				case "pillar":
+					this.found[name] = true;
+					gs.displayMessage("messages", 'book', true, function(obj) {
+						obj.frame = 1;
+					}, obj);
+					break;
+				}
+			}
+		}
+	}
+
+	var exitRect = this.triggers['exit'].rect;
+	var foundAll = this.carpetFound && this.found['pillar'] && this.found['blood']
+			&& this.found['femur'] && this.found['collar'];
+	var onPentacle = exitRect.contains(gs.player.x, gs.player.y);
+	if(!this.pentacleFound && onPentacle) {
+		this.pentacleFound = true;
+		gs.displayMessage("messages", 'pentacle', true);
+	}
+	else if(foundAll && !this.exiting && onPentacle) {
+		this.exiting = true;
+		gs.displayMessage("messages", 'invoc', true, function() {
+			gs.lightGroup.callAll('kill');
+			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
+			gs.displayMessage("messages", 'invoc2', true, function() {
+				console.log("EXIT !");
+			});
+		});
+	}
 }
+
+IntroLevel.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	gs.game.debug.text("exit: "+this.triggers['exit'].rect.contains(gs.player.x, gs.player.y), 10, 32);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -605,3 +769,9 @@ IntroLevel.prototype.update = function() {
 
 var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, '', GameState);
 
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// FUCK IT !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
