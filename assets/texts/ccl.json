@@ -30,11 +30,14 @@
 	
 	"d6" : [//Après avoir récupéré Matt
 		"Matt : Andrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\nAndrew : Hear what ?\n Matt : ...never mind.",
-		"Andrew : Do you know how to go back ?\nMatt : Go back ? Where ? We're fine here, aren't we ?\nAndrew : ...",
-		"Andrew : To our world.\nMatt : Oh, this one ! Wait, you didn't get the last formula ?",
-		"Andrew : Which formula ?\n Matt : The one at the end of the book.\nDon't tell to me that you didn't wrote it down." 
-		"Andrew : So, you had it all the time ?",
-		"Matt : It would have been foolish to come here without it !"
+		"Andrew : We have to find how to go back. ?\nMatt : Go back ? Where ? We're fine here, aren't we ?\nAndrew : To our world, Matt. I could come because I found your note, with the reciepe for the formula.",
+		"Matt : Me ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming." 
+		"Andrew : So, you had it all the time ?\nMatt : It would have been foolish to come here without it !",
+		"Andrew : Why wouldn't you come back ?\nMatt : Oh, you know... stuff... shiny sand... But you're here.\nWill you stay with me ?",
+		">Let's stay here\n>Let's go home together",
+		"Andrew : Ok, let's stay here a little longer. \nMatt : Wonderful  :D !",// les deux vont se mettre à la place de Dagfin & Ecran fin
+		"Andrew : I'd rather go home with you.\nMatt : Oh... I'm a bit decived, but ok. Here's the formula.",
+		// petite note "got the return formula" => lecture formule (\"meard sa'nds pli Dagfin, Yl'her fo  ytic gnirebmuls Ni'eht\") => pièce du début => écran fin
 	],
 	
 	
