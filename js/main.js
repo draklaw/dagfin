@@ -260,7 +260,6 @@ GameState.prototype.create = function () {
 			var zed = that.mobs[j];
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
-				//TODO: Make a scary noise.
 				zed.sfx.play('zombi',0,1,false,true); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
@@ -272,8 +271,11 @@ GameState.prototype.create = function () {
 	
 	// Lighting.
 	if(this.enableLighting) {
-		this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
-		this.lightLayer = this.add.sprite(0, 0, this.lightmap, 0, this.postProcessGroup);
+		var margin = 5;
+		this.lightmap = this.make.renderTexture(MAX_WIDTH+margin*2,
+												MAX_HEIGHT+margin*2,
+												"lightmap");
+		this.lightLayer = this.add.sprite(-margin, -margin, this.lightmap, 0, this.postProcessGroup);
 		this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
 		
 		// Contains all the stuff renderer to the lightmap.
@@ -283,6 +285,7 @@ GameState.prototype.create = function () {
 		this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
 		
 		this.lightGroup = this.add.group(this.lightLayerGroup);
+		this.lightGroup.position.set(margin, margin);
 		
 		var mapLights = this.map.objects.lights;
 		for(var i=0; i<mapLights.length; ++i) {
@@ -471,6 +474,7 @@ GameState.prototype.update = function () {
 						zed.hitCooldown = false;
 					}, this);
 				zed.sfx.play('zombiHit',0,1,false,true); //hit by zombie
+				pc.damage(1);
 				//console.log("HULK SMASH !");
 			}
 		}
@@ -496,6 +500,7 @@ GameState.prototype.update = function () {
 	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
+	this.camera.update();
 	this.postProcessGroup.x = this.camera.x;
 	this.postProcessGroup.y = this.camera.y;
 	
@@ -698,11 +703,17 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 function Player(game, x, y) {
 	'use strict';
-	
 	Dood.call(this, game, x, y, "player");
+	this.revive(3);
+	//this.health = 3;
+	
+	this.events.onKilled.add(function(){
+		console.log("Humanity lost you beneath the surface !");
+	});
 }
 
 Player.prototype = Object.create(Dood.prototype);
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -885,12 +896,18 @@ ExperimentalLevel.prototype.create = function() {
 	           
 	           
 	];
-
+	
+	for (var x = 0 ; x < gs.map.width ; x++)
+		for (var y = 0 ; y < gs.map.height ; y++)
+			for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
+				if (gs.map.getTile(x,y).index == this.vulnerableTiles[i]) {
+					gs.map.getTile(x,y).vulnerable = true;
+					break;
+				}
+	
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
-//	gs.mapLayer.debug = true;
-
-	//TODO: Optimize this callback.
+	
 	this.crumble = function () {
 		var newlyInfected = [];
 		
@@ -902,6 +919,7 @@ ExperimentalLevel.prototype.create = function() {
 				if (this.isVulnerable(gs.map, neighbours[j], newlyInfected))
 					newlyInfected.push(neighbours[j]);
 			gs.map.putTile(this.deadTile, xi, yi);
+			gs.map.getTile(xi,yi).vulnerable = false; // Can't be too sure.
 		}
 		
 		this.infectedTiles = newlyInfected;
@@ -918,9 +936,8 @@ ExperimentalLevel.prototype.isVulnerable = function (map, coords, infected) {
 		if (infected[i][0] === coords[0] && infected[i][1] == coords[1])
 			return false; // Tile already infected.
 	
-	for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
-		if (map.getTile(coords[0],coords[1]).index === this.vulnerableTiles[i])
-			return true; // Tile is sane and vulnerable.
+	if (map.getTile(coords[0],coords[1]).vulnerable === true)
+		return true; // Tile is sane and vulnerable.
 	
 	return false;
 };
@@ -1138,6 +1155,9 @@ Chap1Level.prototype.create = function() {
 	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
 //	gs.mapLayer.debug = true;
 
+	this.LAVA_TILE = 7;
+	
+	
    	gs.music = game.add.audio('intro');
 	gs.music.play();
 
@@ -1173,7 +1193,45 @@ Chap1Level.prototype.create = function() {
 		gs.toggleLights('maze');
 	};
 	
-	
+	this.infectedTiles = [];
+	this.crumble = function () {
+		var newlyInfected = [];
+		
+		for (var i = 0 ; i < this.infectedTiles.length ; i++)
+		{
+			var coord = this.infectedTiles[i];
+			var x = coord[0];
+			var y = coord[1];
+			gs.map.removeTile(x, y, gs.bridgeLayer);
+
+			var neighbours = [
+				[ x - 1, y ],
+				[ x + 1, y ],
+				[ x, y - 1 ],
+				[ x, y + 1 ]
+			];
+			for (var j = 0 ; j < 4 ; j++) {
+				var nb = neighbours[j];
+				var tile = gs.map.getTile(nb[0], nb[1], gs.bridgeLayer);
+				if(tile !== null && !tile.isMarked) {
+					newlyInfected.push(nb);
+					tile.isMarked = true;
+				}
+			}
+		}
+		
+		this.infectedTiles = newlyInfected;
+		if(this.infectedTiles.length === 0) {
+			gs.time.events.destroy(this.crumbleTimer);
+		}
+	};
+
+	this.triggers.lava_fail.onEnter = function() {
+		that.triggers.lava_fail.onEnter = null;
+		that.infectedTiles = [ [ 6, 22 ] ];
+		that.crumbleTimer = gs.time.events.loop(
+			200, that.crumble, that);
+	}	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1182,12 +1240,25 @@ Chap1Level.prototype.update = function() {
 	var gs = this.gameState;
 	
 	this.processTriggers();
+	
+	var mapTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
+										undefined, undefined, gs.mapLayer);
+	if(mapTile.index == this.LAVA_TILE) {
+		var bridgeTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
+											   undefined, undefined, gs.bridgeLayer);
+		if(bridgeTile === null) {
+			console.log("Aie");
+			gs.player.damage(1);
+		}
+	}
 }
 
 Chap1Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
+	
+	
 }
 
 
