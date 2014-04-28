@@ -257,7 +257,6 @@ GameState.prototype.create = function () {
 			var zed = that.mobs[j];
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
-				//TODO: Make a scary noise.
 				zed.sfx.play('zombi',0,1,false,true); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
@@ -882,12 +881,18 @@ ExperimentalLevel.prototype.create = function() {
 	           
 	           
 	];
-
+	
+	for (var x = 0 ; x < gs.map.width ; x++)
+		for (var y = 0 ; y < gs.map.height ; y++)
+			for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
+				if (gs.map.getTile(x,y).index == this.vulnerableTiles[i]) {
+					gs.map.getTile(x,y).vulnerable = true;
+					break;
+				}
+	
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
-//	gs.mapLayer.debug = true;
 
-	//TODO: Optimize this callback.
 	this.crumble = function () {
 		var newlyInfected = [];
 		
@@ -899,6 +904,7 @@ ExperimentalLevel.prototype.create = function() {
 				if (this.isVulnerable(gs.map, neighbours[j], newlyInfected))
 					newlyInfected.push(neighbours[j]);
 			gs.map.putTile(this.deadTile, xi, yi);
+			gs.map.getTile(xi,yi).vulnerable = false; // Can't be too sure.
 		}
 		
 		this.infectedTiles = newlyInfected;
@@ -915,9 +921,8 @@ ExperimentalLevel.prototype.isVulnerable = function (map, coords, infected) {
 		if (infected[i][0] === coords[0] && infected[i][1] == coords[1])
 			return false; // Tile already infected.
 	
-	for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
-		if (map.getTile(coords[0],coords[1]).index === this.vulnerableTiles[i])
-			return true; // Tile is sane and vulnerable.
+	if (map.getTile(coords[0],coords[1]).vulnerable === true)
+		return true; // Tile is sane and vulnerable.
 	
 	return false;
 };
