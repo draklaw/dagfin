@@ -59,9 +59,9 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.init = function(levelId) {
 	'use strict';
 	
+//	levelId = levelId || 'intro';
+	levelId = levelId || 'chap1';
 	console.log("Load level: "+levelId);
-	levelId = levelId || 'intro';
-//	levelId = levelId || 'chap1';
 	
 	if(levelId === 'intro') {
 		this.level = new IntroLevel(this);
@@ -266,11 +266,17 @@ GameState.prototype.create = function () {
 			if(isNaN(sizeWooble)) {
 				sizeWooble = LIGHT_RAND;
 			}
-			this.addLight(mapLights[i].x + 16, mapLights[i].y - 16,
-						  mapLights[i].properties.size,
-						  sizeWooble,
-						  color,
-						  colorWooble);
+			var light = this.addLight(mapLights[i].x + 16, mapLights[i].y - 16,
+									  mapLights[i].properties.size,
+									  sizeWooble,
+									  color,
+									  colorWooble,
+									  mapLights[i].properties);
+			
+			if(typeof light.properties.enabled !== 'undefined' &&
+			   light.properties.enabled === 'false') {
+				light.kill();
+			}
 		}
 		
 		this.playerLight = this.addLight(this.player.x + 16,
@@ -456,7 +462,7 @@ GameState.prototype.render = function () {
 ////////////////////////////////////////////////////////////////////////////
 // Other stuff
 
-GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWooble) {
+GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWooble, properties) {
 	if(typeof sizeWooble === 'undefined') { sizeWooble = LIGHT_RAND; }
 	if(typeof color === 'undefined') { color = 0xffffff; }
 	if(typeof colorWooble === 'undefined') { colorWooble = LIGHT_COLOR_RAND; }
@@ -471,6 +477,7 @@ GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWoob
 	light.lightSizeWooble = sizeWooble;
 	light.lightColor = color;
 	light.lightColorWooble = colorWooble;
+	light.properties = properties || {};
 	
 	light.anchor.set(.5, .5);
 	var scale = size * this.rnd.realInRange(
@@ -483,6 +490,21 @@ GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWoob
 	
 	return light;
 };
+
+GameState.prototype.toggleLights = function(toggle) {
+	for(var i=0; i<this.lightGroup.length; ++i) {
+		var light = this.lightGroup.children[i];
+		
+		if(light.properties.toggle === toggle) {
+			if(light.alive) {
+				light.kill();
+			}
+			else {
+				light.revive();
+			}
+		}
+	}
+}
 
 GameState.prototype.stringToColor = function(str) {
 	if(!str) {
@@ -619,6 +641,10 @@ function Level(gameState) {
 }
 
 Level.prototype.parseLevel = function(mapJson) {
+	'use strict';
+	
+	var gs = this.gameState;
+		
 	this.triggersLayer = null;
 	for(var i=0; i<mapJson.layers.length; ++i) {
 		var layer = mapJson.layers[i];
@@ -636,9 +662,39 @@ Level.prototype.parseLevel = function(mapJson) {
 		var tri = this.triggersLayer.objects[i];
 		tri.rect = new Phaser.Rectangle(
 			tri.x, tri.y, tri.width, tri.height);
+		tri.onEnter = null;
+		tri.onLeave = null;
+		tri.isInside = false;
 		this.triggers[tri.name] = tri;
 	}
 };
+
+Level.prototype.processTriggers = function(mapJson) {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	for(var id in this.triggers) {
+		var tri = this.triggers[id];
+		var inside = tri.rect.contains(gs.player.x, gs.player.y);
+
+		if(inside && !tri.isInside) {
+			console.log("Enter:", id);
+			if(tri.onEnter) {
+				tri.onEnter();
+			}
+			tri.isInside = true;
+		}
+		if(!inside && tri.isInside) {
+			console.log("Leave:", id);
+			if(tri.onLeave) {
+				tri.onLeave();
+			}
+			tri.isInside = false;
+		}
+	}
+};
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Test level
@@ -990,6 +1046,19 @@ Chap1Level.prototype.create = function() {
 	
 	gs.displayMessage("messages", "intro", true);
 	
+	var that = this;
+	this.triggers.indice1.onEnter = function() {
+		that.triggers.indice1.onEnter = null;
+		gs.displayMessage("messages", "indice1", true, function() {
+			gs.objects.indice1.kill();
+		});
+	};
+	
+	this.triggers.mazeToggle.onEnter = function() {
+		gs.toggleLights('maze');
+	};
+	
+	
 }
 
 Chap1Level.prototype.update = function() {
@@ -997,6 +1066,7 @@ Chap1Level.prototype.update = function() {
 	
 	var gs = this.gameState;
 	
+	this.processTriggers();
 }
 
 Chap1Level.prototype.render = function() {
