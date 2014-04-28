@@ -73,6 +73,9 @@ GameState.prototype.init = function(levelId) {
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
 	}
+	else if(levelId === 'boss') {
+		this.level = new BossLevel(this);
+	}
 	else if(levelId === 'test') {
 		this.level = new TestLevel(this);
 	}
@@ -261,7 +264,6 @@ GameState.prototype.create = function () {
 			var zed = that.mobs[j];
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
-				//TODO: Make a scary noise.
 				zed.sfx.play('zombi',0,1,false,true); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
@@ -918,12 +920,18 @@ ExperimentalLevel.prototype.create = function() {
 	           
 	           
 	];
-
+	
+	for (var x = 0 ; x < gs.map.width ; x++)
+		for (var y = 0 ; y < gs.map.height ; y++)
+			for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
+				if (gs.map.getTile(x,y).index == this.vulnerableTiles[i]) {
+					gs.map.getTile(x,y).vulnerable = true;
+					break;
+				}
+	
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
-//	gs.mapLayer.debug = true;
-
-	//TODO: Optimize this callback.
+	
 	this.crumble = function () {
 		var newlyInfected = [];
 		
@@ -935,6 +943,7 @@ ExperimentalLevel.prototype.create = function() {
 				if (this.isVulnerable(gs.map, neighbours[j], newlyInfected))
 					newlyInfected.push(neighbours[j]);
 			gs.map.putTile(this.deadTile, xi, yi);
+			gs.map.getTile(xi,yi).vulnerable = false; // Can't be too sure.
 		}
 		
 		this.infectedTiles = newlyInfected;
@@ -951,9 +960,8 @@ ExperimentalLevel.prototype.isVulnerable = function (map, coords, infected) {
 		if (infected[i][0] === coords[0] && infected[i][1] == coords[1])
 			return false; // Tile already infected.
 	
-	for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
-		if (map.getTile(coords[0],coords[1]).index === this.vulnerableTiles[i])
-			return true; // Tile is sane and vulnerable.
+	if (map.getTile(coords[0],coords[1]).vulnerable === true)
+		return true; // Tile is sane and vulnerable.
 	
 	return false;
 };
@@ -1171,6 +1179,9 @@ Chap1Level.prototype.create = function() {
 	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
 //	gs.mapLayer.debug = true;
 
+	this.LAVA_TILE = 7;
+	
+	
    	gs.music = game.add.audio('intro');
 	gs.music.play();
 
@@ -1206,7 +1217,45 @@ Chap1Level.prototype.create = function() {
 		gs.toggleLights('maze');
 	};
 	
-	
+	this.infectedTiles = [];
+	this.crumble = function () {
+		var newlyInfected = [];
+		
+		for (var i = 0 ; i < this.infectedTiles.length ; i++)
+		{
+			var coord = this.infectedTiles[i];
+			var x = coord[0];
+			var y = coord[1];
+			gs.map.removeTile(x, y, gs.bridgeLayer);
+
+			var neighbours = [
+				[ x - 1, y ],
+				[ x + 1, y ],
+				[ x, y - 1 ],
+				[ x, y + 1 ]
+			];
+			for (var j = 0 ; j < 4 ; j++) {
+				var nb = neighbours[j];
+				var tile = gs.map.getTile(nb[0], nb[1], gs.bridgeLayer);
+				if(tile !== null && !tile.isMarked) {
+					newlyInfected.push(nb);
+					tile.isMarked = true;
+				}
+			}
+		}
+		
+		this.infectedTiles = newlyInfected;
+		if(this.infectedTiles.length === 0) {
+			gs.time.events.destroy(this.crumbleTimer);
+		}
+	};
+
+	this.triggers.lava_fail.onEnter = function() {
+		that.triggers.lava_fail.onEnter = null;
+		that.infectedTiles = [ [ 6, 22 ] ];
+		that.crumbleTimer = gs.time.events.loop(
+			200, that.crumble, that);
+	}	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1215,9 +1264,92 @@ Chap1Level.prototype.update = function() {
 	var gs = this.gameState;
 	
 	this.processTriggers();
+	
+	var mapTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
+										undefined, undefined, gs.mapLayer);
+	if(mapTile.index == this.LAVA_TILE) {
+		var bridgeTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
+											   undefined, undefined, gs.bridgeLayer);
+		if(bridgeTile === null) {
+			console.log("Aie");
+			gs.player.damage(1);
+		}
+	}
 }
 
 Chap1Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Boss
+
+function BossLevel(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+BossLevel.prototype = Object.create(Level.prototype);
+
+BossLevel.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("boss_map_json", "assets/maps/boss.json");
+//	gs.load.json("messages", "assets/texts/ccl.json");
+	
+	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+BossLevel.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Defered loading here. But as we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("boss_map_json");
+	gs.load.tilemap("boss_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	gs.map = gs.game.add.tilemap("boss_map");
+	gs.map.addTilesetImage("basic", "boss_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+	
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+
+//	gs.overlaylayer = gs.map.addLayer("overlay");
+	
+
+   	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+//	gs.displayMessage("messages", "intro", true);
+	
+}
+
+BossLevel.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+}
+
+BossLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
