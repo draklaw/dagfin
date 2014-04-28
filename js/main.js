@@ -81,6 +81,9 @@ GameState.prototype.init = function(levelId) {
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
 	}
+	else if(levelId === 'chap2') {
+		this.level = new Chap2Level(this);
+	}
 	else if(levelId === 'chap3') {
 		this.level = new Chap3Level(this);
 	}
@@ -221,7 +224,24 @@ GameState.prototype.create = function () {
 		}
 	}
 	
-	// People.
+	// Doors in the map
+	this.doors = {};
+	if(this.map.objects.doors) {
+		for(var i = 0 ; i < this.map.objects.doors.length ; i++) {
+			var door = this.map.objects.doors[i];
+			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
+			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
+			var key = door.properties.type;
+			var sprite = this.add.sprite(door.x + offset_x + 16,
+			                             door.y + offset_y - 16,
+			                             key, 0, this.objectsGroup);
+			sprite.anchor.set(.5, .5);
+			this.objects[door.name] = sprite;
+			sprite.objName = door.name;
+			this.game.physics.arcade.enable(sprite);
+		}
+	}
+		// People.
 	var spawnObj = this.map.objects.doods[0];
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
@@ -334,9 +354,9 @@ GameState.prototype.create = function () {
 		
 		this.playerLight = this.addLight(this.player.x + 16,
 										 this.player.y - 32,
-										 LIGHT_SCALE,
+										 7,
 										 LIGHT_RAND,
-										 0xd0d0d0,
+										 0xa0c0e0,
 										 LIGHT_COLOR_RAND);
 		if(!this.level.enablePlayerLight) {
 			this.playerLight.kill();
@@ -863,12 +883,13 @@ Level.prototype.parseLevel = function(mapJson) {
 	var gs = this.gameState;
 		
 	this.triggersLayer = null;
+	this.mapLayers = {}
 	for(var i=0; i<mapJson.layers.length; ++i) {
 		var layer = mapJson.layers[i];
 		if(layer.name === 'triggers') {
 			this.triggersLayer = layer;
-			break;
 		}
+		this.mapLayers[layer.name] = layer;
 	}
 	if(!this.triggersLayer) {
 		console.warn("Triggers not found !");
@@ -1395,7 +1416,6 @@ Chap1Level.prototype.create = function() {
 	this.triggers.exit.onEnter = function() {
 		gs.game.state.restart(true, false, null, 'chap2');
 	}
-	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1425,6 +1445,166 @@ Chap1Level.prototype.render = function() {
 	
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Chapter II
+
+function Chap2Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap2Level.prototype = Object.create(Level.prototype);
+
+Chap2Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
+	gs.load.json("messages", "assets/texts/chap2.json");
+	
+	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn", "assets/tilesets/spawn.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	
+	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("hourglass", "assets/sprites/sablier.png");
+	gs.load.image("plante64", "assets/sprites/plante64.png");
+	
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap2Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	// Deferred loading here. But since we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap2_map_json");
+	gs.load.tilemap("chap2_map", null, this.mapJson,
+	                Phaser.Tilemap.TILED_JSON);
+	
+	this.parseLevel(this.mapJson);
+	
+	gs.map = gs.game.add.tilemap("chap2_map");
+	gs.map.addTilesetImage("terrain", "chap2_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+	
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+	// gs.mapLayer.debug = true;
+	
+	gs.music = game.add.audio('intro');
+	gs.music.play();
+	
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+	var that = this;
+	//TODO: Disable zombie freezing power.
+	
+	this.triggers.dialog1.onEnter = function() {
+		that.triggers.dialog1.onEnter = null;
+		gs.displayMessage("messages", "dialog1", true);
+	};
+	
+	this.triggers.dialog2.onEnter = function() {
+		that.triggers.dialog2.onEnter = null;
+		gs.displayMessage("messages", "dialog2", true);
+	};
+	
+	//FIXME: Some part of the dialogs can be factorized in the JSON file.
+	// It's also possible to make it so the door noise triggers just before
+	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
+	
+	this.noteLast = function() {
+		that.triggers.hourglassNote.onEnter = null;
+		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
+			gs.objects.hourglassNote.kill();
+		});
+	};
+	
+	this.hourglassLast = function() {
+		that.triggers.hourglass.onEnter = null;
+		//TODO: Open all doors with trigger="two".
+		//TODO: Add zombie freezing power.
+		gs.displayMessage("messages", "hourglassLast", true, function() {
+			gs.objects.hourglass.kill();
+		});
+	};
+	
+	this.noteFirst = function() {
+		that.triggers.hourglassNote.onEnter = null;
+		that.triggers.hourglass.onEnter = that.hourglassLast;
+		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
+			gs.objects.hourglassNote.kill();
+		});
+	};
+	
+	this.hourglassFirst = function() {
+		that.triggers.hourglass.onEnter = null;
+		that.triggers.hourglassNote.onEnter = that.noteLast;
+		//TODO: Open all doors with trigger="two".
+		//TODO: Add zombie freezing power.
+		gs.displayMessage("messages", "hourglassFirst", true, function() {
+			gs.objects.hourglass.kill();
+		});
+	};
+	
+	this.triggers.hourglassNote.onEnter = this.noteFirst;
+	this.triggers.hourglass.onEnter = this.hourglassFirst;
+	
+	this.triggers.importantNote.onEnter = function() {
+		that.triggers.importantNote.onEnter = null;
+		gs.displayMessage("messages", "importantNote", true, function() {
+			gs.objects.importantNote.kill();
+		});
+	};
+	
+	this.triggers.scaredNote.onEnter = function() {
+		that.triggers.scaredNote.onEnter = null;
+		gs.displayMessage("messages", "scaredNote", true, function() {
+			gs.objects.scaredNote.kill();
+		});
+	};
+	
+	this.triggers.doorSwitch.onEnter = function() {
+		that.triggers.doorSwitch.onEnter = null;
+		//TODO: Open all doors with trigger="one".
+		gs.displayMessage("messages", "doorSwitch", true);
+	};
+	
+	this.triggers.carnivorousPlant.onEnter = function() {
+		that.triggers.carnivorousPlant.onEnter = null;
+		gs.askQuestion("messages", "carnivorousPlant", [
+			function () { gs.objects.carnivorousPlant.kill(); },
+			null
+		]);
+	};
+	
+	this.triggers.exit.onEnter = function() {
+		gs.game.state.restart(true, false, null, 'chap3');
+	}
+}
+
+Chap2Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	this.processTriggers();
+}
+
+Chap2Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter III
@@ -1442,14 +1622,15 @@ Chap3Level.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("chap3_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/"+lang+"/chap1.json");
+	gs.load.json("chap3_map_json", "assets/maps/chap3.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap3.json");
 	
 	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
 	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
 
 	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("flame", "assets/sprites/flame.png");
 
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1472,23 +1653,44 @@ Chap3Level.prototype.create = function() {
 	gs.map.addTilesetImage("basic", "chap3_tileset");
 	gs.map.addTilesetImage("spawn", "spawn");
 	gs.map.addTilesetImage("spawn2", "spawn2");
-	gs.map.setCollision([ 1, 8 ]);
+	gs.map.setCollision([ 1, 8, 10 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
-	
+
+	gs.overlayLayer = gs.map.createLayer("overlay");
+
+	for(var i=0; i<this.mapLayers.crystals.objects.length; ++i) {
+		var crystal = this.mapLayers.crystals.objects[i];
+		crystal.rect = new Phaser.Rectangle(crystal.x, crystal.y, crystal.width, crystal.height);
+	}
+	this.crystals = this.mapLayers.crystals.objects;
+
 	gs.music = game.add.audio('intro');
 	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
 
 	gs.displayMessage("messages", "intro", true);
 	
 	var that = this;
 
+	this.triggers.flame.onEnter = function() {
+		that.triggers.flame.onEnter = null;
+		gs.displayMessage("messages", "flame", true, function() {
+			gs.objects.flame.kill();
+			gs.playerLight.revive();
+			gs.toggleLights('flame');
+		});
+	}
+	
 //	this.triggers.exit.onEnter = function() {
 //		gs.game.state.restart(true, false, null, 'boss');
 //	}
-	
+
+
 }
 
 Chap3Level.prototype.update = function() {
@@ -1498,6 +1700,39 @@ Chap3Level.prototype.update = function() {
 	
 	this.processTriggers();
 	
+	if(gs.playerLight.alive) {
+		gs.playerLight.lightSize -= gs.time.elapsed / 4000;
+		if(gs.playerLight.lightSize < 1) {
+			gs.playerLight.lightSize = 1;
+		}
+	}
+	
+	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
+		var x = gs.player.x;
+		var y = gs.player.y;
+
+		switch(gs.player.facing) {
+			case DOWN:
+				y += 32;
+				break;
+			case UP:
+				y -= 32;
+				break;
+			case RIGHT:
+				x += 32;
+				break;
+			case LEFT:
+				x -= 32;
+				break;
+		};
+		
+		for(var i=0; i<this.crystals.length; ++i) {
+			if(this.crystals[i].rect.contains(x, y)) {
+				gs.playerLight.lightSize = 3;
+				break;
+			}
+		}
+	}
 }
 
 Chap3Level.prototype.render = function() {
@@ -1529,6 +1764,9 @@ BossLevel.prototype.preload = function() {
 //	gs.load.json("messages", "assets/texts/"+lang+"/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	gs.load.image("trone", "assets/sprites/trone.png");
+
 	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
 
 	gs.load.audio('music', [
@@ -1548,6 +1786,8 @@ BossLevel.prototype.create = function() {
 	
 	gs.map = gs.game.add.tilemap("boss_map");
 	gs.map.addTilesetImage("basic", "boss_tileset");
+	gs.map.addTilesetImage("spawn2", "spawn2");
+	gs.map.addTilesetImage("trone", "trone");
 	gs.map.setCollision([ 1, 8 ]);
 	
 	gs.mapLayer = gs.map.createLayer("map");
