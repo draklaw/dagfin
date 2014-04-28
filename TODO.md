@@ -2,16 +2,14 @@
 * Chapter text in one page.
 
 ### Code
-* The gameplay !
-* Fix diagonal speed.
+* Progressive lights in chap1
+
 
 ### Graphics
 * Character animations
-* Enemies sprites
 * Map tileset(s)
 
 ### Sound
-* Enemies sounds
 * Ambience
 
 ### Report Bugs !

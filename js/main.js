@@ -81,6 +81,9 @@ GameState.prototype.init = function(levelId) {
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
 	}
+	else if(levelId === 'chap3') {
+		this.level = new Chap3Level(this);
+	}
 	else if(levelId === 'boss') {
 		this.level = new BossLevel(this);
 	}
@@ -171,7 +174,7 @@ GameState.prototype.create = function () {
 		this.k_debug3 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_3);
 		this.k_debug4 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_4);
 		this.k_debug5 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_5);
-		this.k_debug1 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_6);
+		this.k_debug6 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_6);
 	}
 	//TODO: m et M (sound control)
 
@@ -189,13 +192,16 @@ GameState.prototype.create = function () {
 	this.objectsGroup = this.make.group();
 	// Group all the stuff that should be sorted by depth.
 	this.characters = this.make.group();	
-	
+	// Group all the stuff that should be sorted above the rest.
+	this.ceiling = this.make.group();	
+
 	// Map.
 	this.level.create();
 		
 	// Add groups after level
 	this.world.add(this.objectsGroup);
 	this.world.add(this.characters);
+	this.world.add(this.ceiling);
 
 	// Items in the map
 	this.objects = {};
@@ -439,6 +445,18 @@ GameState.prototype.update = function () {
 		this.k_use.triggered = false;
 		this.nextMessage();
 	}
+	else if(this.question) {
+		if (this.k_down.isDown &&
+				this.questionChoice+1 < this.question.choices.length) {
+			++this.questionChoice;
+			this.updateQuestionText();
+		}
+		if (this.k_up.isDown &&
+				this.questionChoice > 0) {
+			--this.questionChoice;
+			this.updateQuestionText();
+		}
+	}
 	
 	var punch = false;
 	if (this.k_punch.isDown && !pc.hitCooldown)
@@ -649,6 +667,13 @@ GameState.prototype.obstructed = function(line) {
 };
 
 GameState.prototype.nextMessage = function() {
+	if(this.question) {
+		var choice = this.question.choices[this.questionChoice];
+		this.messageQueue = choice.message;
+		this.messageCallback = this.questionCallbacks[this.questionChoice];
+		this.messageCallbackParam = this.questionCallbackParam;
+		this.question = null;
+	}
 	if(this.messageQueue.length === 0) {
 		this.messageGroup.callAll('kill');
 		this.message.text = "";
@@ -665,6 +690,31 @@ GameState.prototype.nextMessage = function() {
 		this.messageGroup.callAll('revive');
 		this.message.text = this.messageQueue.shift();
 	}
+};
+
+GameState.prototype.updateQuestionText = function() {
+	var msg = this.question.question + "\n";
+	console.log("Update question:", this.questionChoice);
+	for(var i=0; i<this.question.choices.length; ++i) {
+		msg += "\n";
+		if(i === this.questionChoice)
+			msg += "> ";
+		else
+			msg += "  ";
+		msg += this.question.choices[i].ans;
+	}
+	this.message.text = msg;
+};
+
+GameState.prototype.askQuestion = function(key, msg, callbacks, param) {
+	this.blocPlayerWhileMsg = true;
+	this.questionCallbacks = callbacks || [];
+	this.questionCallbackParam = param;
+	this.question = this.cache.getJSON(key)[msg];
+	this.questionChoice = 0;
+
+	this.messageGroup.callAll('revive');
+	this.updateQuestionText();
 };
 
 GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, param) {
@@ -1201,8 +1251,11 @@ Chap1Level.prototype.preload = function() {
 	gs.load.json("messages", "assets/texts/chap1.json");
 	
 	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn", "assets/tilesets/spawn.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
 
 	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("clock", "assets/sprites/clock.png");
 
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1214,7 +1267,7 @@ Chap1Level.prototype.create = function() {
 	
 	var gs = this.gameState;
 
-	// Defered loading here. But as we have the json, it's instant.
+	// Deferred loading here. But since we have the json, it's instant.
 	this.mapJson = gs.cache.getJSON("chap1_map_json");
 	gs.load.tilemap("chap1_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
@@ -1223,20 +1276,30 @@ Chap1Level.prototype.create = function() {
 
 	gs.map = gs.game.add.tilemap("chap1_map");
 	gs.map.addTilesetImage("basic", "chap1_tileset");
+	gs.map.addTilesetImage("spawn", "spawn");
+	gs.map.addTilesetImage("spawn2", "spawn2");
 	gs.map.setCollision([ 1, 8 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
-//	gs.mapLayer.debug = true;
-
+	// gs.mapLayer.debug = true;
+	
+	gs.overlayLayer = gs.map.createLayer("overlay");
 	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
-//	gs.mapLayer.debug = true;
-
+	gs.secretLayer = gs.map.createLayer("secret_passage",
+										undefined, undefined,
+									   	gs.ceiling);
+	
 	this.LAVA_TILE = 7;
 	
 	
+<<<<<<< HEAD
    	gs.music = game.add.audio('music');
 	gs.music.play('', 0, 0.2);
+=======
+	gs.music = game.add.audio('intro');
+	gs.music.play();
+>>>>>>> draklaw/master
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -1301,14 +1364,43 @@ Chap1Level.prototype.create = function() {
 		if(this.infectedTiles.length === 0) {
 			gs.time.events.destroy(this.crumbleTimer);
 		}
+		
 	};
-
+	
 	this.triggers.lava_fail.onEnter = function() {
 		that.triggers.lava_fail.onEnter = null;
 		that.infectedTiles = [ [ 6, 22 ] ];
 		that.crumbleTimer = gs.time.events.loop(
 			200, that.crumble, that);
-	}	
+	}
+	
+	this.triggers.secret_tip.onEnter = function() {
+		that.triggers.secret_tip.onEnter = null;
+		gs.displayMessage("messages", "secret", true);
+	};
+
+	this.triggers.reveal_secret.onEnter = function() {
+		that.triggers.reveal_secret.onEnter = null;
+		gs.ceiling.remove(gs.secretLayer);
+	};
+	
+	gs.game.hasClock = false;
+	this.triggers.clock.onEnter = function() {
+		that.triggers.clock.onEnter = null;
+		gs.askQuestion("messages", "clock", [
+			function() {
+				gs.objects.clock.kill();
+				gs.game.hasClock = true;
+			},
+			function() {
+			}
+		]);
+	};
+	
+	this.triggers.exit.onEnter = function() {
+		gs.game.state.restart(true, false, null, 'chap2');
+	}
+	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1324,13 +1416,96 @@ Chap1Level.prototype.update = function() {
 		var bridgeTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
 											   undefined, undefined, gs.bridgeLayer);
 		if(bridgeTile === null) {
-			console.log("Aie");
 			gs.player.damage(1);
+			
 		}
 	}
 }
 
 Chap1Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Chapter III
+
+function Chap3Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap3Level.prototype = Object.create(Level.prototype);
+
+Chap3Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("chap3_map_json", "assets/maps/chap1.json");
+	gs.load.json("messages", "assets/texts/chap1.json");
+	
+	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn", "assets/tilesets/spawn.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+
+	gs.load.image("note", "assets/sprites/note.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap3Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Deferred loading here. But since we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap3_map_json");
+	gs.load.tilemap("chap3_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	this.parseLevel(this.mapJson);
+
+	gs.map = gs.game.add.tilemap("chap3_map");
+	gs.map.addTilesetImage("basic", "chap3_tileset");
+	gs.map.addTilesetImage("spawn", "spawn");
+	gs.map.addTilesetImage("spawn2", "spawn2");
+	gs.map.setCollision([ 1, 8 ]);
+
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+	// gs.mapLayer.debug = true;
+	
+	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	gs.displayMessage("messages", "intro", true);
+	
+	var that = this;
+
+//	this.triggers.exit.onEnter = function() {
+//		gs.game.state.restart(true, false, null, 'boss');
+//	}
+	
+}
+
+Chap3Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	this.processTriggers();
+	
+}
+
+Chap3Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
@@ -1383,7 +1558,7 @@ BossLevel.prototype.create = function() {
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 
-//	gs.overlaylayer = gs.map.addLayer("overlay");
+	gs.overlayLayer = gs.map.createLayer("overlay");
 	
 
    	gs.music = game.add.audio('music');
