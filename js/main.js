@@ -73,6 +73,9 @@ GameState.prototype.init = function(levelId) {
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
 	}
+	else if(levelId === 'chap2') {
+		this.level = new Chap2Level(this);
+	}
 	else if(levelId === 'chap3') {
 		this.level = new Chap3Level(this);
 	}
@@ -1349,7 +1352,6 @@ Chap1Level.prototype.create = function() {
 	this.triggers.exit.onEnter = function() {
 		gs.game.state.restart(true, false, null, 'chap2');
 	}
-	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1379,6 +1381,165 @@ Chap1Level.prototype.render = function() {
 	
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Chapter II
+
+function Chap2Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap2Level.prototype = Object.create(Level.prototype);
+
+Chap2Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
+	gs.load.json("messages", "assets/texts/chap2.json");
+	
+	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn", "assets/tilesets/spawn.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	
+	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("hourglass", "assets/sprites/sablier.png");
+	gs.load.image("plante64", "assets/sprites/plante64.png");
+	
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap2Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	// Deferred loading here. But since we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap2_map_json");
+	gs.load.tilemap("chap2_map", null, this.mapJson,
+	                Phaser.Tilemap.TILED_JSON);
+	
+	this.parseLevel(this.mapJson);
+	
+	gs.map = gs.game.add.tilemap("chap2_map");
+	gs.map.addTilesetImage("terrain", "chap2_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+	
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+	// gs.mapLayer.debug = true;
+	
+	gs.music = game.add.audio('intro');
+	gs.music.play();
+	
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+	var that = this;
+	
+	this.triggers.dialog1.onEnter = function() {
+		that.triggers.dialog1.onEnter = null;
+		gs.displayMessage("messages", "dialog1", true);
+	};
+	
+	this.triggers.dialog2.onEnter = function() {
+		that.triggers.dialog2.onEnter = null;
+		gs.displayMessage("messages", "dialog2", true);
+	};
+	
+	//FIXME: Some part of the dialogs can be factorized in the JSON file.
+	// It's also possible to make it so the door noise triggers just before
+	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
+	
+	this.noteLast = function() {
+		that.triggers.hourglassNote.onEnter = null;
+		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
+			gs.objects.hourglassNote.kill();
+		});
+	};
+	
+	this.hourglassLast = function() {
+		that.triggers.hourglass.onEnter = null;
+		//TODO: Open all doors with trigger="two".
+		gs.displayMessage("messages", "hourglassLast", true, function() {
+			gs.objects.hourglass.kill();
+		});
+	};
+	
+	this.noteFirst = function() {
+		that.triggers.hourglassNote.onEnter = null;
+		that.triggers.hourglass.onEnter = that.hourglassLast;
+		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
+			gs.objects.hourglassNote.kill();
+		});
+	};
+	
+	this.hourglassFirst = function() {
+		that.triggers.hourglass.onEnter = null;
+		that.triggers.hourglassNote.onEnter = that.noteLast;
+		//TODO: Open all doors with trigger="two".
+		gs.displayMessage("messages", "hourglassFirst", true, function() {
+			gs.objects.hourglass.kill();
+		});
+	};
+	
+	this.triggers.hourglassNote.onEnter = this.noteFirst;
+	this.triggers.hourglass.onEnter = this.hourglassFirst;
+	
+	this.triggers.importantNote.onEnter = function() {
+		that.triggers.importantNote.onEnter = null;
+		gs.displayMessage("messages", "importantNote", true, function() {
+			gs.objects.importantNote.kill();
+		});
+	};
+	
+	this.triggers.scaredNote.onEnter = function() {
+		that.triggers.scaredNote.onEnter = null;
+		gs.displayMessage("messages", "scaredNote", true, function() {
+			gs.objects.scaredNote.kill();
+		});
+	};
+	
+	this.triggers.doorSwitch.onEnter = function() {
+		that.triggers.doorSwitch.onEnter = null;
+		//TODO: Open all doors with trigger="one".
+		//FIXME: Add a line of dialog in the JSON file to advise player to avoid zed's LoS.
+		gs.displayMessage("messages", "doorSwitch", true);
+	};
+	
+	this.triggers.carnivorousPlant.onEnter = function() {
+		//TODO: Make a multiple choice dialog or alter JSON source to remove choice.
+		that.triggers.carnivorousPlant.onEnter = null;
+		gs.askQuestion("messages", "carnivorousPlant", [
+			function () { gs.objects.carnivorousPlant.kill(); },
+			null
+		]);
+	};
+	
+	this.triggers.exit.onEnter = function() {
+		gs.game.state.restart(true, false, null, 'chap3');
+	}
+}
+
+Chap2Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	this.processTriggers();
+}
+
+Chap2Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter III
