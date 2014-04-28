@@ -150,6 +150,13 @@ GameState.prototype.create = function () {
 	this.k_debug = this.game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
 	//TODO: m et M (sound control)
 
+	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
+	this.k_fullscreen.onDown.add(toggleFullScreen, this);
+	
+	function toggleFullScreen(gs){
+		this.scale.startFullScreen();
+	}
+
 	// Sound effects
 	var soundSprite = this.cache.getJSON("sfxInfo").spritemap;
 	this.sfx = this.add.audio('sfx');
@@ -229,7 +236,7 @@ GameState.prototype.create = function () {
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				//TODO: Make a scary noise.
-				this.sfx.play('zombi',0,1,false,false); //don't work ??!
+				this.sfx.play('zombi',0,1,false,true); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
@@ -307,7 +314,7 @@ GameState.prototype.create = function () {
 	if(!this.level.enableNoisePass) {
 		this.noiseSprite.kill();
 	}
-	
+
 	/*
 	// Noises pass
 	this.sounds = game.add.audio("sounds");
@@ -350,7 +357,7 @@ GameState.prototype.update = function () {
 
 	// bruit de pas
 	if(pc.body.velocity.x || pc.body.velocity.y){
-		this.sfx.play('footstep',0,1,true,false);
+		//this.sfx.play('footstep',0,1,true,false);
 	} else this.sfx.stop('footstep');
 	
 	if(this.k_use.justPressed(1)) {
@@ -360,10 +367,11 @@ GameState.prototype.update = function () {
 	var punch = false;
 	if (this.k_punch.isDown && !pc.hitCooldown)
 	{
+		// Play stun zombie
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
-		this.sfx.play('hit',0,1,false,false); //don't work ??!
+		this.sfx.play('hit',0,1,false,true);
 		//console.log("Take that !");
 	}
 	
@@ -393,6 +401,7 @@ GameState.prototype.update = function () {
 				zed.body.velocity.set(0, 0);
 				zed.hitCooldown = true;
 				this.time.events.add(HIT_COOLDOWN, function () { zed.hitCooldown = false; }, this);
+				this.sfx.play('hit',0,1,false,true); //don't work ??!
 				//console.log("HULK SMASH !");
 			}
 		}

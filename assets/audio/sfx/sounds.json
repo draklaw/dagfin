@@ -6,7 +6,7 @@
   "spritemap": {
     "footstep": {
       "start": 0,
-      "end": 0.529365079365079365,
+      "end": 0.229365079365079365,
       "loop": true
     },
     "hit": {
