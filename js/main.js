@@ -14,7 +14,7 @@ var LEFT  = 3;
 
 var PLAYER_VELOCITY = 140;
 var PLAYER_MAX_LIFE = 3;
-var PLAYER_FULL_LIFE_RECOVERY_TIME = 6f0; //in seconds 0 for no regen
+var PLAYER_FULL_LIFE_RECOVERY_TIME = 60; //in seconds 0 for no regen
 
 
 var HIT_COOLDOWN = 500;
@@ -413,7 +413,7 @@ GameState.prototype.update = function () {
 			pc.body.velocity.x = -1;
 			pc.facing = LEFT;
 		}
-		pc.body.velocity.setMagnitude(PLAYER_VELOCITY);
+		pc.body.velocity.setMagnitude(pc.speed());
 	}
 	pc.frame = pc.looks*4 + pc.facing;
 
@@ -527,7 +527,7 @@ GameState.prototype.update = function () {
 		this.lightLayer.kill();
 	}
 	this.player.regenerate();
-	this.damageSprite.alpha = 1 - Math.sqrt(this.player.health/PLAYER_MAX_LIFE);
+	this.damageSprite.alpha = 1 - this.player.abilityRate();
 };
 
 
@@ -735,6 +735,12 @@ function Player(game, x, y) {
 			);
 		player.lastTime = player.now;
 	};
+	this.abilityRate = function(){
+		return Math.sqrt(player.health/PLAYER_MAX_LIFE);
+	}
+	this.speed = function(){
+	return PLAYER_VELOCITY * player.abilityRate();
+	}
 }
 
 Player.prototype = Object.create(Dood.prototype);
