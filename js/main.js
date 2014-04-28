@@ -126,7 +126,9 @@ GameState.prototype.create = function () {
 	
 	
 	// Some settings...
+	this.debugMode = true;
 	this.enableLighting = true;
+	this.enableCollisions = true;
 
 	// Message box ! (Needed before level.create())
 	this.messageGroup = this.make.group(this.postProcessGroup);
@@ -146,7 +148,14 @@ GameState.prototype.create = function () {
 	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER); //was CONTROL
 	//this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
-	this.k_debug = this.game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
+	if(this.debugMode) {
+		this.k_debug1 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_1);
+		this.k_debug2 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_2);
+		this.k_debug3 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_3);
+		this.k_debug4 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_4);
+		this.k_debug5 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_5);
+		this.k_debug1 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_6);
+	}
 	//TODO: m et M (sound control)
 
 	// Sound effects
@@ -163,11 +172,7 @@ GameState.prototype.create = function () {
 	
 	// Map.
 	this.level.create();
-	
-	this.mapLayer = this.map.createLayer("map");
-	this.mapLayer.resizeWorld();
-//	this.mapLayer.debug = true;
-	
+		
 	// Add groups after level
 	this.world.add(this.objectsGroup);
 	this.world.add(this.characters);
@@ -179,9 +184,10 @@ GameState.prototype.create = function () {
 			var item = this.map.objects.items[i];
 			var offset_x = parseInt(item.properties.offset_x, 10) || 0;
 			var offset_y = parseInt(item.properties.offset_y, 10) || 0;
+			var key = item.properties.key || item.name+"_item";
 			var sprite = this.add.sprite(item.x + offset_x + 16,
 										 item.y + offset_y - 16,
-										 item.name+"_item", 0, this.objectsGroup);
+										 key, 0, this.objectsGroup);
 			sprite.anchor.set(.5, .5);
 			this.objects[item.name] = sprite;
 			sprite.objName = item.name;
@@ -332,12 +338,27 @@ GameState.prototype.create = function () {
 GameState.prototype.update = function () {
 	'use strict';
 	
+	// Debug cheats !
+	if(this.debugMode) {
+		if(this.k_debug3.justPressed(1)) {
+			this.enableCollisions = !this.enableCollisions;
+			console.log("Collisions:", this.enableCollisions);
+		}
+		if(this.k_debug2.justPressed(1)) {
+			this.enableLighting = !this.enableLighting;
+			console.log("Lighting:", this.enableLighting);
+		}
+	}
+	
 	// Hack use key !
 	this.k_use.triggered = this.k_use.justPressed(1);
 	
 	var pc = this.player;
-	this.game.physics.arcade.collide(pc, this.mapLayer);
 	
+	if(this.enableCollisions) {
+		this.game.physics.arcade.collide(pc, this.mapLayer);
+	}
+
 	// React to controls.
 	pc.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
@@ -433,6 +454,11 @@ GameState.prototype.update = function () {
 		this.lightmap.renderXY(this.lightLayerGroup,
 							   -this.camera.x,
 							   -this.camera.y);
+		
+		this.lightLayer.revive();
+	}
+	else {
+		this.lightLayer.kill();
 	}
 };
 
@@ -715,6 +741,7 @@ TestLevel.prototype.preload = function() {
 	gs.load.tilemap("map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
 	gs.load.image("defaultTileset", "assets/tilesets/test.png");
+
 }
 
 TestLevel.prototype.create = function() {
@@ -730,6 +757,11 @@ TestLevel.prototype.create = function() {
 		26,
 		49, 51
 	]);
+
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+//	gs.mapLayer.debug = true;
+
 }
 
 TestLevel.prototype.update = function() {
@@ -800,7 +832,11 @@ ExperimentalLevel.prototype.create = function() {
 	           
 	           
 	];
-	
+
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+//	gs.mapLayer.debug = true;
+
 	//TODO: Optimize this callback.
 	this.crumble = function () {
 		var newlyInfected = [];
@@ -891,6 +927,10 @@ IntroLevel.prototype.create = function() {
 	gs.map = gs.game.add.tilemap("intro_map");
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
+
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+//	gs.mapLayer.debug = true;
 
 	gs.music = game.add.audio('intro');
 	gs.music.play('', 0, 0.2);
@@ -1015,7 +1055,7 @@ Chap1Level.prototype.preload = function() {
 	
 	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
 
-	gs.load.image("indice1_item", "assets/sprites/note.png");
+	gs.load.image("note", "assets/sprites/note.png");
 
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1038,6 +1078,13 @@ Chap1Level.prototype.create = function() {
 	gs.map.addTilesetImage("basic", "chap1_tileset");
 	gs.map.setCollision([ 1, 8 ]);
 
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+//	gs.mapLayer.debug = true;
+
+	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
+//	gs.mapLayer.debug = true;
+
    	gs.music = game.add.audio('intro');
 	gs.music.play();
 
@@ -1047,10 +1094,25 @@ Chap1Level.prototype.create = function() {
 	gs.displayMessage("messages", "intro", true);
 	
 	var that = this;
+
 	this.triggers.indice1.onEnter = function() {
 		that.triggers.indice1.onEnter = null;
 		gs.displayMessage("messages", "indice1", true, function() {
 			gs.objects.indice1.kill();
+		});
+	};
+	
+	this.triggers.indice2.onEnter = function() {
+		that.triggers.indice2.onEnter = null;
+		gs.displayMessage("messages", "indice2", true, function() {
+			gs.objects.indice2.kill();
+		});
+	};
+	
+	this.triggers.indice3.onEnter = function() {
+		that.triggers.indice3.onEnter = null;
+		gs.displayMessage("messages", "indice3", true, function() {
+			gs.objects.indice3.kill();
 		});
 	};
 	
