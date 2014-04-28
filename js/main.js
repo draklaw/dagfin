@@ -15,7 +15,7 @@ var LEFT  = 3;
 var PLAYER_VELOCITY = 140;
 var PLAYER_MAX_LIFE = 3;
 var PLAYER_FULL_LIFE_RECOVERY_TIME = 60; //in seconds 0 for no regen
-
+var SLOW_PLAYER_WHEN_DAMAGED = true;
 
 var HIT_COOLDOWN = 500;
 
@@ -739,7 +739,8 @@ function Player(game, x, y) {
 		return Math.sqrt(player.health/PLAYER_MAX_LIFE);
 	}
 	this.speed = function(){
-	return PLAYER_VELOCITY * player.abilityRate();
+		if(SLOW_PLAYER_WHEN_DAMAGED) return PLAYER_VELOCITY * player.abilityRate();
+		else return PLAYER_VELOCITY;
 	}
 }
 
