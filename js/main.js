@@ -892,7 +892,7 @@ ExperimentalLevel.prototype.create = function() {
 	
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
-
+	
 	this.crumble = function () {
 		var newlyInfected = [];
 		
