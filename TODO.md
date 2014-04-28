@@ -14,3 +14,8 @@
 ### Sound
 * Enemies sounds
 * Ambience
+
+### Report Bugs !
+* StateManager.restart argument index
+* Key.justPressed/justReleased default parameter
+* Color WTF ?

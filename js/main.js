@@ -47,14 +47,33 @@ function GameState() {
 	'use strict';
 	
 	Phaser.State.call(this);
-	
-//	this.level = new ExperimentalLevel(this);
-//	this.level = new TestLevel(this);
-	this.level = new IntroLevel(this);
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
 
+
+////////////////////////////////////////////////////////////////////////////
+// Init
+
+GameState.prototype.init = function(levelId) {
+	'use strict';
+	
+	console.log("Load level: "+levelId);
+	levelId = levelId || 'intro';
+	
+	if(levelId === 'intro') {
+		this.level = new IntroLevel(this);
+	}
+	else if(levelId === 'test') {
+		this.level = new TestLevel(this);
+	}
+	else if(levelId === 'expe') {
+		this.level = new ExperimentalLevel(this);
+	}
+	else {
+		console.error("Unknown level '"+levelId+"'.");
+	}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Preload
@@ -707,6 +726,11 @@ ExperimentalLevel.prototype.update = function() {
 	
 }
 
+ExperimentalLevel.prototype.render = function() {
+	var gs = this.gameState;
+	
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Intro
 
@@ -855,7 +879,7 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				console.log("EXIT !");
+				gs.game.state.restart(true, false, null, 'expe');
 			});
 		});
 	}
