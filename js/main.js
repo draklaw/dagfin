@@ -13,6 +13,9 @@ var RIGHT = 2;
 var LEFT  = 3;
 
 var PLAYER_VELOCITY = 140;
+var PLAYER_MAX_LIFE = 3;
+var PLAYER_FULL_LIFE_RECOVERY_TIME = 6f0; //in seconds 0 for no regen
+
 
 var HIT_COOLDOWN = 500;
 
@@ -88,6 +91,7 @@ GameState.prototype.preload = function () {
 	'use strict';
 	
 	this.load.image("black", "assets/sprites/black.png");
+	this.load.image("damage", "assets/sprites/damage.png");
 	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
 	
 	this.load.image("message_bg", "assets/message_bg.png");
@@ -346,6 +350,10 @@ GameState.prototype.create = function () {
 	if(!this.level.enableNoisePass) {
 		this.noiseSprite.kill();
 	}
+	
+	// Damage pass
+	this.damageSprite = this.add.sprite(0, 0, "damage", 0, this.postProcessGroup);
+	this.damageSprite.scale.set(MAX_WIDTH, MAX_HEIGHT);
 
 	/*
 	// Noises pass
@@ -516,6 +524,8 @@ GameState.prototype.update = function () {
 	else {
 		this.lightLayer.kill();
 	}
+	this.player.regenerate();
+	this.damageSprite.alpha = 1 - Math.sqrt(this.player.health/PLAYER_MAX_LIFE);
 };
 
 
@@ -701,17 +711,31 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 function Player(game, x, y) {
 	'use strict';
+	var player = this;
 	Dood.call(this, game, x, y, "player");
-	this.revive(3);
-	//this.health = 3;
+	this.revive(PLAYER_MAX_LIFE);
 	
 	this.events.onKilled.add(function(){
+		console.log(player.health);
 		console.log("Humanity lost you beneath the surface !");
+		//TODO : death sound, death music, gameover screen
 	});
+	player.lastTime = (new Date()).getTime();
+	this.regenerate = function(){
+		player.now = (new Date()).getTime();
+		if(player.alive && PLAYER_FULL_LIFE_RECOVERY_TIME)
+			player.health = Math.min(
+				PLAYER_MAX_LIFE, 
+				player.health + ( 
+					( player.now - player.lastTime ) * PLAYER_MAX_LIFE
+					/ ( 1000 * PLAYER_FULL_LIFE_RECOVERY_TIME )
+				)
+			);
+		player.lastTime = player.now;
+	};
 }
 
 Player.prototype = Object.create(Dood.prototype);
-
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
