@@ -60,7 +60,7 @@ GameState.prototype.init = function(levelId) {
 	'use strict';
 	
 	console.log("Load level: "+levelId);
-	levelId = levelId || 'intro';
+	levelId = levelId || 'boss';
 //	levelId = levelId || 'chap1';
 	
 	if(levelId === 'intro') {
@@ -68,6 +68,9 @@ GameState.prototype.init = function(levelId) {
 	}
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
+	}
+	else if(levelId === 'boss') {
+		this.level = new BossLevel(this);
 	}
 	else if(levelId === 'test') {
 		this.level = new TestLevel(this);
@@ -1008,6 +1011,72 @@ Chap1Level.prototype.update = function() {
 }
 
 Chap1Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Boss
+
+function BossLevel(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+BossLevel.prototype = Object.create(Level.prototype);
+
+BossLevel.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("boss_map_json", "assets/maps/boss.json");
+//	gs.load.json("messages", "assets/texts/ccl.json");
+	
+	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+BossLevel.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Defered loading here. But as we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("boss_map_json");
+	gs.load.tilemap("boss_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	gs.map = gs.game.add.tilemap("boss_map");
+	gs.map.addTilesetImage("basic", "boss_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+//	gs.overlaylayer = gs.map.addLayer("overlay");
+	
+
+   	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+//	gs.displayMessage("messages", "intro", true);
+	
+}
+
+BossLevel.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+}
+
+BossLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
