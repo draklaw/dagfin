@@ -6,15 +6,15 @@
 	],
 	
 	"indice1" : [
-	"Simply fascinating.\nCan't believe I'm truly here.\n"
+		"Simply fascinating.\nCan't believe I'm truly here."
 	],
 	
 	"indice2" : [
-	"I should have taken my charm.\nIt may have been useful."
+		"I should have taken my charm.\nIt may have been useful."
 	],	
-
+	
 	"indice3" : [
-	"I need to go deeper."
+		"I need to go deeper."
 	],
 	
 	"obj" : [
@@ -22,5 +22,9 @@
 		">Yes\n>No",
 		"It's still working, but in normal direction... And the speed is not constant.",
 		"I don't have any butter nor jam to repair it."
+	],
+	
+	"secret" : [
+		"The distance between these two torches is exactly 9m 3/4..."
 	]
 }

@@ -1137,7 +1137,7 @@ Chap1Level.prototype.create = function() {
 	
 	var gs = this.gameState;
 
-	// Defered loading here. But as we have the json, it's instant.
+	// Deferred loading here. But since we have the json, it's instant.
 	this.mapJson = gs.cache.getJSON("chap1_map_json");
 	gs.load.tilemap("chap1_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
@@ -1150,15 +1150,15 @@ Chap1Level.prototype.create = function() {
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
-//	gs.mapLayer.debug = true;
-
+	// gs.mapLayer.debug = true;
+	
 	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
-//	gs.mapLayer.debug = true;
-
+	gs.secretLayer = gs.map.createLayer("secret_passage");
+	
 	this.LAVA_TILE = 7;
 	
 	
-   	gs.music = game.add.audio('intro');
+  gs.music = game.add.audio('intro');
 	gs.music.play();
 
 	this.enablePlayerLight = false;
@@ -1225,13 +1225,18 @@ Chap1Level.prototype.create = function() {
 			gs.time.events.destroy(this.crumbleTimer);
 		}
 	};
-
+	
 	this.triggers.lava_fail.onEnter = function() {
 		that.triggers.lava_fail.onEnter = null;
 		that.infectedTiles = [ [ 6, 22 ] ];
 		that.crumbleTimer = gs.time.events.loop(
 			200, that.crumble, that);
-	}	
+	}
+	
+	this.triggers.secret_tip.onEnter = function() {
+		that.triggers.secret_tip.onEnter = null;
+		gs.displayMessage("messages", "secret", true);
+	};
 }
 
 Chap1Level.prototype.update = function() {
