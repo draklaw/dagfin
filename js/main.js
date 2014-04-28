@@ -48,8 +48,6 @@ function GameState() {
 	
 	Phaser.State.call(this);
 	
-//	this.level = new TestLevel(this);
-	this.level = new IntroLevel(this);
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -97,9 +95,6 @@ GameState.prototype.preload = function () {
 	
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
-	this.load.tilemap("map", "assets/maps/test.json", null,
-	                  Phaser.Tilemap.TILED_JSON);
-
 	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
     	//this.load.audio('sfx', this.cache.getJSON("sfxInfo").resources);
 	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
@@ -917,7 +912,6 @@ IntroLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-	gs.game.debug.text("exit: "+this.triggers['exit'].rect.contains(gs.player.x, gs.player.y), 10, 32);
 }
 
 
