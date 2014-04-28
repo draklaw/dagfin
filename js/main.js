@@ -111,7 +111,7 @@ GameState.prototype.preload = function () {
 	this.load.image("message_bg", "assets/message_bg.png");
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
-//	this.load.json("message_test", "assets/texts/test.json");
+//	this.load.json("message_test", "assets/texts/"+lang+"/test.json");
 	
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
@@ -1096,7 +1096,7 @@ IntroLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("intro_map_json", "assets/maps/intro.json");
-	gs.load.json("messages", "assets/texts/intro.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/intro.json");
 	
 	gs.load.image("intro_tileset", "assets/tilesets/intro.png");
 	gs.load.spritesheet("pillar_item", "assets/sprites/pillar.png", 32, 64);
@@ -1248,7 +1248,7 @@ Chap1Level.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/chap1.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap1.json");
 	
 	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -1443,7 +1443,7 @@ Chap3Level.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("chap3_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/chap1.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap1.json");
 	
 	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -1526,7 +1526,7 @@ BossLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("boss_map_json", "assets/maps/boss.json");
-//	gs.load.json("messages", "assets/texts/ccl.json");
+//	gs.load.json("messages", "assets/texts/"+lang+"/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
 	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
