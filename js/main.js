@@ -322,6 +322,9 @@ GameState.prototype.create = function () {
 GameState.prototype.update = function () {
 	'use strict';
 	
+	// Hack use key !
+	this.k_use.triggered = this.k_use.justPressed(1);
+	
 	var pc = this.player;
 	this.game.physics.arcade.collide(pc, this.mapLayer);
 	
@@ -353,7 +356,8 @@ GameState.prototype.update = function () {
 		this.sfx.play('footstep', 0, 1, true, false);
 	} else this.sfx.stop('footstep');
 	
-	if(this.k_use.justPressed(1)) {
+	if(this.k_use.triggered && this.hasMessageDisplayed()) {
+		this.k_use.triggered = false;
 		this.nextMessage();
 	}
 	
@@ -541,6 +545,10 @@ GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, pa
 	if(!Array.isArray(this.messageQueue)) {
 		console.warn("displayMessage: message '"+key+"."+msg+"' does not exist or is not an array.");
 	}
+};
+
+GameState.prototype.hasMessageDisplayed = function() {
+	return this.messageBg.alive;
 };
 
 // Kind of assumes the stalker is a zombie.
@@ -847,7 +855,7 @@ IntroLevel.prototype.update = function() {
 		this.carpetFound = true;
 	}
 		
-	if(gs.messageQueue.length === 0 && gs.k_use.justPressed(1)) {
+	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
 		var x = gs.player.x;
 		var y = gs.player.y;
 
