@@ -1293,13 +1293,8 @@ Chap1Level.prototype.create = function() {
 	this.LAVA_TILE = 7;
 	
 	
-<<<<<<< HEAD
    	gs.music = game.add.audio('music');
 	gs.music.play('', 0, 0.2);
-=======
-	gs.music = game.add.audio('intro');
-	gs.music.play();
->>>>>>> draklaw/master
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
