@@ -1135,6 +1135,9 @@ Chap1Level.prototype.create = function() {
 	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
 //	gs.mapLayer.debug = true;
 
+	this.LAVA_TILE = 7;
+	
+	
    	gs.music = game.add.audio('intro');
 	gs.music.play();
 
@@ -1170,7 +1173,45 @@ Chap1Level.prototype.create = function() {
 		gs.toggleLights('maze');
 	};
 	
-	
+	this.infectedTiles = [];
+	this.crumble = function () {
+		var newlyInfected = [];
+		
+		for (var i = 0 ; i < this.infectedTiles.length ; i++)
+		{
+			var coord = this.infectedTiles[i];
+			var x = coord[0];
+			var y = coord[1];
+			gs.map.removeTile(x, y, gs.bridgeLayer);
+
+			var neighbours = [
+				[ x - 1, y ],
+				[ x + 1, y ],
+				[ x, y - 1 ],
+				[ x, y + 1 ]
+			];
+			for (var j = 0 ; j < 4 ; j++) {
+				var nb = neighbours[j];
+				var tile = gs.map.getTile(nb[0], nb[1], gs.bridgeLayer);
+				if(tile !== null && !tile.isMarked) {
+					newlyInfected.push(nb);
+					tile.isMarked = true;
+				}
+			}
+		}
+		
+		this.infectedTiles = newlyInfected;
+		if(this.infectedTiles.length === 0) {
+			gs.time.events.destroy(this.crumbleTimer);
+		}
+	};
+
+	this.triggers.lava_fail.onEnter = function() {
+		that.triggers.lava_fail.onEnter = null;
+		that.infectedTiles = [ [ 6, 22 ] ];
+		that.crumbleTimer = gs.time.events.loop(
+			200, that.crumble, that);
+	}	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1179,12 +1220,25 @@ Chap1Level.prototype.update = function() {
 	var gs = this.gameState;
 	
 	this.processTriggers();
+	
+	var mapTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
+										undefined, undefined, gs.mapLayer);
+	if(mapTile.index == this.LAVA_TILE) {
+		var bridgeTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
+											   undefined, undefined, gs.bridgeLayer);
+		if(bridgeTile === null) {
+			console.log("Aie");
+			gs.player.damage(1);
+		}
+	}
 }
 
 Chap1Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
+	
+	
 }
 
 
