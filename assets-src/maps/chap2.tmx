@@ -288,6 +288,14 @@
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>
+  <object name="Light" type="light" gid="17" x="704" y="1568">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup name="doors" width="64" height="64">
   <object name="HDoor" type="hdoor" gid="20" x="672" y="1600">
