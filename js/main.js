@@ -143,8 +143,8 @@ GameState.prototype.create = function () {
 	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 	this.k_punch = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
-	this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER); //was CONTROL
+	//this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
 	this.k_debug = this.game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
 	//TODO: m et M (sound control)
@@ -228,6 +228,7 @@ GameState.prototype.create = function () {
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				//TODO: Make a scary noise.
+				this.sfx.play('zombi',0,1,false,false); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
@@ -348,10 +349,10 @@ GameState.prototype.update = function () {
 
 	// bruit de pas
 	if(pc.body.velocity.x || pc.body.velocity.y){
-		this.sfx.play('footstep',0,1,true);
+		this.sfx.play('footstep',0,1,true,false);
 	} else this.sfx.stop('footstep');
 	
-	if(this.k_read.justPressed(1)) {
+	if(this.k_use.justPressed(1)) {
 		this.nextMessage();
 	}
 	
@@ -361,6 +362,7 @@ GameState.prototype.update = function () {
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
+		this.sfx.play('hit',0,1,false,false); //don't work ??!
 		//console.log("Take that !");
 	}
 	
@@ -818,7 +820,7 @@ IntroLevel.prototype.create = function() {
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
 
     	gs.music = game.add.audio('intro');
-	gs.music.play();
+	gs.music.play('',0,0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
