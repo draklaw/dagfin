@@ -376,9 +376,11 @@ GameState.prototype.update = function () {
 	pc.frame = pc.looks*4 + pc.facing;
 
 	// bruit de pas
-	if(pc.body.velocity.x || pc.body.velocity.y){
-		pc.sfx.play('playerFootStep', 0, 1, true, false);
-	} else pc.sfx.stop();
+	if(	pc.body.prev.x !== pc.body.position.x
+	   || pc.body.prev.y !== pc.body.position.y
+	  ){
+		pc.sfx.play('playerFootStep', 0, 1, false, false);
+	}
 	
 	if(this.k_use.triggered && this.hasMessageDisplayed()) {
 		this.k_use.triggered = false;
