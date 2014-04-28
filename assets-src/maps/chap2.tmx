@@ -27,20 +27,20 @@
 1,1,1,1,1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,9,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,9,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,2,2,2,9,2,2,2,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,2,2,1,1,1,1,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,2,2,2,2,9,2,2,2,2,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,2,2,2,2,2,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,2,2,2,2,2,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,2,2,2,1,1,1,2,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,2,2,2,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,2,2,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,9,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,1,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,1,1,2,2,2,2,2,1,2,2,2,9,2,2,2,2,2,2,2,2,2,9,2,2,2,1,2,2,2,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,2,1,1,1,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,2,2,1,1,1,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,2,2,2,1,1,1,1,1,1,2,2,2,2,1,2,2,2,2,9,2,2,2,2,1,2,2,2,2,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,2,2,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,2,2,1,1,1,2,2,2,2,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,2,2,1,1,1,1,2,2,2,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,2,2,2,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -57,26 +57,26 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,2,9,2,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,4,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,4,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,9,2,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,9,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 </data>
  </layer>
  <objectgroup name="templates" width="64" height="64"/>
  <objectgroup name="doods" width="64" height="64">
-  <object name="Player" type="player_spawn" gid="18" x="128" y="1664"/>
+  <object name="Player" type="player_spawn" gid="18" x="128" y="1984"/>
   <object name="Zombie" type="zombie_spawn" gid="19" x="704" y="1504"/>
   <object name="Zombie" type="zombie_spawn" gid="19" x="544" y="608"/>
   <object name="Zombie" type="zombie_spawn" gid="19" x="864" y="608"/>
@@ -88,220 +88,12 @@
   <object name="Zombie" type="zombie_spawn" gid="19" x="928" y="832"/>
  </objectgroup>
  <objectgroup name="lights" width="64" height="64">
-  <object name="Light" type="light" gid="17" x="192" y="1664">
+  <object name="Light" type="light" gid="17" x="128" y="1888">
    <properties>
     <property name="color" value="d0d0d0"/>
     <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="384" y="1664">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="576" y="1664">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="832" y="1664">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1024" y="1664">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1216" y="1664">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="1568">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1312" y="1408">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1216" y="1344">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1120" y="1408">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="896" y="1280">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="1216">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="1088">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="544" y="1024">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="960">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="864" y="1024">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="1376">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="512" y="1280">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="288" y="1408">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="192" y="1344">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="96" y="1408">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="704">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="320" y="576">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="288">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="256" y="192">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1152" y="192">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="1088" y="576">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
    </properties>
   </object>
   <object name="DimLight" type="light" gid="17" x="1248" y="928">
@@ -320,12 +112,188 @@
     <property name="size_woobling" value=".01"/>
    </properties>
   </object>
+  <object name="Light" type="light" gid="17" x="128" y="1728">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="192" y="1664">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="384" y="1664">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="576" y="1664">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="832" y="1664">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1024" y="1664">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1216" y="1664">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
   <object name="Light" type="light" gid="17" x="1408" y="1664">
    <properties>
     <property name="color" value="d0d0d0"/>
     <property name="color_woobling" value=".2"/>
-    <property name="size" value="8"/>
-    <property name="size_woobling" value=".01"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1120" y="1408">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1216" y="1344">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1312" y="1408">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="896" y="1280">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="1216">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="1376">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="512" y="1280">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="1088">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="544" y="1024">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="960">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="864" y="1024">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="96" y="1408">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="192" y="1344">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="288" y="1408">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="1568">
+   <properties>
+    <property name="color" value="d0d0d0"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="6"/>
+    <property name="size_woobling" value=".02"/>
    </properties>
   </object>
  </objectgroup>
@@ -419,8 +387,8 @@
   </object>
  </objectgroup>
  <objectgroup name="triggers" width="64" height="64">
-  <object name="dialog1" x="192" y="1600" width="32" height="96"/>
-  <object name="dialog2" x="640" y="1600" width="32" height="96"/>
+  <object name="dialog1" x="96" y="1856" width="96" height="32"/>
+  <object name="dialog2" x="672" y="1600" width="32" height="96"/>
   <object name="doorSwitch" x="1472" y="1632" width="32" height="32"/>
   <object name="hourglassNote" x="1216" y="1376" width="32" height="32"/>
   <object name="hourglass" x="192" y="1376" width="32" height="32"/>

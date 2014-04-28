@@ -73,6 +73,9 @@ GameState.prototype.init = function(levelId) {
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
 	}
+	else if(levelId === 'chap2') {
+		this.level = new Chap2Level(this);
+	}
 	else if(levelId === 'chap3') {
 		this.level = new Chap3Level(this);
 	}
@@ -210,7 +213,24 @@ GameState.prototype.create = function () {
 		}
 	}
 	
-	// People.
+	// Doors in the map
+	this.doors = {};
+	if(this.map.objects.doors) {
+		for(var i = 0 ; i < this.map.objects.doors.length ; i++) {
+			var door = this.map.objects.doors[i];
+			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
+			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
+			var key = door.properties.type;
+			var sprite = this.add.sprite(door.x + offset_x + 16,
+			                             door.y + offset_y - 16,
+			                             key, 0, this.objectsGroup);
+			sprite.anchor.set(.5, .5);
+			this.objects[door.name] = sprite;
+			sprite.objName = door.name;
+			this.game.physics.arcade.enable(sprite);
+		}
+	}
+		// People.
 	var spawnObj = this.map.objects.doods[0];
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
@@ -1350,7 +1370,6 @@ Chap1Level.prototype.create = function() {
 	this.triggers.exit.onEnter = function() {
 		gs.game.state.restart(true, false, null, 'chap2');
 	}
-	
 }
 
 Chap1Level.prototype.update = function() {
@@ -1380,6 +1399,166 @@ Chap1Level.prototype.render = function() {
 	
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Chapter II
+
+function Chap2Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap2Level.prototype = Object.create(Level.prototype);
+
+Chap2Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
+	gs.load.json("messages", "assets/texts/chap2.json");
+	
+	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn", "assets/tilesets/spawn.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	
+	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("hourglass", "assets/sprites/sablier.png");
+	gs.load.image("plante64", "assets/sprites/plante64.png");
+	
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap2Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	// Deferred loading here. But since we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap2_map_json");
+	gs.load.tilemap("chap2_map", null, this.mapJson,
+	                Phaser.Tilemap.TILED_JSON);
+	
+	this.parseLevel(this.mapJson);
+	
+	gs.map = gs.game.add.tilemap("chap2_map");
+	gs.map.addTilesetImage("terrain", "chap2_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+	
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+	// gs.mapLayer.debug = true;
+	
+	gs.music = game.add.audio('intro');
+	gs.music.play();
+	
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+	var that = this;
+	//TODO: Disable zombie freezing power.
+	
+	this.triggers.dialog1.onEnter = function() {
+		that.triggers.dialog1.onEnter = null;
+		gs.displayMessage("messages", "dialog1", true);
+	};
+	
+	this.triggers.dialog2.onEnter = function() {
+		that.triggers.dialog2.onEnter = null;
+		gs.displayMessage("messages", "dialog2", true);
+	};
+	
+	//FIXME: Some part of the dialogs can be factorized in the JSON file.
+	// It's also possible to make it so the door noise triggers just before
+	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
+	
+	this.noteLast = function() {
+		that.triggers.hourglassNote.onEnter = null;
+		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
+			gs.objects.hourglassNote.kill();
+		});
+	};
+	
+	this.hourglassLast = function() {
+		that.triggers.hourglass.onEnter = null;
+		//TODO: Open all doors with trigger="two".
+		//TODO: Add zombie freezing power.
+		gs.displayMessage("messages", "hourglassLast", true, function() {
+			gs.objects.hourglass.kill();
+		});
+	};
+	
+	this.noteFirst = function() {
+		that.triggers.hourglassNote.onEnter = null;
+		that.triggers.hourglass.onEnter = that.hourglassLast;
+		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
+			gs.objects.hourglassNote.kill();
+		});
+	};
+	
+	this.hourglassFirst = function() {
+		that.triggers.hourglass.onEnter = null;
+		that.triggers.hourglassNote.onEnter = that.noteLast;
+		//TODO: Open all doors with trigger="two".
+		//TODO: Add zombie freezing power.
+		gs.displayMessage("messages", "hourglassFirst", true, function() {
+			gs.objects.hourglass.kill();
+		});
+	};
+	
+	this.triggers.hourglassNote.onEnter = this.noteFirst;
+	this.triggers.hourglass.onEnter = this.hourglassFirst;
+	
+	this.triggers.importantNote.onEnter = function() {
+		that.triggers.importantNote.onEnter = null;
+		gs.displayMessage("messages", "importantNote", true, function() {
+			gs.objects.importantNote.kill();
+		});
+	};
+	
+	this.triggers.scaredNote.onEnter = function() {
+		that.triggers.scaredNote.onEnter = null;
+		gs.displayMessage("messages", "scaredNote", true, function() {
+			gs.objects.scaredNote.kill();
+		});
+	};
+	
+	this.triggers.doorSwitch.onEnter = function() {
+		that.triggers.doorSwitch.onEnter = null;
+		//TODO: Open all doors with trigger="one".
+		gs.displayMessage("messages", "doorSwitch", true);
+	};
+	
+	this.triggers.carnivorousPlant.onEnter = function() {
+		that.triggers.carnivorousPlant.onEnter = null;
+		gs.askQuestion("messages", "carnivorousPlant", [
+			function () { gs.objects.carnivorousPlant.kill(); },
+			null
+		]);
+	};
+	
+	this.triggers.exit.onEnter = function() {
+		gs.game.state.restart(true, false, null, 'chap3');
+	}
+}
+
+Chap2Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	this.processTriggers();
+}
+
+Chap2Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter III
