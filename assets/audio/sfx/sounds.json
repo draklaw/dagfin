@@ -6,10 +6,30 @@
   "spritemap": {
     "footstep": {
       "start": 0,
+      "end": 0.029365079365079365,
+      "loop": true
+    },
+    "playerFootStep": {
+      "start": 0,
+      "end": 0.229365079365079365,
+      "loop": true
+    },
+    "zombiFootStep": {
+      "start": 0,
       "end": 0.529365079365079365,
       "loop": true
     },
     "hit": {
+      "start": 2,
+      "end": 2.1205668934240363,
+      "loop": false
+    },
+    "playerHit": {
+      "start": 2,
+      "end": 2.1205668934240363,
+      "loop": false
+    },
+    "zombiHit": {
       "start": 2,
       "end": 2.1205668934240363,
       "loop": false
