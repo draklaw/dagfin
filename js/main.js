@@ -1228,6 +1228,7 @@ Chap1Level.prototype.create = function() {
 	gs.map = gs.game.add.tilemap("chap1_map");
 	gs.map.addTilesetImage("basic", "chap1_tileset");
 	gs.map.addTilesetImage("spawn", "spawn");
+	gs.map.addTilesetImage("spawn2", "spawn2");
 	gs.map.setCollision([ 1, 8 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
