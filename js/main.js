@@ -29,6 +29,8 @@ var NORMAL  = 0;
 var STUNNED = 1;
 var BERZERK = 2;
 
+var FLOOR_CRUMBLING_DELAY = 500;
+
 var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
@@ -46,7 +48,8 @@ function GameState() {
 	
 	Phaser.State.call(this);
 	
-	this.level = new TestLevel(this);
+	this.level = new ExperimentalLevel(this);
+//	this.level = new TestLevel(this);
 //	this.level = new IntroLevel(this);
 }
 
@@ -65,15 +68,14 @@ GameState.prototype.preload = function () {
 	this.load.image("message_bg", "assets/message_bg.png");
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
-	this.load.json("message_test", "assets/texts/test.json");
+//	this.load.json("message_test", "assets/texts/test.json");
 	
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 	
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
-	this.load.tilemap("map", "assets/maps/test.json", null,
-	                  Phaser.Tilemap.TILED_JSON);
+//	this.load.tilemap("map", "assets/maps/test.json", null, Phaser.Tilemap.TILED_JSON);
 	
 	//this.load.audio("sounds", ["foo.mp3", "foo.ogg"]);
 	
@@ -566,6 +568,103 @@ TestLevel.prototype.create = function() {
 
 TestLevel.prototype.update = function() {
 	var gs = this.gameState;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Quack experimantal level
+
+function ExperimentalLevel(gameState) {
+	Level.call(this, gameState);
+}
+
+ExperimentalLevel.prototype = Object.create(Level.prototype);
+
+ExperimentalLevel.prototype.preload = function() {
+	var gs = this.gameState;
+	
+	gs.load.tilemap("map", "assets/maps/test2.json", null, Phaser.Tilemap.TILED_JSON);
+	gs.load.image("terrainTileset", "assets/tilesets/test.png");
+	gs.load.image("specialsTileset", "assets/tilesets/basic.png");
+}
+
+ExperimentalLevel.prototype.create = function() {
+	var gs = this.gameState;
+	
+	gs.map = gs.game.add.tilemap("map");
+	gs.map.addTilesetImage("terrain", "terrainTileset");
+	gs.map.addTilesetImage("specials", "specialsTileset");
+	gs.map.setCollision([
+	// terrain: 8x8 (1-64)
+	          4, 5, 6, 7,   
+	   10,   12,13,14,15,   
+	   18,   20,21,22,23,   
+	   26,   28,      31,   
+	         36,      39,   
+	               46,47,   
+	49,   51,               
+	// special: 4x4 (65-80)
+	65,        
+	69,70,71,72
+	           
+	           
+	]);
+	
+	this.infectedTiles = [[3,3]];
+	this.deadTile = 67;
+	this.vulnerableTiles = [
+	// terrain: 8x8 (1-64)
+	 1, 2, 3,               
+	 9,   11,               
+	17,   19,               
+	25,   27,   29,30,      
+	33,34,35,   37,38,      
+	41,42,43,44,45,         
+	   50,   52,53,         
+	// special: 4x4 (65-80)
+	   66,   68
+	           
+	           
+	           
+	];
+	
+	//TODO: Optimize this callback.
+	this.crumble = function () {
+		var newlyInfected = [];
+		
+		for (var i = 0 ; i < this.infectedTiles.length ; i++)
+		{
+			var xi = this.infectedTiles[i][0], yi = this.infectedTiles[i][1];
+			var neighbours = this.getNeighbours(xi,yi);
+			for (var j = 0 ; j < 4 ; j++)
+				if (this.isVulnerable(gs.map, neighbours[j], newlyInfected))
+					newlyInfected.push(neighbours[j]);
+			gs.map.putTile(this.deadTile, xi, yi);
+		}
+		
+		this.infectedTiles = newlyInfected;
+	};
+	gs.time.events.loop(FLOOR_CRUMBLING_DELAY, this.crumble, this);
+}
+
+ExperimentalLevel.prototype.getNeighbours = function (x, y) {
+	return [[x+1,y],[x,y+1],[x-1,y],[x,y-1]]
+};
+
+ExperimentalLevel.prototype.isVulnerable = function (map, coords, infected) {
+	for (var i = 0 ; i < infected.length ; i++)
+		if (infected[i][0] === coords[0] && infected[i][1] == coords[1])
+			return false; // Tile already infected.
+	
+	for (var i = 0 ; i < this.vulnerableTiles.length ; i++)
+		if (map.getTile(coords[0],coords[1]).index === this.vulnerableTiles[i])
+			return true; // Tile is sane and vulnerable.
+	
+	return false;
+};
+
+ExperimentalLevel.prototype.update = function() {
+	var gs = this.gameState;
+	
 }
 
 ////////////////////////////////////////////////////////////////////////////
