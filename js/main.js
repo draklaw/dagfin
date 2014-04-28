@@ -73,6 +73,9 @@ GameState.prototype.init = function(levelId) {
 	else if(levelId === 'chap1') {
 		this.level = new Chap1Level(this);
 	}
+	else if(levelId === 'chap3') {
+		this.level = new Chap3Level(this);
+	}
 	else if(levelId === 'boss') {
 		this.level = new BossLevel(this);
 	}
@@ -1369,6 +1372,89 @@ Chap1Level.prototype.update = function() {
 }
 
 Chap1Level.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Chapter III
+
+function Chap3Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap3Level.prototype = Object.create(Level.prototype);
+
+Chap3Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("chap3_map_json", "assets/maps/chap1.json");
+	gs.load.json("messages", "assets/texts/chap1.json");
+	
+	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn", "assets/tilesets/spawn.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+
+	gs.load.image("note", "assets/sprites/note.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap3Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Deferred loading here. But since we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap3_map_json");
+	gs.load.tilemap("chap3_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	this.parseLevel(this.mapJson);
+
+	gs.map = gs.game.add.tilemap("chap3_map");
+	gs.map.addTilesetImage("basic", "chap3_tileset");
+	gs.map.addTilesetImage("spawn", "spawn");
+	gs.map.addTilesetImage("spawn2", "spawn2");
+	gs.map.setCollision([ 1, 8 ]);
+
+	gs.mapLayer = gs.map.createLayer("map");
+	gs.mapLayer.resizeWorld();
+	// gs.mapLayer.debug = true;
+	
+	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	gs.displayMessage("messages", "intro", true);
+	
+	var that = this;
+
+//	this.triggers.exit.onEnter = function() {
+//		gs.game.state.restart(true, false, null, 'boss');
+//	}
+	
+}
+
+Chap3Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+	this.processTriggers();
+	
+}
+
+Chap3Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
