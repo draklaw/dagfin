@@ -269,8 +269,11 @@ GameState.prototype.create = function () {
 	
 	// Lighting.
 	if(this.enableLighting) {
-		this.lightmap = this.make.renderTexture(MAX_WIDTH, MAX_HEIGHT, "lightmap");
-		this.lightLayer = this.add.sprite(0, 0, this.lightmap, 0, this.postProcessGroup);
+		var margin = 5;
+		this.lightmap = this.make.renderTexture(MAX_WIDTH+margin*2,
+												MAX_HEIGHT+margin*2,
+												"lightmap");
+		this.lightLayer = this.add.sprite(-margin, -margin, this.lightmap, 0, this.postProcessGroup);
 		this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
 		
 		// Contains all the stuff renderer to the lightmap.
@@ -280,6 +283,7 @@ GameState.prototype.create = function () {
 		this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
 		
 		this.lightGroup = this.add.group(this.lightLayerGroup);
+		this.lightGroup.position.set(margin, margin);
 		
 		var mapLights = this.map.objects.lights;
 		for(var i=0; i<mapLights.length; ++i) {
@@ -468,6 +472,7 @@ GameState.prototype.update = function () {
 						zed.hitCooldown = false;
 					}, this);
 				zed.sfx.play('zombiHit',0,1,false,true); //hit by zombie
+				pc.damage(1);
 				//console.log("HULK SMASH !");
 			}
 		}
@@ -493,6 +498,7 @@ GameState.prototype.update = function () {
 	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
+	this.camera.update();
 	this.postProcessGroup.x = this.camera.x;
 	this.postProcessGroup.y = this.camera.y;
 	
@@ -695,11 +701,17 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 function Player(game, x, y) {
 	'use strict';
-	
 	Dood.call(this, game, x, y, "player");
+	this.revive(3);
+	//this.health = 3;
+	
+	this.events.onKilled.add(function(){
+		console.log("Humanity lost you beneath the surface !");
+	});
 }
 
 Player.prototype = Object.create(Dood.prototype);
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
