@@ -156,6 +156,11 @@ GameState.prototype.create = function () {
 		this.sfx.addMarker(key, soundSprite[key].start, soundSprite[key].end - soundSprite[key].start, 1, soundSprite[key].loop);
 	}
 
+	// Group all the stuff on the ground (always in background)
+	this.objectsGroup = this.make.group();
+	// Group all the stuff that should be sorted by depth.
+	this.characters = this.make.group();	
+	
 	// Map.
 	this.level.create();
 	
@@ -163,11 +168,10 @@ GameState.prototype.create = function () {
 	this.mapLayer.resizeWorld();
 //	this.mapLayer.debug = true;
 	
-	// Group all the stuff on the ground (always in background)
-	this.objectsGroup = this.add.group();
-	// Group all the stuff that should be sorted by depth.
-	this.characters = this.add.group();	
-	
+	// Add groups after level
+	this.world.add(this.objectsGroup);
+	this.world.add(this.characters);
+
 	// Items in the map
 	this.objects = {};
 	if(this.map.objects.items) {
@@ -606,6 +610,28 @@ function Level(gameState) {
 	this.enableNoisePass = true;
 }
 
+Level.prototype.parseLevel = function(mapJson) {
+	this.triggersLayer = null;
+	for(var i=0; i<mapJson.layers.length; ++i) {
+		var layer = mapJson.layers[i];
+		if(layer.name === 'triggers') {
+			this.triggersLayer = layer;
+			break;
+		}
+	}
+	if(!this.triggersLayer) {
+		console.warn("Triggers not found !");
+	}
+	
+	this.triggers = {};
+	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
+		var tri = this.triggersLayer.objects[i];
+		tri.rect = new Phaser.Rectangle(
+			tri.x, tri.y, tri.width, tri.height);
+		this.triggers[tri.name] = tri;
+	}
+};
+
 ////////////////////////////////////////////////////////////////////////////
 // Test level
 
@@ -796,25 +822,7 @@ IntroLevel.prototype.create = function() {
 	gs.load.tilemap("intro_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
 	
-	this.triggersLayer = null;
-	for(var i=0; i<this.mapJson.layers.length; ++i) {
-		var layer = this.mapJson.layers[i];
-		if(layer.name === 'triggers') {
-			this.triggersLayer = layer;
-			break;
-		}
-	}
-	if(!this.triggersLayer) {
-		console.warn("Triggers not found !");
-	}
-	
-	this.triggers = {};
-	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
-		var tri = this.triggersLayer.objects[i];
-		tri.rect = new Phaser.Rectangle(
-			tri.x, tri.y, tri.width, tri.height);
-		this.triggers[tri.name] = tri;
-	}
+	this.parseLevel(this.mapJson);
 
 	gs.map = gs.game.add.tilemap("intro_map");
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
@@ -943,6 +951,8 @@ Chap1Level.prototype.preload = function() {
 	
 	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
 
+	gs.load.image("indice1_item", "assets/sprites/note.png");
+
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
@@ -958,25 +968,7 @@ Chap1Level.prototype.create = function() {
 	gs.load.tilemap("chap1_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
 	
-	this.triggersLayer = null;
-	for(var i=0; i<this.mapJson.layers.length; ++i) {
-		var layer = this.mapJson.layers[i];
-		if(layer.name === 'triggers') {
-			this.triggersLayer = layer;
-			break;
-		}
-	}
-	if(!this.triggersLayer) {
-		console.warn("Triggers not found !");
-	}
-	
-	this.triggers = {};
-	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
-		var tri = this.triggersLayer.objects[i];
-		tri.rect = new Phaser.Rectangle(
-			tri.x, tri.y, tri.width, tri.height);
-		this.triggers[tri.name] = tri;
-	}
+	this.parseLevel(this.mapJson);
 
 	gs.map = gs.game.add.tilemap("chap1_map");
 	gs.map.addTilesetImage("basic", "chap1_tileset");
