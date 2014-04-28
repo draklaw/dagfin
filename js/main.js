@@ -61,9 +61,13 @@ GameState.prototype.init = function(levelId) {
 	
 	console.log("Load level: "+levelId);
 	levelId = levelId || 'intro';
+//	levelId = levelId || 'chap1';
 	
 	if(levelId === 'intro') {
 		this.level = new IntroLevel(this);
+	}
+	else if(levelId === 'chap1') {
+		this.level = new Chap1Level(this);
 	}
 	else if(levelId === 'test') {
 		this.level = new TestLevel(this);
@@ -139,8 +143,8 @@ GameState.prototype.create = function () {
 	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 	this.k_punch = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
-	this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER); //was CONTROL
+	//this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
 	this.k_debug = this.game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
 	//TODO: m et M (sound control)
@@ -224,6 +228,7 @@ GameState.prototype.create = function () {
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				//TODO: Make a scary noise.
+				this.sfx.play('zombi',0,1,false,false); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
@@ -324,30 +329,31 @@ GameState.prototype.update = function () {
 	pc.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
 		if (this.k_down.isDown) {
-			pc.body.velocity.y = PLAYER_VELOCITY;
+			pc.body.velocity.y = 1;
 			pc.facing = DOWN;
 		}
 		if (this.k_up.isDown) {
-			pc.body.velocity.y = -PLAYER_VELOCITY;
+			pc.body.velocity.y = -1;
 			pc.facing = UP;
 		}
 		if (this.k_right.isDown) {
-			pc.body.velocity.x = PLAYER_VELOCITY;
+			pc.body.velocity.x = 1;
 			pc.facing = RIGHT;
 		}
 		if (this.k_left.isDown) {
-			pc.body.velocity.x = -PLAYER_VELOCITY;
+			pc.body.velocity.x = -1;
 			pc.facing = LEFT;
 		}
+		pc.body.velocity.setMagnitude(PLAYER_VELOCITY);
 	}
 	pc.frame = pc.looks*4 + pc.facing;
 
 	// bruit de pas
 	if(pc.body.velocity.x || pc.body.velocity.y){
-		this.sfx.play('footstep',0,1,true);
+		this.sfx.play('footstep', 0, 1, true, false);
 	} else this.sfx.stop('footstep');
 	
-	if(this.k_read.justPressed(1)) {
+	if(this.k_use.justPressed(1)) {
 		this.nextMessage();
 	}
 	
@@ -357,6 +363,7 @@ GameState.prototype.update = function () {
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
+		this.sfx.play('hit', 0, 1, false, false); //don't work ??!
 		//console.log("Take that !");
 	}
 	
@@ -813,8 +820,8 @@ IntroLevel.prototype.create = function() {
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
 	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
 
-    	gs.music = game.add.audio('intro');
-	gs.music.play();
+	gs.music = game.add.audio('intro');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
@@ -902,13 +909,97 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				gs.game.state.restart(true, false, null, 'expe');
+				gs.game.state.restart(true, false, null, 'chap1');
 			});
 		});
 	}
 }
 
 IntroLevel.prototype.render = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// Chapter I
+
+function Chap1Level(gameState) {
+	'use strict';
+	
+	Level.call(this, gameState);
+}
+
+Chap1Level.prototype = Object.create(Level.prototype);
+
+Chap1Level.prototype.preload = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
+	gs.load.json("messages", "assets/texts/chap1.json");
+	
+	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
+
+	gs.load.audio('intro', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+}
+
+Chap1Level.prototype.create = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+
+	// Defered loading here. But as we have the json, it's instant.
+	this.mapJson = gs.cache.getJSON("chap1_map_json");
+	gs.load.tilemap("chap1_map", null, this.mapJson,
+				  Phaser.Tilemap.TILED_JSON);
+	
+	this.triggersLayer = null;
+	for(var i=0; i<this.mapJson.layers.length; ++i) {
+		var layer = this.mapJson.layers[i];
+		if(layer.name === 'triggers') {
+			this.triggersLayer = layer;
+			break;
+		}
+	}
+	if(!this.triggersLayer) {
+		console.warn("Triggers not found !");
+	}
+	
+	this.triggers = {};
+	for(var i=0; i<this.triggersLayer.objects.length; ++i) {
+		var tri = this.triggersLayer.objects[i];
+		tri.rect = new Phaser.Rectangle(
+			tri.x, tri.y, tri.width, tri.height);
+		this.triggers[tri.name] = tri;
+	}
+
+	gs.map = gs.game.add.tilemap("chap1_map");
+	gs.map.addTilesetImage("basic", "chap1_tileset");
+	gs.map.setCollision([ 1, 8 ]);
+
+   	gs.music = game.add.audio('intro');
+	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
+	
+	gs.displayMessage("messages", "intro", true);
+	
+}
+
+Chap1Level.prototype.update = function() {
+	'use strict';
+	
+	var gs = this.gameState;
+	
+}
+
+Chap1Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;

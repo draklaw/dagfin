@@ -1,6 +1,5 @@
 ### General
-* Story/level plan
-* Some gameplay
+* Chapter text in one page.
 
 ### Code
 * The gameplay !
