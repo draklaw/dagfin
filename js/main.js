@@ -30,6 +30,14 @@ var ZOMBIE_IDEA_DELAY = 5000;
 var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
 var FAR_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*2;
 
+var DAGFIN_WIDTH = 5*DOOD_WIDTH;
+var DAGFIN_DISPLAY_HEIGHT = 4*DOOD_WIDTH;
+var DAGFIN_COLLISION_HEIGHT = 2*DOOD_WIDTH;
+var DAGFIN_SPOTTING_RANGE = 10*DOOD_WIDTH;
+var DAGFIN_BASE_VELOCITY = 50;
+var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
+var DAGFIN_ZOMBI_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
+
 var NORMAL  = 0;
 var STUNNED = 1;
 var BERZERK = 2;
@@ -167,6 +175,9 @@ GameState.prototype.create = function () {
 	}
 	//TODO: m et M (sound control)
 
+	game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT; // Stretch to fill
+	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE; // Keep original size
+	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL; // Maintain aspect ratio
 	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
 	this.k_fullscreen.onDown.add(toggleFullScreen, this);
 	
@@ -747,6 +758,41 @@ function Player(game, x, y) {
 Player.prototype = Object.create(Dood.prototype);
 
 ////////////////////////////////////////////////////////////////////////////
+// Dagfin
+
+
+function Dagfin(game, x, y) {
+	'use strict';
+	var dagfin = this;
+	Dood.call(this, game, x, y, "dagfin");
+	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
+	this.revive();
+
+	this.ritualItemPlaced = 0;
+	
+	this.events.onKilled.add(function(){
+		console.log("You Win");
+		//TODO : death sound, death music, win screen
+	});
+	dagfin.lastTime = (new Date()).getTime();
+	this.overTimeBehavior = function(){
+		dagfin.now = (new Date()).getTime();
+		// when aggro, spawn zombi over time DAGFIN_ZOMBI_SPAWN_FREQUENCY
+		// DAGFIN_SPOTTING_RANGE;
+		dagfin.lastTime = dagfin.now;
+	};
+	this.ritualStepBehavior = function(){
+		// Spawn zombi
+		// increase Speed
+	}
+	this.speed = function(){
+		return DAGFIN_BASE_VELOCITY + ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
+	}
+}
+
+Dagfin.prototype = Object.create(Dood.prototype);
+
+////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // LEVELS !
 ////////////////////////////////////////////////////////////////////////////
@@ -1008,7 +1054,7 @@ IntroLevel.prototype.preload = function() {
 	gs.load.image("blood_item", "assets/sprites/blood.png");
 	gs.load.image("femur_item", "assets/sprites/femur.png");
 	gs.load.image("collar_item", "assets/sprites/collar.png");
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1033,7 +1079,7 @@ IntroLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-	gs.music = game.add.audio('intro');
+	gs.music = game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -1158,7 +1204,7 @@ Chap1Level.prototype.preload = function() {
 
 	gs.load.image("note", "assets/sprites/note.png");
 
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1189,8 +1235,8 @@ Chap1Level.prototype.create = function() {
 	this.LAVA_TILE = 7;
 	
 	
-   	gs.music = game.add.audio('intro');
-	gs.music.play();
+   	gs.music = game.add.audio('music');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -1313,8 +1359,9 @@ BossLevel.prototype.preload = function() {
 //	gs.load.json("messages", "assets/texts/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
+	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
 
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1339,8 +1386,8 @@ BossLevel.prototype.create = function() {
 //	gs.overlaylayer = gs.map.addLayer("overlay");
 	
 
-   	gs.music = game.add.audio('intro');
-	gs.music.play();
+   	gs.music = game.add.audio('music');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;

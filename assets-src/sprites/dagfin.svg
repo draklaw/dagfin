@@ -11,14 +11,14 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="30"
-   height="20.000002"
+   height="24.000002"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.2 r9819"
    sodipodi:docname="dagfin.svg"
-   inkscape:export-filename="/home/draklaw/tmp/dagfin/assets-src/sprites/dagfin128/5.png"
-   inkscape:export-xdpi="576"
-   inkscape:export-ydpi="576">
+   inkscape:export-filename="/home/draklaw/tmp/dagfin/assets-src/sprites/dagfin5x4/5.png"
+   inkscape:export-xdpi="479.99997"
+   inkscape:export-ydpi="479.99997">
   <defs
      id="defs4">
     <inkscape:path-effect
@@ -44,8 +44,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="15.839192"
-     inkscape:cx="13.102663"
-     inkscape:cy="1.1754464"
+     inkscape:cx="1.8962878"
+     inkscape:cy="3.1754468"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -54,10 +54,10 @@
      inkscape:window-x="0"
      inkscape:window-y="30"
      inkscape:window-maximized="1"
-     fit-margin-top="0"
+     fit-margin-top="2"
      fit-margin-left="5"
      fit-margin-right="5"
-     fit-margin-bottom="0">
+     fit-margin-bottom="2">
     <inkscape:grid
        type="xygrid"
        id="grid2985"
@@ -82,7 +82,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-315,-319.86218)">
+     transform="translate(-315,-317.86218)">
     <path
        sodipodi:type="arc"
        style="fill:#800000;fill-opacity:1;stroke:none"
@@ -99,7 +99,7 @@
        id="path2987"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:#ffffff;stroke:none;"
+       style="fill:#ffffff;stroke:none"
        d="m 326,329.69551 c 1.33334,2.66667 1.33334,2.66667 4,2.66667 2.66666,0 2.66666,0 4,-2.66667 -1.33334,6.66667 -1.33334,4 -4,4 -2.66666,0 -2.66666,2.66667 -4,-4 z"
        id="path3849"
        inkscape:connector-curvature="0" />
@@ -129,7 +129,7 @@
     <g
        id="g3855"
        transform="matrix(0.13333341,0,0,0.13333341,290.66664,282.38053)"
-       style="fill:#00d400;fill-opacity:1;stroke:none;">
+       style="fill:#00d400;fill-opacity:1;stroke:none">
       <path
          inkscape:transform-center-y="1.1111085"
          inkscape:transform-center-x="20"
