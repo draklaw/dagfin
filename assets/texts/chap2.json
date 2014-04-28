@@ -3,22 +3,53 @@
 		"Chapter Two : The Wreckeds\n\nThe realm of Yl'her was empty, and Dagfin was bored of it.\nHe called back the Chaos, and once again the Chaos melted.\nIt obeyed The Odd One, and the Wreckeds appeared.\nBut the Chaos cannot create from scratch.\nThe Odd One made a pact with Brims, The Moisty One.\nBut the Moisty One sent its dead ones to Dagfin.\nThe chaos could not create true life from the dead.\nAnd the Wreckeds sprang."
 	],
 	
-	"indice1" : [
-	"I hope some parts of the book were only myths."
+	"dialog1" : [
+	"I hope these scary drawings I glimpsed in the book were just added for the show..."
 	],
 	
-	"indice2" : [
-	"THEY'RE REAL !!!"
-	],	
-
-	"indice3" : [
-	"They bite, too.\nIt hurts a lot."
-	],	
+	"dialog2" : [
+	"Oh dear... their teeths were *NOT* to scale !"
+	],
 	
-	"obj" : [
+	"doorSwitch" : [
+	"It sounds like a door just opened.\nI'm not sure that's a good thing."
+	],
+	
+	"hourglassNoteFirst" : [
+	"Matt's note: I just got bitten by a Wrecked, and it hurts a lot!\nI hope they're not poisonous or something...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
+	"Well, let's hope I'll have more luck finding it than Matt."
+	],
+	
+	"hourglassNoteLast" : [
+	"Matt's note: I just got bitten by a Wrecked, and it hurts a lot!\nI hope they're not poisonous or something...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
+	"He must be talking about that hourglass I've picked up.\nI can use it against these creatures !",
+	"[Press SPACE to defend yourself; monsters will be freezed... momentarily.]"
+	],
+	
+	"hourglassFirst" : [
+	"There's a shiny hourglass here.\nWell... I'll just pick it up.",
+	"Say, was that the sound of a door opening ?"
+	],
+	
+	"hourglassLast" : [
+	"Here's the Hourglass that Matt mentionned. I hope I won't actually have to use it.",
+	"[Press SPACE to defend yourself; monsters will be freezed... momentarily.]",
+	"I heard the sound of a door opening... now to find which one."
+	],
+	
+	"importantNote" : [
+	"Matt's note: The Path That Goes Deeper is straight ahead...\nthough I somehow feel there is something else to be found in this Chapter.\nNo matter. The Path is ahead. I must pursue my Descent..."
+	],
+	
+	"scaredNote" : [
+	"???'s note: Oh Lord, those foul spawn of the Odd One are everywhere !\nYet, I must complete this unholy quest I undertook.\nI shall just lay there a while, till the creature I hear\nchooses to leave the room next to mine...",
+	"I can make off weird, worn out stains on that note...\nwait, what did I just stepped on ? Is that a bone ?"
+	],
+	
+	"carnivorousPlant" : [
 	"There's a carnivorous flower, but it doesn't seem dangerous. Should I take it ?",
 	">Yes\n>No",
-	"Hope it won't bite my sandwich. Oh, nevermind, I didn't took a sandwich."
+	"Hope it won't bite my sandwich. Oh, nevermind, I didn't take a sandwich."
 	"I don't want to pet a flower."
 	]
 }
