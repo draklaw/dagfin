@@ -1,0 +1,24 @@
+{
+	"intro" : [
+		"Chapter Two : The Wreckeds\n\nThe realm of Yl'her was empty, and Dagfin was bored of it.\nHe called back the Chaos, and once again the Chaos melted.\nIt obeyed The Odd One, and the Wreckeds appeared.\nBut the Chaos cannot create from scratch.\nThe Odd One made a pact with Brims, The Moisty One.\nBut the Moisty One sent its dead ones to Dagfin.\nThe chaos could not create true life from the dead.\nAnd the Wreckeds sprang."
+	],
+	
+	"indice1" : [
+	"I hope some parts of the book were only myths."
+	],
+	
+	"indice2" : [
+	"THEY'RE REAL !!!"
+	],	
+
+	"indice3" : [
+	"They bite, too.\nIt hurts a lot."
+	],	
+	
+	"obj" : [
+	"There's a carnivorous flower, but it doesn't seem dangerous. Should I take it ?",
+	">Yes\n>No",
+	"Hope it won't bite my sandwich. Oh, nevermind, I didn't took a sandwich."
+	"I don't want to pet a flower."
+	]
+}
