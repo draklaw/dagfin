@@ -17,7 +17,7 @@ var LEFT  = 3;
 var PLAYER_VELOCITY = 140;
 var PLAYER_MAX_LIFE = 3;
 var PLAYER_FULL_LIFE_RECOVERY_TIME = 60; //in seconds 0 for no regen
-var SLOW_PLAYER_WHEN_DAMAGED = true;
+var SLOW_PLAYER_WHEN_DAMAGED = false;
 
 var HIT_COOLDOWN = 500;
 
@@ -248,6 +248,14 @@ GameState.prototype.create = function () {
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 	
+	this.player.events.onKilled.add(function() {
+		this.gameOver.revive();
+		this.gameOverText.text = "You disapeard deep beneath the surface...";
+		this.time.events.repeat(1500, 1, function() {
+			this.state.restart();
+		}, this);
+	}, this);
+	
 	// Sound effects
 	addSfx(this.player);
 	function addSfx(entity){
@@ -381,6 +389,13 @@ GameState.prototype.create = function () {
 	
 	// Add Message box
 	this.postProcessGroup.add(this.messageGroup);
+	
+	// Game Over
+	this.gameOver = this.add.sprite(0, 0, "black", 0, this.postProcessGroup);
+	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
+	this.gameOver.kill();
+	this.gameOverText = this.add.text(40, 280,
+						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
 	
 	// Noise pass
 	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
@@ -818,15 +833,19 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 function Player(game, x, y) {
 	'use strict';
+	
+	this.game = game;
+	
 	var player = this;
 	Dood.call(this, game, x, y, "player");
 	this.revive(PLAYER_MAX_LIFE);
 	
 	this.events.onKilled.add(function(){
-		console.log(player.health);
-		console.log("Humanity lost you beneath the surface !");
+//		console.log(player.health);
+//		console.log("Humanity lost you beneath the surface !");
 		//TODO : death sound, death music, gameover screen
 	});
+	
 	player.lastTime = (new Date()).getTime();
 	this.regenerate = function(){
 		player.now = (new Date()).getTime();
@@ -1700,6 +1719,7 @@ Chap3Level.prototype.preload = function() {
 
 	gs.load.image("note", "assets/sprites/note.png");
 	gs.load.image("flame", "assets/sprites/flame.png");
+	gs.load.image("chair", "assets/sprites/chair.png");
 
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1754,11 +1774,43 @@ Chap3Level.prototype.create = function() {
 			gs.toggleLights('flame');
 		});
 	}
-	
-//	this.triggers.exit.onEnter = function() {
-//		gs.game.state.restart(true, false, null, 'boss');
-//	}
 
+	this.triggers.indice1.onEnter = function() {
+		that.triggers.indice1.onEnter = null;
+		gs.displayMessage("messages", "indice1", true, function() {
+			gs.objects.indice1.kill();
+		});
+	};
+	
+	this.triggers.indice2.onEnter = function() {
+		that.triggers.indice2.onEnter = null;
+		gs.displayMessage("messages", "indice2", true, function() {
+			gs.objects.indice2.kill();
+		});
+	};
+	
+	this.triggers.indice3.onEnter = function() {
+		that.triggers.indice3.onEnter = null;
+		gs.displayMessage("messages", "indice3", true, function() {
+			gs.objects.indice3.kill();
+		});
+	};
+	
+	gs.game.hasChair = false;
+	this.triggers.chair.onEnter = function() {
+		that.triggers.chair.onEnter = null;
+		gs.askQuestion("messages", "chair", [
+			function() {
+				gs.objects.chair.kill();
+				gs.game.hasChair = true;
+			},
+			null
+		]);
+	};
+
+	this.triggers.exit.onEnter = function() {
+		gs.game.state.restart(true, false, null, 'boss');
+	}
 
 }
 
@@ -1770,7 +1822,7 @@ Chap3Level.prototype.update = function() {
 	this.processTriggers();
 	
 	if(gs.playerLight.alive) {
-		gs.playerLight.lightSize -= gs.time.elapsed / 4000;
+		gs.playerLight.lightSize -= gs.time.elapsed / 12000;
 		if(gs.playerLight.lightSize < 1) {
 			gs.playerLight.lightSize = 1;
 		}
