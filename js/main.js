@@ -887,7 +887,7 @@ function Dagfin(game, x, y) {
 		return DAGFIN_BASE_VELOCITY + ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
 	}
 	
-	this.body.velocity.y = 16;
+//	this.body.velocity.y = 16;
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
@@ -1824,13 +1824,14 @@ BossLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("boss_map_json", "assets/maps/boss.json");
-//	gs.load.json("messages", "assets/texts/"+lang+"/ccl.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
 	gs.load.image("trone", "assets/sprites/trone.png");
 
 	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
+	gs.load.spritesheet("matt", "assets/sprites/matt.png", 32, 48);
 
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1847,6 +1848,8 @@ BossLevel.prototype.create = function() {
 	gs.load.tilemap("boss_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
 	
+	this.parseLevel(this.mapJson);
+
 	gs.map = gs.game.add.tilemap("boss_map");
 	gs.map.addTilesetImage("basic", "boss_tileset");
 	gs.map.addTilesetImage("spawn2", "spawn2");
@@ -1867,7 +1870,15 @@ BossLevel.prototype.create = function() {
 	
 	this.dagfin = new Dagfin(gs.game, 32*32+16, 10*32);
 	
+	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
+	
 //	gs.displayMessage("messages", "intro", true);
+	
+	this.triggers.boss.onEnter = function() {
+		gs.displayMessage("messages", "aaarg", true, function() {
+			gs.player.kill();
+		});
+	};
 	
 }
 
@@ -1875,6 +1886,8 @@ BossLevel.prototype.update = function() {
 	'use strict';
 	
 	var gs = this.gameState;
+	
+	this.processTriggers();
 	
 }
 

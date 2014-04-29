@@ -762,7 +762,20 @@
         {
          "height":64,
          "name":"triggers",
-         "objects":[],
+         "objects":[
+                {
+                 "height":32,
+                 "name":"boss",
+                 "properties":
+                    {
+
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":288,
+                 "x":896,
+                 "y":416
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
