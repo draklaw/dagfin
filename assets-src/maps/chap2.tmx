@@ -18,24 +18,24 @@
 1,1,1,1,1,1,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,9,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,1,1,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,1,1,2,2,1,1,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,1,1,2,2,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,9,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,9,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,2,2,1,1,1,1,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,2,2,2,2,9,2,2,2,2,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,2,2,2,2,2,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,2,2,2,1,1,2,2,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,1,1,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,9,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,1,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -53,7 +53,7 @@
 1,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,9,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,9,2,2,2,2,2,9,2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2,9,2,2,2,2,2,9,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,2,9,2,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -96,17 +96,9 @@
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>
-  <object name="DimLight" type="light" gid="17" x="1248" y="928">
+  <object name="DimLight" type="light" gid="17" x="160" y="960">
    <properties>
-    <property name="color" value="804040"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
-    <property name="size_woobling" value=".01"/>
-   </properties>
-  </object>
-  <object name="DimLight" type="light" gid="17" x="160" y="928">
-   <properties>
-    <property name="color" value="804040"/>
+    <property name="color" value="604040"/>
     <property name="color_woobling" value=".2"/>
     <property name="size" value="16"/>
     <property name="size_woobling" value=".01"/>
@@ -296,6 +288,62 @@
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>
+  <object name="DimLight" type="light" gid="17" x="1248" y="960">
+   <properties>
+    <property name="color" value="604040"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="16"/>
+    <property name="size_woobling" value=".01"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="704">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1088" y="576">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="1152" y="192">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="288">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="320" y="576">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="256" y="192">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup name="doors" width="64" height="64">
   <object name="HDoor" type="hdoor" gid="20" x="672" y="1600">
@@ -323,7 +371,7 @@
     <property name="trigger" value="one"/>
    </properties>
   </object>
-  <object name="HDoor" type="hdoor" gid="20" x="704" y="1472">
+  <object name="HDoor" type="hdoor" gid="20" x="704" y="1440">
    <properties>
     <property name="trigger" value="one"/>
    </properties>
@@ -349,6 +397,66 @@
    </properties>
   </object>
   <object name="VDoor" type="vdoor" gid="21" x="384" y="576">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="VDoor" type="vdoor" gid="21" x="1024" y="608">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="VDoor" type="vdoor" gid="21" x="1024" y="544">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="VDoor" type="vdoor" gid="21" x="384" y="544">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="VDoor" type="vdoor" gid="21" x="384" y="608">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="672" y="352">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="736" y="352">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="672" y="1440">
+   <properties>
+    <property name="trigger" value="one"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="736" y="1440">
+   <properties>
+    <property name="trigger" value="one"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="672" y="832">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="736" y="832">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="672" y="896">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="736" y="896">
    <properties>
     <property name="trigger" value="two"/>
    </properties>
@@ -380,7 +488,7 @@
     <property name="key" value="plante64"/>
    </properties>
   </object>
-  <object name="importantNote" type="item" gid="22" x="768" y="864">
+  <object name="importantNote" type="item" gid="22" x="800" y="864">
    <properties>
     <property name="key" value="note"/>
    </properties>
@@ -393,7 +501,7 @@
   <object name="hourglassNote" x="1216" y="1376" width="32" height="32"/>
   <object name="hourglass" x="192" y="1376" width="32" height="32"/>
   <object name="carnivorousPlant" x="160" y="1120" width="32" height="32"/>
-  <object name="importantNote" x="768" y="832" width="32" height="32"/>
+  <object name="importantNote" x="800" y="832" width="32" height="32"/>
   <object name="scaredNote" x="1248" y="1120" width="32" height="32"/>
   <object name="exit" x="672" y="64" width="96" height="96"/>
  </objectgroup>

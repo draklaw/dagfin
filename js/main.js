@@ -121,6 +121,9 @@ GameState.prototype.preload = function () {
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 	
+	this.load.image("hdoor", "assets/sprites/hdoor.png");
+	this.load.image("vdoor", "assets/sprites/vdoor.png");
+	
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
 	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
@@ -195,6 +198,8 @@ GameState.prototype.create = function () {
 
 	// Group all the stuff on the ground (always in background)
 	this.objectsGroup = this.make.group();
+	// Group all the doors.
+	this.doorsGroup = this.make.group();	
 	// Group all the stuff that should be sorted by depth.
 	this.characters = this.make.group();	
 	// Group all the stuff that should be sorted above the rest.
@@ -205,6 +210,7 @@ GameState.prototype.create = function () {
 		
 	// Add groups after level
 	this.world.add(this.objectsGroup);
+	this.world.add(this.doorsGroup);
 	this.world.add(this.characters);
 	this.world.add(this.ceiling);
 
@@ -227,23 +233,26 @@ GameState.prototype.create = function () {
 	}
 	
 	// Doors in the map
-	this.doors = {};
+	this.doors = [];
 	if(this.map.objects.doors) {
 		for(var i = 0 ; i < this.map.objects.doors.length ; i++) {
 			var door = this.map.objects.doors[i];
 			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
 			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
-			var key = door.properties.type;
+			var key = door.name.toLowerCase(); //FIXME: Should be door.type but it fails.
+			if (key === "hdoor") offset_y -= 32; else offset_y -= 16;
 			var sprite = this.add.sprite(door.x + offset_x + 16,
-			                             door.y + offset_y - 16,
-			                             key, 0, this.objectsGroup);
+			                             door.y + offset_y,
+			                             key, 0, this.doorsGroup);
 			sprite.anchor.set(.5, .5);
-			this.objects[door.name] = sprite;
 			sprite.objName = door.name;
 			this.game.physics.arcade.enable(sprite);
+			sprite.body.immovable = true;
+			door.sprite = sprite;
 		}
 	}
-		// People.
+	
+	// People.
 	var spawnObj = this.map.objects.doods[0];
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
@@ -271,18 +280,17 @@ GameState.prototype.create = function () {
 			);
 		}
 	}
-
 	
+	// Loop closure hack - I hate this language.
 	this.mobs = new Array();
-	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
-	{
-		spawnObj = this.map.objects.doods[i];
-		this.mobs[i] = new Dood(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
-		
-		var that = this, j = i;
-		addSfx(this.mobs[i])
-		this.mobs[i].shamble = function () {
-			var zed = that.mobs[j];
+	var that = this;
+	
+	function hackLC (i) {
+		spawnObj = that.map.objects.doods[i+1];
+		var zed = new Dood(that.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
+		that.mobs[i] = zed;
+		addSfx(that.mobs[i]);
+		zed.shamble = function () {
 			if (zed.looks == STUNNED)
 				return;
 			zed.facing = that.rnd.integer()%4;
@@ -305,18 +313,20 @@ GameState.prototype.create = function () {
 					break;
 			};
 		};
-		this.time.events.loop(ZOMBIE_IDEA_DELAY, this.mobs[i].shamble, this);
+		that.time.events.loop(ZOMBIE_IDEA_DELAY, zed.shamble, that);
 		
-		this.mobs[i].spot = function () {
-			var zed = that.mobs[j];
+		zed.spot = function () {
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				zed.sfx.play('zombi',0,1,false,true);
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
-		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, this.mobs[i].spot, this);
+		that.time.events.loop(ZOMBIE_SPOTTING_DELAY, zed.spot, that);
 	}
+
+	for (var i = 0 ; i < this.map.objects.doods.length - 1 ; i++)
+		hackLC(i);
 	
 	this.postProcessGroup = this.add.group();
 	
@@ -446,6 +456,7 @@ GameState.prototype.update = function () {
 	
 	if(this.enableCollisions) {
 		this.game.physics.arcade.collide(pc, this.mapLayer);
+		this.game.physics.arcade.collide(pc, this.doorsGroup);
 	}
 
 	// React to controls.
@@ -496,23 +507,23 @@ GameState.prototype.update = function () {
 	}
 	
 	var punch = false;
-	if (this.k_punch.isDown && !pc.hitCooldown)
+	if (this.k_punch.isDown && !pc.hitCooldown && pc.canPunch)
 	{
 		// Player stun zombie
 		punch = true;
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
 		pc.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
-		//console.log("Take that !");
 	}
 	
 	// Everyday I'm shambling.
-	for (var i = 1 ; i < this.map.objects.doods.length ; i++)
+	for (var i = 0 ; i < this.mobs.length ; i++)
 	{
 		var zed = this.mobs[i];
 		
 		// Stumble against the walls.
 		this.game.physics.arcade.collide(zed, this.mapLayer);
+		this.game.physics.arcade.collide(zed, this.doorsGroup);
 		var zblock = zed.body.blocked;
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
@@ -537,7 +548,6 @@ GameState.prototype.update = function () {
 					function () {
 						zed.looks = NORMAL;
 					}, this);
-				//console.log("In your face !");
 			} else if (!zed.hitCooldown) {
 				zed.looks = BERZERK;
 				zed.body.velocity.set(0, 0);
@@ -549,14 +559,10 @@ GameState.prototype.update = function () {
 					}, this);
 				zed.sfx.play('zombiHit',0,1,false,true); //hit by zombie
 				pc.damage(1);
-				//console.log("HULK SMASH !");
 			}
 		}
-		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player)) {
-			// We lost him, boss !
-			//console.log("Huh ?");
+		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player))
 			zed.looks = NORMAL;
-		}
 	}
 	function intensityDistanceDependant(mob){
 		var distance = gs.game.physics.arcade.distanceBetween(pc, mob);
@@ -839,6 +845,7 @@ function Player(game, x, y) {
 	var player = this;
 	Dood.call(this, game, x, y, "player");
 	this.revive(PLAYER_MAX_LIFE);
+	player.canPunch = true;
 	
 	this.events.onKilled.add(function(){
 //		console.log(player.health);
@@ -1594,7 +1601,9 @@ Chap2Level.prototype.create = function() {
 	gs.displayMessage("messages", "intro", true);
 	
 	var that = this;
-	//TODO: Disable zombie freezing power.
+	
+	//FIXME: Ugly hack. Disables punching when there will be a player.
+	gs.time.events.add(0, function () {gs.player.canPunch = false;}, this);
 	
 	this.triggers.dialog1.onEnter = function() {
 		that.triggers.dialog1.onEnter = null;
@@ -1619,8 +1628,10 @@ Chap2Level.prototype.create = function() {
 	
 	this.hourglassLast = function() {
 		that.triggers.hourglass.onEnter = null;
-		//TODO: Open all doors with trigger="two".
-		//TODO: Add zombie freezing power.
+		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
+			if (gs.map.objects.doors[i].properties.trigger === "two")
+				gs.map.objects.doors[i].sprite.kill();
+		gs.player.canPunch = true;
 		gs.displayMessage("messages", "hourglassLast", true, function() {
 			gs.objects.hourglass.kill();
 		});
@@ -1637,8 +1648,10 @@ Chap2Level.prototype.create = function() {
 	this.hourglassFirst = function() {
 		that.triggers.hourglass.onEnter = null;
 		that.triggers.hourglassNote.onEnter = that.noteLast;
-		//TODO: Open all doors with trigger="two".
-		//TODO: Add zombie freezing power.
+		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
+			if (gs.map.objects.doors[i].properties.trigger === "two")
+				gs.map.objects.doors[i].sprite.kill();
+		gs.player.canPunch = true;
 		gs.displayMessage("messages", "hourglassFirst", true, function() {
 			gs.objects.hourglass.kill();
 		});
@@ -1663,14 +1676,18 @@ Chap2Level.prototype.create = function() {
 	
 	this.triggers.doorSwitch.onEnter = function() {
 		that.triggers.doorSwitch.onEnter = null;
-		//TODO: Open all doors with trigger="one".
+		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
+			if (gs.map.objects.doors[i].properties.trigger === "one")
+				gs.map.objects.doors[i].sprite.kill();
 		gs.displayMessage("messages", "doorSwitch", true);
 	};
 	
 	this.triggers.carnivorousPlant.onEnter = function() {
-		that.triggers.carnivorousPlant.onEnter = null;
 		gs.askQuestion("messages", "carnivorousPlant", [
-			function () { gs.objects.carnivorousPlant.kill(); },
+			function () {
+				that.triggers.carnivorousPlant.onEnter = null;
+				gs.objects.carnivorousPlant.kill();
+			},
 			null
 		]);
 	};
