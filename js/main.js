@@ -1444,7 +1444,7 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap2');
+		gs.game.state.restart(true, false, null, 'chap3');
 	}
 }
 
