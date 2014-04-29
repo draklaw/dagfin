@@ -1,25 +1,36 @@
 {
-	"intro" : [
-		"Chapter Three : The realm of Yl'her\n\nThe realm of The Odd One was profoundly nested in the other realms.\nIt had no light nor darkness, and the wreckeds lied still.\nOnce again, the Chaos was called, and once again the Chaos changed the realm.\nFrom the Th'liy's realm he borrowed the light, and from the one of Cas'sacor the deep darkness.\nThe two did not melt, and never stop fighting one other.\nThe Chaos took also life from the Earth, and the wrecked gained the Motion.\nWhen the Odd One checked the work of the Chaos, he was pelased, and the Chaos and him reigned together on Yl'her."
-	],
-	
-	"indice1" :[
-	"Bite hurts. Yl'her moving under my feets."
-	],
-	
-	"indice2" :[
-	"Sand everywhere. Shiny, Shiny little sand."
-	],	
+    "intro" : [
+        "Chapter Three : The realm of Yl'her\n\nThe realm of The Odd One was profoundly nested in the other\nrealms. It had no light nor darkness, and the wreckeds lied still.",
+        "Once again, the Chaos was called, and once again the Chaos\nchanged the realm. From the Th'liy's realm he borrowed the light,\nand from the one of Cas'sacor the deep darkness.\n\nThe two did not melt, and never stop fighting one other.",
+        "The Chaos took also life from the Earth, and the wrecked gained\nthe Motion. When the Odd One checked the work of the Chaos, he\nwas pelased, and the Chaos and him reigned together on Yl'her."
+    ],
 
-	"indice3" :[
-	"If I fit, I sit."
-	],	
-	
-	"obj" : [
-	"I found a... chair ? Who would leave a chair here ? Should I take it ?",
-	">Yes\n>No",
-	"Nice, it fit in my pocket. Wait. A chair fit in my pocket ? This world is wierd."
-	"It's too big for me, I can't take it !"
-	]
-	
+    "indice1" :[
+        "Bite hurts. Yl'her moving under my feets."
+    ],
+
+    "indice2" :[
+        "Sand everywhere. Shiny, Shiny little sand."
+    ],
+
+    "indice3" :[
+        "If I fit, I sit."
+    ],
+
+    "flame": [
+        "This crystal flame glows a deep bleu. I finaly found my own sun !"
+    ],
+
+    "chair" : {
+        "question": "I found a... chair ? Who would leave a chair here ? Should I take it ?",
+        "choices": [
+            { "ans": "Yes",
+                "message": [ "Nice, it fit in my pocket.\n\nWait. A chair fit in my pocket ?\nThis world is wierd."]
+            },
+            { "ans": "No",
+                "message": [ "It's too big for me, I can't take it !" ]
+            }
+        ]
+    }
+
 }

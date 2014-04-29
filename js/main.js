@@ -1550,7 +1550,7 @@ Chap2Level.prototype.preload = function() {
 	var gs = this.gameState;
 	
 	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
-	gs.load.json("messages", "assets/texts/chap2.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap2.json");
 	
 	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
