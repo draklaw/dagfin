@@ -15,7 +15,7 @@ var LEFT  = 3;
 var PLAYER_VELOCITY = 140;
 var PLAYER_MAX_LIFE = 3;
 var PLAYER_FULL_LIFE_RECOVERY_TIME = 60; //in seconds 0 for no regen
-var SLOW_PLAYER_WHEN_DAMAGED = true;
+var SLOW_PLAYER_WHEN_DAMAGED = false;
 
 var HIT_COOLDOWN = 500;
 
@@ -29,6 +29,14 @@ var ZOMBIE_STUN_DELAY = 1000;
 var ZOMBIE_IDEA_DELAY = 5000;
 var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
 var FAR_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*2;
+
+var DAGFIN_WIDTH = 5*DOOD_WIDTH;
+var DAGFIN_DISPLAY_HEIGHT = 4*DOOD_WIDTH;
+var DAGFIN_COLLISION_HEIGHT = 2*DOOD_WIDTH;
+var DAGFIN_SPOTTING_RANGE = 10*DOOD_WIDTH;
+var DAGFIN_BASE_VELOCITY = 50;
+var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
+var DAGFIN_ZOMBI_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
 
 var NORMAL  = 0;
 var STUNNED = 1;
@@ -106,7 +114,7 @@ GameState.prototype.preload = function () {
 	this.load.image("message_bg", "assets/message_bg.png");
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
-//	this.load.json("message_test", "assets/texts/test.json");
+//	this.load.json("message_test", "assets/texts/"+lang+"/test.json");
 	
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
@@ -176,6 +184,9 @@ GameState.prototype.create = function () {
 	}
 	//TODO: m et M (sound control)
 
+	game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT; // Stretch to fill
+	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE; // Keep original size
+	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL; // Maintain aspect ratio
 	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
 	this.k_fullscreen.onDown.add(toggleFullScreen, this);
 	
@@ -243,6 +254,14 @@ GameState.prototype.create = function () {
 	var spawnObj = this.map.objects.doods[0];
 	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
+	
+	this.player.events.onKilled.add(function() {
+		this.gameOver.revive();
+		this.gameOverText.text = "You disapeard deep beneath the surface...";
+		this.time.events.repeat(1500, 1, function() {
+			this.state.restart();
+		}, this);
+	}, this);
 	
 	// Sound effects
 	addSfx(this.player);
@@ -353,9 +372,9 @@ GameState.prototype.create = function () {
 		
 		this.playerLight = this.addLight(this.player.x + 16,
 										 this.player.y - 32,
-										 LIGHT_SCALE,
+										 7,
 										 LIGHT_RAND,
-										 0xd0d0d0,
+										 0xa0c0e0,
 										 LIGHT_COLOR_RAND);
 		if(!this.level.enablePlayerLight) {
 			this.playerLight.kill();
@@ -378,6 +397,13 @@ GameState.prototype.create = function () {
 	
 	// Add Message box
 	this.postProcessGroup.add(this.messageGroup);
+	
+	// Game Over
+	this.gameOver = this.add.sprite(0, 0, "black", 0, this.postProcessGroup);
+	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
+	this.gameOver.kill();
+	this.gameOverText = this.add.text(40, 280,
+						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
 	
 	// Noise pass
 	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
@@ -789,16 +815,20 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 function Player(game, x, y) {
 	'use strict';
+	
+	this.game = game;
+	
 	var player = this;
 	Dood.call(this, game, x, y, "player");
 	this.revive(PLAYER_MAX_LIFE);
 	player.canPunch = true;
 	
 	this.events.onKilled.add(function(){
-		console.log(player.health);
-		console.log("Humanity lost you beneath the surface !");
+//		console.log(player.health);
+//		console.log("Humanity lost you beneath the surface !");
 		//TODO : death sound, death music, gameover screen
 	});
+	
 	player.lastTime = (new Date()).getTime();
 	this.regenerate = function(){
 		player.now = (new Date()).getTime();
@@ -824,6 +854,52 @@ function Player(game, x, y) {
 Player.prototype = Object.create(Dood.prototype);
 
 ////////////////////////////////////////////////////////////////////////////
+// Dagfin
+
+
+function Dagfin(game, x, y) {
+	'use strict';
+	
+	this.game = game;
+	var dagfin = this;
+	
+	Dood.call(this, game, x, y, "dagfin");
+	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
+	this.animations.add("move", null, 16, true);
+	this.animations.play("move");
+
+	this.revive();
+
+	this.game.physics.arcade.enable(this);
+
+	this.ritualItemPlaced = 0;
+	
+	this.events.onKilled.add(function(){
+		console.log("You Win");
+		//TODO : death sound, death music, win screen
+	});
+	dagfin.lastTime = (new Date()).getTime();
+	this.overTimeBehavior = function(){
+		dagfin.now = (new Date()).getTime();
+		// when aggro, spawn zombi over time DAGFIN_ZOMBI_SPAWN_FREQUENCY
+		// DAGFIN_SPOTTING_RANGE;
+		dagfin.lastTime = dagfin.now;
+	};
+	
+	this.ritualStepBehavior = function(){
+		// Spawn zombi
+		// increase Speed
+	}
+	this.speed = function(){
+		return DAGFIN_BASE_VELOCITY + ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
+	}
+	
+//	this.body.velocity.y = 16;
+}
+
+Dagfin.prototype = Object.create(Dood.prototype);
+
+////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // LEVELS !
 ////////////////////////////////////////////////////////////////////////////
@@ -844,12 +920,13 @@ Level.prototype.parseLevel = function(mapJson) {
 	var gs = this.gameState;
 		
 	this.triggersLayer = null;
+	this.mapLayers = {}
 	for(var i=0; i<mapJson.layers.length; ++i) {
 		var layer = mapJson.layers[i];
 		if(layer.name === 'triggers') {
 			this.triggersLayer = layer;
-			break;
 		}
+		this.mapLayers[layer.name] = layer;
 	}
 	if(!this.triggersLayer) {
 		console.warn("Triggers not found !");
@@ -1077,7 +1154,7 @@ IntroLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("intro_map_json", "assets/maps/intro.json");
-	gs.load.json("messages", "assets/texts/intro.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/intro.json");
 	
 	gs.load.image("intro_tileset", "assets/tilesets/intro.png");
 	gs.load.spritesheet("pillar_item", "assets/sprites/pillar.png", 32, 64);
@@ -1085,7 +1162,7 @@ IntroLevel.prototype.preload = function() {
 	gs.load.image("blood_item", "assets/sprites/blood.png");
 	gs.load.image("femur_item", "assets/sprites/femur.png");
 	gs.load.image("collar_item", "assets/sprites/collar.png");
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1110,7 +1187,7 @@ IntroLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-	gs.music = game.add.audio('intro');
+	gs.music = game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -1229,7 +1306,7 @@ Chap1Level.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/chap1.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap1.json");
 	
 	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -1238,7 +1315,7 @@ Chap1Level.prototype.preload = function() {
 	gs.load.image("note", "assets/sprites/note.png");
 	gs.load.image("clock", "assets/sprites/clock.png");
 
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1274,8 +1351,8 @@ Chap1Level.prototype.create = function() {
 	this.LAVA_TILE = 7;
 	
 	
-	gs.music = game.add.audio('intro');
-	gs.music.play();
+   	gs.music = game.add.audio('music');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -1374,7 +1451,7 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap2');
+		gs.game.state.restart(true, false, null, 'chap3');
 	}
 }
 
@@ -1592,14 +1669,16 @@ Chap3Level.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("chap3_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/chap1.json");
+	gs.load.json("chap3_map_json", "assets/maps/chap3.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap3.json");
 	
 	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
 	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
 
 	gs.load.image("note", "assets/sprites/note.png");
+	gs.load.image("flame", "assets/sprites/flame.png");
+	gs.load.image("chair", "assets/sprites/chair.png");
 
 	gs.load.audio('intro', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1622,23 +1701,76 @@ Chap3Level.prototype.create = function() {
 	gs.map.addTilesetImage("basic", "chap3_tileset");
 	gs.map.addTilesetImage("spawn", "spawn");
 	gs.map.addTilesetImage("spawn2", "spawn2");
-	gs.map.setCollision([ 1, 8 ]);
+	gs.map.setCollision([ 1, 8, 10 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
-	
+
+	gs.overlayLayer = gs.map.createLayer("overlay");
+
+	for(var i=0; i<this.mapLayers.crystals.objects.length; ++i) {
+		var crystal = this.mapLayers.crystals.objects[i];
+		crystal.rect = new Phaser.Rectangle(crystal.x, crystal.y, crystal.width, crystal.height);
+	}
+	this.crystals = this.mapLayers.crystals.objects;
+
 	gs.music = game.add.audio('intro');
 	gs.music.play();
+
+	this.enablePlayerLight = false;
+	this.enableNoisePass = true;
 
 	gs.displayMessage("messages", "intro", true);
 	
 	var that = this;
 
-//	this.triggers.exit.onEnter = function() {
-//		gs.game.state.restart(true, false, null, 'boss');
-//	}
+	this.triggers.flame.onEnter = function() {
+		that.triggers.flame.onEnter = null;
+		gs.displayMessage("messages", "flame", true, function() {
+			gs.objects.flame.kill();
+			gs.playerLight.revive();
+			gs.toggleLights('flame');
+		});
+	}
+
+	this.triggers.indice1.onEnter = function() {
+		that.triggers.indice1.onEnter = null;
+		gs.displayMessage("messages", "indice1", true, function() {
+			gs.objects.indice1.kill();
+		});
+	};
 	
+	this.triggers.indice2.onEnter = function() {
+		that.triggers.indice2.onEnter = null;
+		gs.displayMessage("messages", "indice2", true, function() {
+			gs.objects.indice2.kill();
+		});
+	};
+	
+	this.triggers.indice3.onEnter = function() {
+		that.triggers.indice3.onEnter = null;
+		gs.displayMessage("messages", "indice3", true, function() {
+			gs.objects.indice3.kill();
+		});
+	};
+	
+	gs.game.hasChair = false;
+	this.triggers.chair.onEnter = function() {
+		that.triggers.chair.onEnter = null;
+		gs.askQuestion("messages", "chair", [
+			function() {
+				gs.objects.chair.kill();
+				gs.game.hasChair = true;
+			},
+			null
+		]);
+	};
+
+	this.triggers.exit.onEnter = function() {
+		gs.game.state.restart(true, false, null, 'boss');
+	}
+
 }
 
 Chap3Level.prototype.update = function() {
@@ -1648,6 +1780,39 @@ Chap3Level.prototype.update = function() {
 	
 	this.processTriggers();
 	
+	if(gs.playerLight.alive) {
+		gs.playerLight.lightSize -= gs.time.elapsed / 12000;
+		if(gs.playerLight.lightSize < 1) {
+			gs.playerLight.lightSize = 1;
+		}
+	}
+	
+	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
+		var x = gs.player.x;
+		var y = gs.player.y;
+
+		switch(gs.player.facing) {
+			case DOWN:
+				y += 32;
+				break;
+			case UP:
+				y -= 32;
+				break;
+			case RIGHT:
+				x += 32;
+				break;
+			case LEFT:
+				x -= 32;
+				break;
+		};
+		
+		for(var i=0; i<this.crystals.length; ++i) {
+			if(this.crystals[i].rect.contains(x, y)) {
+				gs.playerLight.lightSize = 3;
+				break;
+			}
+		}
+	}
 }
 
 Chap3Level.prototype.render = function() {
@@ -1676,11 +1841,16 @@ BossLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("boss_map_json", "assets/maps/boss.json");
-//	gs.load.json("messages", "assets/texts/ccl.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
+	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	gs.load.image("trone", "assets/sprites/trone.png");
 
-	gs.load.audio('intro', [
+	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
+	gs.load.spritesheet("matt", "assets/sprites/matt.png", 32, 48);
+
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1695,8 +1865,12 @@ BossLevel.prototype.create = function() {
 	gs.load.tilemap("boss_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
 	
+	this.parseLevel(this.mapJson);
+
 	gs.map = gs.game.add.tilemap("boss_map");
 	gs.map.addTilesetImage("basic", "boss_tileset");
+	gs.map.addTilesetImage("spawn2", "spawn2");
+	gs.map.addTilesetImage("trone", "trone");
 	gs.map.setCollision([ 1, 8 ]);
 	
 	gs.mapLayer = gs.map.createLayer("map");
@@ -1705,13 +1879,23 @@ BossLevel.prototype.create = function() {
 	gs.overlayLayer = gs.map.createLayer("overlay");
 	
 
-   	gs.music = game.add.audio('intro');
-	gs.music.play();
+   	gs.music = game.add.audio('music');
+	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
+	this.dagfin = new Dagfin(gs.game, 32*32+16, 10*32);
+	
+	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
+	
 //	gs.displayMessage("messages", "intro", true);
+	
+	this.triggers.boss.onEnter = function() {
+		gs.displayMessage("messages", "aaarg", true, function() {
+			gs.player.kill();
+		});
+	};
 	
 }
 
@@ -1719,6 +1903,8 @@ BossLevel.prototype.update = function() {
 	'use strict';
 	
 	var gs = this.gameState;
+	
+	this.processTriggers();
 	
 }
 
