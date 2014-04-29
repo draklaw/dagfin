@@ -2,10 +2,12 @@
 var MAX_WIDTH = 800;
 var MAX_HEIGHT = 600;
 
-var DOOD_WIDTH = 32;
-var DOOD_HEIGHT = 48;
-var DOOD_OFFSET_X = 16;
-var DOOD_OFFSET_Y = -16;
+var TILE_SIZE = 32
+
+var DOOD_WIDTH = TILE_SIZE;
+var DOOD_HEIGHT = TILE_SIZE*1.5;
+var DOOD_OFFSET_X = TILE_SIZE/2;
+var DOOD_OFFSET_Y = -TILE_SIZE/2;
 
 var DOWN  = 0;
 var UP    = 1;
@@ -21,7 +23,7 @@ var HIT_COOLDOWN = 500;
 
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
-var ZOMBIE_SPOTTING_RANGE = 160;
+var ZOMBIE_SPOTTING_RANGE = TILE_SIZE*5;
 var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_CHARGE_DELAY = 0;
@@ -30,10 +32,10 @@ var ZOMBIE_IDEA_DELAY = 5000;
 var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
 var FAR_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*2;
 
-var DAGFIN_WIDTH = 5*DOOD_WIDTH;
-var DAGFIN_DISPLAY_HEIGHT = 4*DOOD_WIDTH;
-var DAGFIN_COLLISION_HEIGHT = 2*DOOD_WIDTH;
-var DAGFIN_SPOTTING_RANGE = 10*DOOD_WIDTH;
+var DAGFIN_WIDTH = 5*TILE_SIZE;
+var DAGFIN_DISPLAY_HEIGHT = 4*TILE_SIZE;
+var DAGFIN_COLLISION_HEIGHT = 2*TILE_SIZE;
+var DAGFIN_SPOTTING_RANGE = 10*TILE_SIZE;
 var DAGFIN_BASE_VELOCITY = 50;
 var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
 var DAGFIN_ZOMBI_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
@@ -301,7 +303,7 @@ GameState.prototype.create = function () {
 			var zed = that.mobs[j];
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
-				zed.sfx.play('zombi',0,1,false,true); //don't work ??!
+				zed.sfx.play('zombi',0,1,false,true);
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
@@ -769,10 +771,8 @@ GameState.prototype.lineOfSight = function(stalker, victim) {
 
 function Dood(game, x, y, spritesheet, group) {
 	'use strict';
-	
-	if (typeof group === 'undefined') {
-		group = game.state.getCurrentState().characters;
-	}
+	var gs = game.state.getCurrentState();
+	if (!group) group = gs.characters;
 	
 	Phaser.Sprite.call(this, game, x, y, spritesheet, 0);
 	group.add(this);
@@ -783,7 +783,31 @@ function Dood(game, x, y, spritesheet, group) {
 	this.hitCooldown = false;
 	
 	this.game.physics.arcade.enable(this);
-	this.body.setSize(32, 32, 0, 16);
+	this.body.setSize(TILE_SIZE, TILE_SIZE, 0, TILE_SIZE/2);
+
+	this.aggroPlayer = function (runSpeed, aggroRange, aggroFrontConeAngle, aggroThroughWall) {
+		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
+				&& 	( aggroThroughWall || this.isDirectPathObstructed(gs.player) )
+				&& 	(!aggroFrontConeAngle || this.isInFrontCone(gs.player,aggroFrontConeAngle) )
+			) {
+				game.physics.arcade.moveToObject(this, gs.player, runSpeed);
+				this.triggerAggroSoundEffect();
+		}
+	}
+	this.isTargetInRange = function(target, range) {
+		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
+		return line2Target.length < range;
+	}
+	this.isDirectPathObstructed = function(target) {
+		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
+		return !gs.obstructed(line2Target);
+	}
+	this.isInFrontCone = function(target, frontConeAngle) {
+		throw "non implémenté";
+	}
+	this.triggerAggroSoundEffect = function(){
+		//this.sfx.play('zombi',0,1,false,true);
+	}
 }
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
@@ -810,14 +834,14 @@ function Player(game, x, y) {
 			player.health = Math.min(
 				PLAYER_MAX_LIFE, 
 				player.health + ( 
-					( player.now - player.lastTime ) * PLAYER_MAX_LIFE
-					/ ( 1000 * PLAYER_FULL_LIFE_RECOVERY_TIME )
+					( player.now - player.lastTime ) * PLAYER_MAX_LIFE /
+					( 1000 * PLAYER_FULL_LIFE_RECOVERY_TIME )
 				)
 			);
 		player.lastTime = player.now;
 	};
 	this.abilityRate = function(){
-		return Math.sqrt(player.health/PLAYER_MAX_LIFE);
+		return Math.sqrt(player.health / PLAYER_MAX_LIFE);
 	}
 	this.speed = function(){
 		if(SLOW_PLAYER_WHEN_DAMAGED) return PLAYER_VELOCITY * player.abilityRate();
@@ -826,6 +850,38 @@ function Player(game, x, y) {
 }
 
 Player.prototype = Object.create(Dood.prototype);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Dagfin
@@ -855,6 +911,10 @@ function Dagfin(game, x, y) {
 	dagfin.lastTime = (new Date()).getTime();
 	this.overTimeBehavior = function(){
 		dagfin.now = (new Date()).getTime();
+
+		this.aggroPlayer(this.speed(), DAGFIN_SPOTTING_RANGE);
+		//this.body.velocity.y = this.speed();
+		this.game.physics.arcade.collide(dagfin, this.mapLayer)
 		// when aggro, spawn zombi over time DAGFIN_ZOMBI_SPAWN_FREQUENCY
 		// DAGFIN_SPOTTING_RANGE;
 		dagfin.lastTime = dagfin.now;
@@ -865,10 +925,8 @@ function Dagfin(game, x, y) {
 		// increase Speed
 	}
 	this.speed = function(){
-		return DAGFIN_BASE_VELOCITY + ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
+		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
 	}
-	
-	this.body.velocity.y = 16;
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
@@ -1813,7 +1871,7 @@ BossLevel.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	this.dagfin = new Dagfin(gs.game, 32*32+16, 10*32);
+	gs.dagfin = new Dagfin(gs.game, TILE_SIZE*32.5, 10*TILE_SIZE);
 	
 //	gs.displayMessage("messages", "intro", true);
 	
@@ -1824,6 +1882,7 @@ BossLevel.prototype.update = function() {
 	
 	var gs = this.gameState;
 	
+	gs.dagfin.overTimeBehavior();
 }
 
 BossLevel.prototype.render = function() {
