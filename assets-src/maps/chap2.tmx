@@ -298,49 +298,49 @@
   </object>
   <object name="Light" type="light" gid="17" x="704" y="704">
    <properties>
-    <property name="color" value="808080"/>
+    <property name="color" value="202020"/>
     <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
+    <property name="size" value="10"/>
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>
   <object name="Light" type="light" gid="17" x="1088" y="576">
    <properties>
-    <property name="color" value="808080"/>
+    <property name="color" value="202020"/>
     <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
-    <property name="size_woobling" value=".02"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="704" y="288">
-   <properties>
-    <property name="color" value="808080"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
-    <property name="size_woobling" value=".02"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="320" y="576">
-   <properties>
-    <property name="color" value="808080"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
-    <property name="size_woobling" value=".02"/>
-   </properties>
-  </object>
-  <object name="Light" type="light" gid="17" x="256" y="192">
-   <properties>
-    <property name="color" value="808080"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
+    <property name="size" value="10"/>
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>
   <object name="Light" type="light" gid="17" x="1152" y="192">
    <properties>
-    <property name="color" value="808080"/>
+    <property name="color" value="202020"/>
     <property name="color_woobling" value=".2"/>
-    <property name="size" value="16"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="704" y="288">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="320" y="576">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
+    <property name="size_woobling" value=".02"/>
+   </properties>
+  </object>
+  <object name="Light" type="light" gid="17" x="256" y="192">
+   <properties>
+    <property name="color" value="202020"/>
+    <property name="color_woobling" value=".2"/>
+    <property name="size" value="10"/>
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>

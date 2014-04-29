@@ -625,9 +625,9 @@
                  "name":"Light",
                  "properties":
                     {
-                     "color":"808080",
+                     "color":"202020",
                      "color_woobling":".2",
-                     "size":"16",
+                     "size":"10",
                      "size_woobling":".02"
                     },
                  "type":"light",
@@ -642,9 +642,9 @@
                  "name":"Light",
                  "properties":
                     {
-                     "color":"808080",
+                     "color":"202020",
                      "color_woobling":".2",
-                     "size":"16",
+                     "size":"10",
                      "size_woobling":".02"
                     },
                  "type":"light",
@@ -659,9 +659,26 @@
                  "name":"Light",
                  "properties":
                     {
-                     "color":"808080",
+                     "color":"202020",
                      "color_woobling":".2",
-                     "size":"16",
+                     "size":"10",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":1152,
+                 "y":192
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"202020",
+                     "color_woobling":".2",
+                     "size":"10",
                      "size_woobling":".02"
                     },
                  "type":"light",
@@ -676,9 +693,9 @@
                  "name":"Light",
                  "properties":
                     {
-                     "color":"808080",
+                     "color":"202020",
                      "color_woobling":".2",
-                     "size":"16",
+                     "size":"10",
                      "size_woobling":".02"
                     },
                  "type":"light",
@@ -693,32 +710,15 @@
                  "name":"Light",
                  "properties":
                     {
-                     "color":"808080",
+                     "color":"202020",
                      "color_woobling":".2",
-                     "size":"16",
+                     "size":"10",
                      "size_woobling":".02"
                     },
                  "type":"light",
                  "visible":true,
                  "width":0,
                  "x":256,
-                 "y":192
-                }, 
-                {
-                 "gid":17,
-                 "height":0,
-                 "name":"Light",
-                 "properties":
-                    {
-                     "color":"808080",
-                     "color_woobling":".2",
-                     "size":"16",
-                     "size_woobling":".02"
-                    },
-                 "type":"light",
-                 "visible":true,
-                 "width":0,
-                 "x":1152,
                  "y":192
                 }],
          "opacity":1,
