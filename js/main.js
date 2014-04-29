@@ -12,7 +12,7 @@ var UP    = 1;
 var RIGHT = 2;
 var LEFT  = 3;
 
-var PLAYER_VELOCITY = 700; //TODO: Disable cheat.
+var PLAYER_VELOCITY = 140;
 var PLAYER_MAX_LIFE = 3;
 var PLAYER_FULL_LIFE_RECOVERY_TIME = 60; //in seconds 0 for no regen
 var SLOW_PLAYER_WHEN_DAMAGED = true;
@@ -270,7 +270,6 @@ GameState.prototype.create = function () {
 		that.mobs[i] = zed;
 		addSfx(that.mobs[i]);
 		zed.shamble = function () {
-			console.log("hop", zed);
 			if (zed.looks == STUNNED)
 				return;
 			zed.facing = that.rnd.integer()%4;
@@ -487,7 +486,6 @@ GameState.prototype.update = function () {
 		pc.hitCooldown = true;
 		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
 		pc.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
-		//console.log("Take that !");
 	}
 	
 	// Everyday I'm shambling.
@@ -497,6 +495,7 @@ GameState.prototype.update = function () {
 		
 		// Stumble against the walls.
 		this.game.physics.arcade.collide(zed, this.mapLayer);
+		this.game.physics.arcade.collide(zed, this.doorsGroup);
 		var zblock = zed.body.blocked;
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
@@ -521,7 +520,6 @@ GameState.prototype.update = function () {
 					function () {
 						zed.looks = NORMAL;
 					}, this);
-				//console.log("In your face !");
 			} else if (!zed.hitCooldown) {
 				zed.looks = BERZERK;
 				zed.body.velocity.set(0, 0);
@@ -533,14 +531,10 @@ GameState.prototype.update = function () {
 					}, this);
 				zed.sfx.play('zombiHit',0,1,false,true); //hit by zombie
 				pc.damage(1);
-				//console.log("HULK SMASH !");
 			}
 		}
-		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player)) {
-			// We lost him, boss !
-			//console.log("Huh ?");
+		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player))
 			zed.looks = NORMAL;
-		}
 	}
 	function intensityDistanceDependant(mob){
 		var distance = gs.game.physics.arcade.distanceBetween(pc, mob);
@@ -1554,9 +1548,11 @@ Chap2Level.prototype.create = function() {
 	};
 	
 	this.triggers.carnivorousPlant.onEnter = function() {
-		that.triggers.carnivorousPlant.onEnter = null;
 		gs.askQuestion("messages", "carnivorousPlant", [
-			function () { gs.objects.carnivorousPlant.kill(); },
+			function () {
+				that.triggers.carnivorousPlant.onEnter = null;
+				gs.objects.carnivorousPlant.kill();
+			},
 			null
 		]);
 	};
