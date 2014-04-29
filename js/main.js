@@ -833,10 +833,18 @@ Player.prototype = Object.create(Dood.prototype);
 
 function Dagfin(game, x, y) {
 	'use strict';
+	
+	this.game = game;
 	var dagfin = this;
+	
 	Dood.call(this, game, x, y, "dagfin");
 	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
+	this.animations.add("move", null, 16, true);
+	this.animations.play("move");
+
 	this.revive();
+
+	this.game.physics.arcade.enable(this);
 
 	this.ritualItemPlaced = 0;
 	
@@ -851,6 +859,7 @@ function Dagfin(game, x, y) {
 		// DAGFIN_SPOTTING_RANGE;
 		dagfin.lastTime = dagfin.now;
 	};
+	
 	this.ritualStepBehavior = function(){
 		// Spawn zombi
 		// increase Speed
@@ -858,6 +867,8 @@ function Dagfin(game, x, y) {
 	this.speed = function(){
 		return DAGFIN_BASE_VELOCITY + ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
 	}
+	
+	this.body.velocity.y = 16;
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
@@ -1801,6 +1812,8 @@ BossLevel.prototype.create = function() {
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
+	
+	this.dagfin = new Dagfin(gs.game, 32*32+16, 10*32);
 	
 //	gs.displayMessage("messages", "intro", true);
 	
