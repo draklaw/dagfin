@@ -200,24 +200,7 @@
                  "name":"DimLight",
                  "properties":
                     {
-                     "color":"804040",
-                     "color_woobling":".2",
-                     "size":"16",
-                     "size_woobling":".01"
-                    },
-                 "type":"light",
-                 "visible":true,
-                 "width":0,
-                 "x":1248,
-                 "y":928
-                }, 
-                {
-                 "gid":17,
-                 "height":0,
-                 "name":"DimLight",
-                 "properties":
-                    {
-                     "color":"804040",
+                     "color":"604040",
                      "color_woobling":".2",
                      "size":"16",
                      "size_woobling":".01"
@@ -226,7 +209,7 @@
                  "visible":true,
                  "width":0,
                  "x":160,
-                 "y":928
+                 "y":960
                 }, 
                 {
                  "gid":17,
@@ -618,6 +601,125 @@
                  "width":0,
                  "x":704,
                  "y":1568
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"DimLight",
+                 "properties":
+                    {
+                     "color":"604040",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".01"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":1248,
+                 "y":960
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"808080",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":704,
+                 "y":704
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"808080",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":1088,
+                 "y":576
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"808080",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":704,
+                 "y":288
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"808080",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":320,
+                 "y":576
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"808080",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":256,
+                 "y":192
+                }, 
+                {
+                 "gid":17,
+                 "height":0,
+                 "name":"Light",
+                 "properties":
+                    {
+                     "color":"808080",
+                     "color_woobling":".2",
+                     "size":"16",
+                     "size_woobling":".02"
+                    },
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":1152,
+                 "y":192
                 }],
          "opacity":1,
          "type":"objectgroup",
