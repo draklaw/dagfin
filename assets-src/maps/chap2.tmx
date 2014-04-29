@@ -33,8 +33,8 @@
 1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,1,9,2,2,2,2,1,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,1,1,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,9,2,2,2,2,2,2,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -344,14 +344,6 @@
     <property name="size_woobling" value=".02"/>
    </properties>
   </object>
-  <object name="Light" type="light" gid="17" x="640" y="864">
-   <properties>
-    <property name="color" value="d0d0d0"/>
-    <property name="color_woobling" value=".2"/>
-    <property name="size" value="6"/>
-    <property name="size_woobling" value=".02"/>
-   </properties>
-  </object>
  </objectgroup>
  <objectgroup name="doors" width="64" height="64">
   <object name="HDoor" type="hdoor" gid="20" x="672" y="1600">
@@ -409,16 +401,6 @@
     <property name="trigger" value="two"/>
    </properties>
   </object>
-  <object name="HDoor" type="hdoor" gid="20" x="736" y="896">
-   <properties>
-    <property name="trigger" value="two"/>
-   </properties>
-  </object>
-  <object name="HDoor" type="hdoor" gid="20" x="672" y="896">
-   <properties>
-    <property name="trigger" value="two"/>
-   </properties>
-  </object>
   <object name="VDoor" type="vdoor" gid="21" x="1024" y="608">
    <properties>
     <property name="trigger" value="two"/>
@@ -459,6 +441,26 @@
     <property name="trigger" value="one"/>
    </properties>
   </object>
+  <object name="HDoor" type="hdoor" gid="20" x="672" y="832">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="736" y="832">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="672" y="896">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
+  <object name="HDoor" type="hdoor" gid="20" x="736" y="896">
+   <properties>
+    <property name="trigger" value="two"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup name="items" width="64" height="64">
   <object name="hourglassNote" type="item" gid="22" x="1216" y="1408">
@@ -486,7 +488,7 @@
     <property name="key" value="plante64"/>
    </properties>
   </object>
-  <object name="importantNote" type="item" gid="22" x="768" y="864">
+  <object name="importantNote" type="item" gid="22" x="800" y="864">
    <properties>
     <property name="key" value="note"/>
    </properties>
@@ -499,7 +501,7 @@
   <object name="hourglassNote" x="1216" y="1376" width="32" height="32"/>
   <object name="hourglass" x="192" y="1376" width="32" height="32"/>
   <object name="carnivorousPlant" x="160" y="1120" width="32" height="32"/>
-  <object name="importantNote" x="768" y="832" width="32" height="32"/>
+  <object name="importantNote" x="800" y="832" width="32" height="32"/>
   <object name="scaredNote" x="1248" y="1120" width="32" height="32"/>
   <object name="exit" x="672" y="64" width="96" height="96"/>
  </objectgroup>
