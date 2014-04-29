@@ -259,19 +259,18 @@ GameState.prototype.create = function () {
 			);
 		}
 	}
-
 	
+	// Loop closure hack - I hate this language.
 	this.mobs = new Array();
-	for (var i = 0 ; i < this.map.objects.doods.length - 1 ; i++)
-	{
-		spawnObj = this.map.objects.doods[i+1];
-		var zed = new Dood(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
-		this.mobs[i] = zed;
-		var that = this;
-		addSfx(this.mobs[i]);
-		// FUCK CALLBACKS. /ragequit.
-		zed.shamble = function (zed) {
-			console.log("hop");
+	var that = this;
+	
+	function hackLC (i) {
+		spawnObj = that.map.objects.doods[i+1];
+		var zed = new Dood(that.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
+		that.mobs[i] = zed;
+		addSfx(that.mobs[i]);
+		zed.shamble = function () {
+			console.log("hop", zed);
 			if (zed.looks == STUNNED)
 				return;
 			zed.facing = that.rnd.integer()%4;
@@ -294,17 +293,20 @@ GameState.prototype.create = function () {
 					break;
 			};
 		};
-		this.time.events.loop(ZOMBIE_IDEA_DELAY, zed.shamble, this, zed);
+		that.time.events.loop(ZOMBIE_IDEA_DELAY, zed.shamble, that);
 		
-		zed.spot = function (zed) {
+		zed.spot = function () {
 			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
 				zed.looks = BERZERK;
 				zed.sfx.play('zombi',0,1,false,true); //don't work ??!
 				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
 			}
 		};
-		this.time.events.loop(ZOMBIE_SPOTTING_DELAY, zed.spot, this, zed);
+		that.time.events.loop(ZOMBIE_SPOTTING_DELAY, zed.spot, that);
 	}
+
+	for (var i = 0 ; i < this.map.objects.doods.length - 1 ; i++)
+		hackLC(i);
 	
 	this.postProcessGroup = this.add.group();
 	
