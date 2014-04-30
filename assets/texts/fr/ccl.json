@@ -1,5 +1,13 @@
 {
-	"d1" : [ //En arrivant devant Dagfin, qui a Matt à sa droite
+	"aaarg" : [
+		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
+		"Matt : Oh, it's you Andrew !\nYou too were tired of this forsaken world ?",
+		"Andrew: Don't worry Matt, I'll take you back home !",
+		"Matt : But we're together home, now...",
+		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
+	],
+	
+	"d1" : [
 		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
 		"Matt : Oh, it's you Andrew !\nYou too were tired of this forsaken world ?",
 		"Andrew: Don't worry Matt, I'll take you back home !",
@@ -7,38 +15,34 @@
 		"> Give the bone to Dagfin\n> Don't do it."
 	],
 	
-	"d2" : [//Si fémur donné
+	"d2" : [
 		"Dagfin : GoOd ! LeT The fUN beGIN !"
-		//combat !
 	],
 	
-	"d3" : [//Si fémur pas donné
+	"d3" : [
 		"Dagfin : YoU LiEd To mE.\nGiVE yOUr wIlL tO The ChaOS."
 	],
 	
-	"d4" : [// Si touché par une attaque de Dagfin ou après d3
-		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn",
-		//Andrew va se placer à la gauche de Dagfin, écran de gameover/rechargement
+	"d4" : [
+		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
 	
-	"d5" : [//Défaite de Dagfin
+	"d5" : [
 		"Dagfin : I CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\nI Am thE pUpIL oF yOUr EyE\nI aM tHe iNexTIngUiSHablE rED-hAiReD tORch\nI am The StAR oF ChAoS.\n",
 		"Dagfin : WiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
-		// Disparaît et Matt vient vers le joueur
 	],
 	
-	"d6" : [//Après avoir récupéré Matt
+	"d6" : [
 		"Matt : Andrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\nAndrew : Hear what ?\n Matt : ...never mind.",
 		"Andrew : We have to find how to go back. ?\nMatt : Go back ? Where ? We're fine here, aren't we ?\nAndrew : To our world, Matt. I could come because I found your note, with the reciepe for the formula.",
-		"Matt : Me ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming." 
+		"Matt : Me ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming.",
 		"Andrew : So, you had it all the time ?\nMatt : It would have been foolish to come here without it !",
 		"Andrew : Why wouldn't you come back ?\nMatt : Oh, you know... stuff... shiny sand... But you're here.\nWill you stay with me ?",
 		">Let's stay here\n>Let's go home together",
-		"Andrew : Ok, let's stay here a little longer. \nMatt : Wonderful  :D !",// les deux vont se mettre à la place de Dagfin & Ecran fin
-		"Andrew : I'd rather go home with you.\nMatt : Oh... I'm a bit decived, but ok. Here's the formula.",
-		// petite note "got the return formula" => lecture formule (\"meard sa'nds pli Dagfin, Yl'her fo  ytic gnirebmuls Ni'eht\") => pièce du début => écran fin
-	],
+		"Andrew : Ok, let's stay here a little longer. \nMatt : Wonderful  :D !",
+		"Andrew : I'd rather go home with you.\nMatt : Oh... I'm a bit decived, but ok. Here's the formula."
+	]
 	
 	
 }

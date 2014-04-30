@@ -1567,7 +1567,7 @@ Chap2Level.prototype.preload = function() {
 	gs.load.image("hourglass", "assets/sprites/sablier.png");
 	gs.load.image("plante64", "assets/sprites/plante64.png");
 	
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1592,8 +1592,8 @@ Chap2Level.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
 	
-	gs.music = game.add.audio('intro');
-	gs.music.play();
+	gs.music = game.add.audio('music');
+    gs.music.play('', 0, 0.2);
 	
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -1738,7 +1738,7 @@ Chap3Level.prototype.preload = function() {
 	gs.load.image("flame", "assets/sprites/flame.png");
 	gs.load.image("chair", "assets/sprites/chair.png");
 
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1773,10 +1773,11 @@ Chap3Level.prototype.create = function() {
 	}
 	this.crystals = this.mapLayers.crystals.objects;
 
-	gs.music = game.add.audio('intro');
-	gs.music.play();
+	gs.music = game.add.audio('music');
+    gs.music.play('', 0, 0.2);
 
-	this.enablePlayerLight = false;
+
+    this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
 	gs.displayMessage("messages", "intro", true);
