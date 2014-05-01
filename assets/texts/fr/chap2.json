@@ -1,23 +1,23 @@
 {
 	"intro" : [
-		"Chapter Two : The Wreckeds\n\nThe realm of Yl'her was empty, and Dagfin was bored of it.\nHe called back the Chaos, and once again the Chaos melted.\nIt obeyed The Odd One, and the Wreckeds appeared.\nBut the Chaos cannot create from scratch.",
-		"\nThe Odd One made a pact with Brims, The Moisty One.\nBut the Moisty One sent its dead ones to Dagfin.\nThe chaos could not create true life from the dead.\nAnd the Wreckeds sprang."
+		"Chaptitre 2 : Les Destructeurs\n\nLa réalité de Yl'her était vide, et Dagfin s'en lassait.\nIl rappela le Chaos, et une fois encore le Chaos fut modelé.\nIl obéit au Grand Ancien, et les Destructeurs apparurent.\nMais le Chaos ne pouvait pas créer quelque chose à partir de rien.",
+		"\nLe Grand Ancien passa un pacte avec Brims, Celui des profondeurs.\nMais Celui des profondeurs envoya ses morts à Dagfin.\nLe chaos ne pouvait pas créer de la vie à partir des morts.\nEt les destructeurs apparurent."
 	],
 	
 	"dialog1" : [
-		"I hope these scary drawings I glimpsed in the book\nwere just added for the show..."
+		"J'éspère que ces dessins effrayants que j'ai apperçu dans le livre\nont juste été ajouté pour le show..."
 	],
 	
 	"dialog2" : [
-		"Oh dear... their teeths were *NOT* to scale !"
+		"Oh mince... leur dents n'étaient *PAS* à l'échelle !"
 	],
 	
 	"doorSwitch" : [
-		"It sounds like a door just opened.\nI'm not sure that's a good thing...\n\nIf the creature I saw is on the loose now,\nI should try to stay out of its sight."
+		" On dirait qu'une porte vient de s'ouvrir.\nJe ne suis pas sur que ce soit une bonne chose...\n\nSi la créature que j'ai vu est en liberté maintenant,\nJe devrait essayer de rester hors de sa vue."
 	],
 	
 	"hourglassNoteFirst" : [
-		"Matt's note: I just got bitten by a Wrecked, and it hurts a lot!\nI hope they're not poisonous or something...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
+		"note de Matt: J'ai été mordu par un Wrecked, et ça fait très mal!\nJ'éspère qu'ils ne sont pas venimeux ou autre...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
 		"Well, let's hope I'll have more luck finding it than Matt."
 	],
 	
