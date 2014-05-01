@@ -5,59 +5,59 @@
 		"Je n'abandonnerai pas."
 	],
 	"room": [
-		"It's the room where Matt did his researches.\nI did not imagine it like that.\nIt's quite unusual for a physician.",
-		"I should begin searching..."
+		"Voici la pièce où Matt faisait ses recherches.\nJe ne l'imaginais pas comme ça.\nC'est assez peu habituel chez un physicien.",
+		"Je devrais commencer à chercher..."
 	],
 
 	"book": [
-		"The book seems ancient and precious.\nI cannot read the whole title,\nI can only read \"Dagfin\"",
-		"\"Help me, please !\"",
-		"It's the handwritting of Matt !\nIt's dated of yesterday !\nI knew Matt was still alive !",
-		"There's also... a recipe ?",
-		"Deep blood of a Wrecked\nEye of the fortuneteller\nCenter of the One",
-		"I should search for these objects."
+		"Le livre semble ancient et précieux.\nJe ne peux pas lire le titre en entier,\nJe lis seulement \"Dagfin\"",
+		"\"Aidez moi, s'il vous plait !\"",
+		"C'est l'écriture de Matt !\nC'est daté d'hier !\nJe savais que Matt était toujours vivant !",
+		"Il y a aussi... une recette ?",
+		"Deep blood of a Wrecked\nOeil d'une diseuse de bonne aventure\nCenter of the One",
+		"Je devrais me mettre à la recherche de ces objets."
 	],
 
 	"blood": [
-		"The smell... ew ! Looks like it's blood.",
-		"It's still liquid, surprisingly."
+		"L'odeur... beurk! On dirait du sang.",
+		"C'est toujours liquide, curieusement."
 	],
 
 	"blood2": [
-		"I don't even know what is a Wrecked, but it seems to be blood."
+		"Je ne sais toujours pas ce qu'est un(e) Wrecked, mais ça a l'air d'être du sang."
 	],
 
 	"femur": [
-		"It's not even human !"
+		"Ce n'est même pas humain !"
 	],
 
 	"femur2": [
-		"I wouldn't want to cross the path of the beast which had such bones."
+		"Je ne voudrais pas croiser le chemin de la bête qui avait de tels os.."
 	],
 
 	"collar": [
-		"The stone has an eery glow..."
+		"La pierre luit d'une lumière étrange..."
 	],
 
 	"collar2": [
-		"At least, this one is not so twisted."
+		"Au moins, celui-ci n'est pas aussi tordu."
 	],
 
 	"carpet": [
-		"This carpet doesn't fit with the room.\nMatt always had strange taste.",
-		"It seems there's something on the floor, under this awful carpet !"
+		"Ce tapis ne colle pas avec la chambre.\nMatt avait toujours des goûts étranges.",
+		"On dirait qu'il y a quelque chose sur le sol, sous cet horrible tapis !"
 	],
 
 	"pentacle": [
-		"I don't know what matter was used to draw this.\nIt seems freshly drawn."
+		"Je ne sais pas ce qu'on a utilisé pour peindre ceci.\n ça a l'air d'avoir été peint récemment."
 	],
 
 	"invoc": [
-		"There's something else written at the bottom of the first page...\nLet's see that !",
+		" Il y a quelque chose d'autre écrit au bas de la première page...\nVoyons ça!",
 		" \"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
 	],
 
 	"invoc2": [
-		"What the !..."
+		"Qu'est ce que !..."
 	]
 }
