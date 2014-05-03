@@ -1408,7 +1408,7 @@ Chap1Level.prototype.create = function() {
 		
 		this.infectedTiles = newlyInfected;
 		if(this.infectedTiles.length === 0) {
-			gs.time.events.destroy(this.crumbleTimer);
+			gs.time.events.remove(this.crumbleTimer);
 		}
 		
 	};
