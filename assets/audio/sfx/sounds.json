@@ -14,7 +14,7 @@
       "end": 0.229365079365079365,
       "loop": true
     },
-    "zombiFootStep": {
+    "zombieFootStep": {
       "start": 0,
       "end": 0.529365079365079365,
       "loop": true
@@ -29,12 +29,12 @@
       "end": 2.1205668934240363,
       "loop": false
     },
-    "zombiHit": {
+    "zombieHit": {
       "start": 2,
       "end": 2.1205668934240363,
       "loop": false
     },
-    "zombi": {
+    "aggro": {
       "start": 4,
       "end": 4.238367346938776,
       "loop": false
