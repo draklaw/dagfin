@@ -2,7 +2,7 @@
 var MAX_WIDTH = 800;
 var MAX_HEIGHT = 600;
 
-var TILE_SIZE = 32
+var TILE_SIZE = 32;
 
 var DOOD_WIDTH = TILE_SIZE;
 var DOOD_HEIGHT = TILE_SIZE*1.5;
@@ -23,6 +23,7 @@ var HIT_COOLDOWN = 500;
 
 var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
+var ZOMBIE_STUNNED_VELOCITY = 0;
 var ZOMBIE_SPOTTING_RANGE = TILE_SIZE*5;
 var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
@@ -38,11 +39,11 @@ var DAGFIN_COLLISION_HEIGHT = 2*TILE_SIZE;
 var DAGFIN_SPOTTING_RANGE = 10*TILE_SIZE;
 var DAGFIN_BASE_VELOCITY = 50;
 var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
-var DAGFIN_ZOMBI_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
+var DAGFIN_ZOMBIE_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
 
 var NORMAL  = 0;
 var STUNNED = 1;
-var BERZERK = 2;
+var AGGRO = 2;
 
 var FLOOR_CRUMBLING_DELAY = 500;
 
@@ -61,9 +62,8 @@ var LIGHT_COLOR_RAND = .2;
 
 function GameState() {
 	'use strict';
-	
 	Phaser.State.call(this);
-	
+
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -116,8 +116,7 @@ GameState.prototype.preload = function () {
 	this.load.image("message_bg", "assets/message_bg.png");
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
-//	this.load.json("message_test", "assets/texts/"+lang+"/test.json");
-	
+
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 	
@@ -127,11 +126,7 @@ GameState.prototype.preload = function () {
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 	
 	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
-    	//this.load.audio('sfx', this.cache.getJSON("sfxInfo").resources);
 	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
-	
-//	this.load.tilemap("map", "assets/maps/test.json", null, Phaser.Tilemap.TILED_JSON);
-	
 	
 	this.level.preload();
 };
@@ -143,7 +138,7 @@ GameState.prototype.preload = function () {
 GameState.prototype.create = function () {
 	'use strict';
 	var gs = this;
-	
+
 	// System stuff...
 	this.time.advancedTiming = true;
 	
@@ -173,16 +168,11 @@ GameState.prototype.create = function () {
 	this.k_left = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 	this.k_right = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 	this.k_punch = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER); //was CONTROL
-	//this.k_read = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+	this.k_use = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
 	if(this.debugMode) {
-		this.k_debug1 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_1);
 		this.k_debug2 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_2);
 		this.k_debug3 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_3);
-		this.k_debug4 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_4);
-		this.k_debug5 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_5);
-		this.k_debug6 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_6);
 	}
 	//TODO: m et M (sound control)
 
@@ -192,7 +182,7 @@ GameState.prototype.create = function () {
 	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
 	this.k_fullscreen.onDown.add(toggleFullScreen, this);
 	
-	function toggleFullScreen(gs){
+	function toggleFullScreen(){
 		this.scale.startFullScreen();
 	}
 
@@ -253,81 +243,17 @@ GameState.prototype.create = function () {
 	}
 	
 	// People.
-	var spawnObj = this.map.objects.doods[0];
-	this.player = new Player(this.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y);
-	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
-	
-	this.player.events.onKilled.add(function() {
-		this.gameOver.revive();
-		this.gameOverText.text = "You disapeard deep beneath the surface...";
-		this.time.events.repeat(1500, 1, function() {
-			this.state.restart();
-		}, this);
-	}, this);
-	
-	// Sound effects
-	addSfx(this.player);
-	function addSfx(entity){
-		var soundSprite = gs.cache.getJSON("sfxInfo").spritemap;
-		entity.sfx = gs.add.audio('sfx');
-		for (var key in soundSprite){
-			entity.sfx.addMarker(
-				key,
-				soundSprite[key].start,
-				soundSprite[key].end - soundSprite[key].start,
-				1,
-				soundSprite[key].loop
-			);
-		}
-	}
-	
-	// Loop closure hack - I hate this language.
-	this.mobs = new Array();
-	var that = this;
-	
-	function hackLC (i) {
-		spawnObj = that.map.objects.doods[i+1];
-		var zed = new Dood(that.game, spawnObj.x+DOOD_OFFSET_X, spawnObj.y+DOOD_OFFSET_Y, "zombie");
-		that.mobs[i] = zed;
-		addSfx(that.mobs[i]);
-		zed.shamble = function () {
-			if (zed.looks == STUNNED)
-				return;
-			zed.facing = that.rnd.integer()%4;
-			switch (zed.facing) {
-				case DOWN:
-					zed.body.velocity.x = 0;
-					zed.body.velocity.y = ZOMBIE_SHAMBLE_VELOCITY;
-					break;
-				case UP:
-					zed.body.velocity.x = 0;
-					zed.body.velocity.y = -ZOMBIE_SHAMBLE_VELOCITY;
-					break;
-				case RIGHT:
-					zed.body.velocity.y = 0;
-					zed.body.velocity.x = ZOMBIE_SHAMBLE_VELOCITY;
-					break;
-				case LEFT:
-					zed.body.velocity.y = 0;
-					zed.body.velocity.x = -ZOMBIE_SHAMBLE_VELOCITY;
-					break;
-			};
-		};
-		that.time.events.loop(ZOMBIE_IDEA_DELAY, zed.shamble, that);
-		
-		zed.spot = function () {
-			if (zed.looks == NORMAL && that.lineOfSight(zed, that.player)) {
-				zed.looks = BERZERK;
-				zed.sfx.play('zombi',0,1,false,true);
-				that.game.physics.arcade.moveToObject(zed, that.player, ZOMBIE_CHARGE_VELOCITY);
-			}
-		};
-		that.time.events.loop(ZOMBIE_SPOTTING_DELAY, zed.spot, that);
-	}
+	var rawPlayerData = this.map.objects.doods[0];
+	this.player = new Player(this.game, rawPlayerData.x, rawPlayerData.y);
 
-	for (var i = 0 ; i < this.map.objects.doods.length - 1 ; i++)
-		hackLC(i);
-	
+	// Zombies
+	this.mobs = new Array();
+	var zombieList = gs.map.objects.doods;
+	for (var i = 1 ; i < zombieList.length ; i++)
+		gs.mobs.push(new Zombie(gs.game, zombieList[i].x, zombieList[i].y));
+
+
+
 	this.postProcessGroup = this.add.group();
 	
 	// Lighting.
@@ -452,41 +378,41 @@ GameState.prototype.update = function () {
 	// Hack use key !
 	this.k_use.triggered = this.k_use.justPressed(1);
 	
-	var pc = this.player;
+	var player = this.player;
 	
 	if(this.enableCollisions) {
-		this.game.physics.arcade.collide(pc, this.mapLayer);
-		this.game.physics.arcade.collide(pc, this.doorsGroup);
+		this.game.physics.arcade.collide(player, this.mapLayer);
+		this.game.physics.arcade.collide(player, this.doorsGroup);
 	}
 
 	// React to controls.
-	pc.body.velocity.set(0, 0);
+	player.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
 		if (this.k_down.isDown) {
-			pc.body.velocity.y = 1;
-			pc.facing = DOWN;
+			player.body.velocity.y = 1;
+			player.facing = DOWN;
 		}
 		if (this.k_up.isDown) {
-			pc.body.velocity.y = -1;
-			pc.facing = UP;
+			player.body.velocity.y = -1;
+			player.facing = UP;
 		}
 		if (this.k_right.isDown) {
-			pc.body.velocity.x = 1;
-			pc.facing = RIGHT;
+			player.body.velocity.x = 1;
+			player.facing = RIGHT;
 		}
 		if (this.k_left.isDown) {
-			pc.body.velocity.x = -1;
-			pc.facing = LEFT;
+			player.body.velocity.x = -1;
+			player.facing = LEFT;
 		}
-		pc.body.velocity.setMagnitude(pc.speed());
+		player.body.velocity.setMagnitude(player.speed());
 	}
-	pc.frame = pc.looks*4 + pc.facing;
+	player.frame = player.behavior*4 + player.facing;
 
 	// bruit de pas
-	if(	pc.body.prev.x !== pc.body.position.x
-	   || pc.body.prev.y !== pc.body.position.y
+	if(	player.body.prev.x !== player.body.position.x
+	   || player.body.prev.y !== player.body.position.y
 	  ){
-		pc.sfx.play('playerFootStep', 0, 1, false, false);
+		player.sfx.play('playerFootStep', 0, 1, false, false);
 	}
 	
 	if(this.k_use.triggered && this.hasMessageDisplayed()) {
@@ -507,13 +433,13 @@ GameState.prototype.update = function () {
 	}
 	
 	var punch = false;
-	if (this.k_punch.isDown && !pc.hitCooldown && pc.canPunch)
+	if (this.k_punch.isDown && !player.hitCooldown && player.canPunch)
 	{
 		// Player stun zombie
 		punch = true;
-		pc.hitCooldown = true;
-		this.time.events.add(HIT_COOLDOWN, function () { pc.hitCooldown = false; }, this);
-		pc.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
+		player.hitCooldown = true;
+		this.time.events.add(HIT_COOLDOWN, function () { player.hitCooldown = false; }, this);
+		player.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
 	}
 	
 	// Everyday I'm shambling.
@@ -527,29 +453,29 @@ GameState.prototype.update = function () {
 		var zblock = zed.body.blocked;
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
-		zed.frame = zed.looks*4 + zed.facing;
+		zed.frame = zed.behavior*4 + zed.facing;
 
 		if(zed.body.velocity.x || zed.body.velocity.y) {
 			zed.sfx.play(
-				'zombiFootStep',0,
+				'zombieFootStep',0,
 				intensityDistanceDependant(zed),
 				false,false);
 		}
 		
 		// EXTERMINATE ! EXTERMINATE !
-		if (zed.looks != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
+		if (zed.behavior != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
 		{
-			pc.body.velocity.set(0, 0);
+			player.body.velocity.set(0, 0);
 			if(punch) {
-				zed.looks = STUNNED;
+				zed.behavior = STUNNED;
 				zed.body.velocity.set(0, 0);
 				this.time.events.add(
 					ZOMBIE_STUN_DELAY,
 					function () {
-						zed.looks = NORMAL;
+						zed.behavior = NORMAL;
 					}, this);
 			} else if (!zed.hitCooldown) {
-				zed.looks = BERZERK;
+				zed.behavior = AGGRO;
 				zed.body.velocity.set(0, 0);
 				zed.hitCooldown = true;
 				this.time.events.add(
@@ -557,15 +483,15 @@ GameState.prototype.update = function () {
 					function () {
 						zed.hitCooldown = false;
 					}, this);
-				zed.sfx.play('zombiHit',0,1,false,true); //hit by zombie
-				pc.damage(1);
+				zed.sfx.play('zombieHit',0,1,false,true); //hit by zombie
+				player.damage(1);
 			}
 		}
-		else if (zed.looks == BERZERK && !this.lineOfSight(zed, this.player))
-			zed.looks = NORMAL;
+		else if (zed.behavior == AGGRO && !this.lineOfSight(zed, this.player))
+			zed.behavior = NORMAL;
 	}
 	function intensityDistanceDependant(mob){
-		var distance = gs.game.physics.arcade.distanceBetween(pc, mob);
+		var distance = gs.game.physics.arcade.distanceBetween(player, mob);
 		var intensity = Math.max(0,Math.min(1,
 			1 - ( 
 					( distance - FULL_SOUND_RANGE )
@@ -627,6 +553,22 @@ GameState.prototype.render = function () {
 
 ////////////////////////////////////////////////////////////////////////////
 // Other stuff
+
+GameState.prototype.addSfx = function(entity){
+	'use strict';
+	var gs = this;
+	var soundSprite = gs.cache.getJSON("sfxInfo").spritemap;
+	entity.sfx = gs.add.audio('sfx');
+	for (var key in soundSprite){
+		entity.sfx.addMarker(
+			key,
+			soundSprite[key].start,
+				soundSprite[key].end - soundSprite[key].start,
+			1,
+			soundSprite[key].loop
+		);
+	}
+};
 
 GameState.prototype.addLight = function(x, y, size, sizeWooble, color, colorWooble, properties) {
 	if(typeof sizeWooble === 'undefined') { sizeWooble = LIGHT_RAND; }
@@ -776,12 +718,14 @@ GameState.prototype.hasMessageDisplayed = function() {
 };
 
 // Kind of assumes the stalker is a zombie.
-GameState.prototype.lineOfSight = function(stalker, victim) {
-	var glance = new Phaser.Line(stalker.x, stalker.y, victim.x, victim.y);
-	var staring_angle = (glance.angle+3*Math.PI/2)-(2*Math.PI-stalker.body.angle);
+GameState.prototype.lineOfSight = function(stalker, target) {
+	var line2Target = new Phaser.Line(stalker.x, stalker.y, target.x, target.y);
+	var staring_angle = (line2Target.angle+3*Math.PI/2)-(2*Math.PI-stalker.body.angle);
 	// Don't ask, lest the zombie stare at YOU instead.
-	return glance.length < ZOMBIE_SPOTTING_RANGE && !this.obstructed(glance) &&
-	Math.cos(staring_angle) > 0 && Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE;
+	return line2Target.length < ZOMBIE_SPOTTING_RANGE
+		&& !this.obstructed(line2Target)
+		&& Math.cos(staring_angle) > 0
+		&& Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE;
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -792,43 +736,57 @@ GameState.prototype.lineOfSight = function(stalker, victim) {
 
 function Dood(game, x, y, spritesheet, group) {
 	'use strict';
-	var gs = game.state.getCurrentState();
-	if (!group) group = gs.characters;
-	
-	Phaser.Sprite.call(this, game, x, y, spritesheet, 0);
-	group.add(this);
+	Phaser.Sprite.call(this, game, x+DOOD_OFFSET_X, y+DOOD_OFFSET_Y, spritesheet, 0);
+
+	game.physics.arcade.enable(this);
+	this.body.setSize(TILE_SIZE, TILE_SIZE, 0, TILE_SIZE/2);
 	this.anchor.set(.5, .6666667);
-	
-	this.looks = NORMAL;
+	this.revive();
+
+	this.behavior = NORMAL;
 	this.facing = DOWN;
 	this.hitCooldown = false;
-	
-	this.game.physics.arcade.enable(this);
-	this.body.setSize(TILE_SIZE, TILE_SIZE, 0, TILE_SIZE/2);
 
-	this.aggroPlayer = function (runSpeed, aggroRange, aggroFrontConeAngle, aggroThroughWall) {
+	this.gs = game.state.getCurrentState(); // gs easy acces for Doods childs classes
+	var gs = this.gs;
+	gs.addSfx(this);
+
+	if (!group) group = gs.characters;
+	group.add(this);
+
+	this.aggroPlayer = function (aggroRange, aggroFrontConeAngle, aggroThroughWall) {
 		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
 				&& 	( aggroThroughWall || this.isDirectPathObstructed(gs.player) )
 				&& 	(!aggroFrontConeAngle || this.isInFrontCone(gs.player,aggroFrontConeAngle) )
 			) {
-				game.physics.arcade.moveToObject(this, gs.player, runSpeed);
+				this.behavior = AGGRO;
+				game.physics.arcade.moveToObject(this, gs.player, this.speed());
 				this.triggerAggroSoundEffect();
+				return true;
 		}
-	}
+		return false;
+	};
 	this.isTargetInRange = function(target, range) {
 		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
 		return line2Target.length < range;
-	}
+	};
 	this.isDirectPathObstructed = function(target) {
 		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
 		return !gs.obstructed(line2Target);
-	}
+	};
 	this.isInFrontCone = function(target, frontConeAngle) {
-		throw "non implémenté";
-	}
+		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
+		var staring_angle = (line2Target.angle+3*Math.PI/2)-(2*Math.PI-this.body.angle);
+		return Math.cos(staring_angle) > 0
+			&& Math.abs(Math.sin(staring_angle)) < frontConeAngle;
+	};
 	this.triggerAggroSoundEffect = function(){
-		//this.sfx.play('zombi',0,1,false,true);
-	}
+		this.sfx.play('aggro',0,1,false,true);
+	};
+	this.speed = function(){
+		console.warn('override this method to let your dood move');
+		return 0;
+	};
 }
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
@@ -839,22 +797,28 @@ Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 function Player(game, x, y) {
 	'use strict';
-	
-	this.game = game;
-	
-	var player = this;
 	Dood.call(this, game, x, y, "player");
-	this.revive(PLAYER_MAX_LIFE);
+
+	var player = this;
+	var gs = this.gs;
+
+	gs.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
+
+	player.health = PLAYER_MAX_LIFE;
 	player.canPunch = true;
-	
-	this.events.onKilled.add(function(){
-//		console.log(player.health);
-//		console.log("Humanity lost you beneath the surface !");
-		//TODO : death sound, death music, gameover screen
+
+	player.events.onKilled.add(function(){
+		gs.gameOver.revive();
+		gs.gameOverText.text = "You disapeard deep beneath the surface...";
+		//		console.log("Humanity lost you beneath the surface !");
+		gs.time.events.repeat(1500, 1, function() {
+			gs.state.restart();
+		}, gs);
+		//TODO : death sound, death music
 	});
 	
 	player.lastTime = (new Date()).getTime();
-	this.regenerate = function(){
+	player.regenerate = function(){
 		player.now = (new Date()).getTime();
 		if(player.alive && PLAYER_FULL_LIFE_RECOVERY_TIME)
 			player.health = Math.min(
@@ -866,20 +830,71 @@ function Player(game, x, y) {
 			);
 		player.lastTime = player.now;
 	};
-	this.abilityRate = function(){
+	player.abilityRate = function(){
 		return Math.sqrt(player.health / PLAYER_MAX_LIFE);
-	}
-	this.speed = function(){
+	};
+	player.speed = function(){
 		if(SLOW_PLAYER_WHEN_DAMAGED) return PLAYER_VELOCITY * player.abilityRate();
 		else return PLAYER_VELOCITY;
-	}
+	};
 }
 
 Player.prototype = Object.create(Dood.prototype);
 
 
+////////////////////////////////////////////////////////////////////////////
+// Zombie
 
+function Zombie(game, x, y) {
+	'use strict';
+	Dood.call(this, game, x, y, "zombie");
 
+	var zombie = this;
+	var gs = this.gs;
+
+	zombie.shamble = function () {
+		if (zombie.behavior == STUNNED)
+			return;
+		zombie.facing = gs.rnd.integer()%4;
+		switch (zombie.facing) {
+			case DOWN:
+				zombie.body.velocity.x = 0;
+				zombie.body.velocity.y = zombie.speed();
+				break;
+			case UP:
+				zombie.body.velocity.x = 0;
+				zombie.body.velocity.y = -zombie.speed();
+				break;
+			case RIGHT:
+				zombie.body.velocity.y = 0;
+				zombie.body.velocity.x = zombie.speed();
+				break;
+			case LEFT:
+				zombie.body.velocity.y = 0;
+				zombie.body.velocity.x = -zombie.speed();
+				break;
+		}
+	};
+	this.spot = function () {
+		if (zombie.behavior == NORMAL){
+			zombie.aggroPlayer(ZOMBIE_SPOTTING_RANGE,ZOMBIE_SPOTTING_ANGLE);
+		}
+	};
+	this.speed = function(){
+		switch (zombie.behavior){
+			case AGGRO: return ZOMBIE_CHARGE_VELOCITY;
+			case STUNNED: return ZOMBIE_STUNNED_VELOCITY;
+			case NORMAL:
+			default:
+				return ZOMBIE_SHAMBLE_VELOCITY;
+		}
+	};
+
+	gs.time.events.loop(ZOMBIE_IDEA_DELAY, zombie.shamble, gs);
+	gs.time.events.loop(ZOMBIE_SPOTTING_DELAY, zombie.spot, gs);
+}
+
+Zombie.prototype = Object.create(Dood.prototype);
 
 
 
@@ -915,21 +930,21 @@ Player.prototype = Object.create(Dood.prototype);
 
 function Dagfin(game, x, y) {
 	'use strict';
-	
-	this.game = game;
-	var dagfin = this;
-	
 	Dood.call(this, game, x, y, "dagfin");
+
+	var dagfin = this;
+	var gs = this.gs;
 	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
 	this.animations.add("move", null, 16, true);
 	this.animations.play("move");
 
 	this.revive();
 
-	this.game.physics.arcade.enable(this);
+	game.physics.arcade.enable(this);
 
 	this.ritualItemPlaced = 0;
-	
+	this.lastZombieSpawn = 0;
+
 	this.events.onKilled.add(function(){
 		console.log("You Win");
 		//TODO : death sound, death music, win screen
@@ -938,18 +953,25 @@ function Dagfin(game, x, y) {
 	this.overTimeBehavior = function(){
 		dagfin.now = (new Date()).getTime();
 
-		this.aggroPlayer(this.speed(), DAGFIN_SPOTTING_RANGE);
 		//this.body.velocity.y = this.speed();
-		this.game.physics.arcade.collide(dagfin, this.mapLayer)
-		// when aggro, spawn zombi over time DAGFIN_ZOMBI_SPAWN_FREQUENCY
-		// DAGFIN_SPOTTING_RANGE;
+		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
+		game.physics.arcade.collide(dagfin, dagfin.mapLayer);
+
+		// when aggro, spawn zombie over time
+		if(dagfin.behavior == AGGRO && dagfin.lastZombieSpawn + DAGFIN_ZOMBIE_SPAWN_FREQUENCY*1000 < dagfin.now){
+			dagfin.spawnZombie();
+			dagfin.lastZombieSpawn = dagfin.now;
+		}
 		dagfin.lastTime = dagfin.now;
 	};
 	
 	this.ritualStepBehavior = function(){
-		// Spawn zombi
-		// increase Speed
-	}
+		dagfin.ritualItemPlaced++; // will increase Speed
+		dagfin.spawnZombie();
+	};
+	this.spawnZombie = function(){
+		gs.mobs.push(new Zombie(gs.game, dagfin.x, dagfin.y));
+	};
 	this.speed = function(){
 		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
 	}
@@ -1509,7 +1531,7 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap3');
+		gs.game.state.restart(true, false, null, 'chap2');
 	}
 }
 
@@ -1557,7 +1579,7 @@ Chap2Level.prototype.preload = function() {
 	var gs = this.gameState;
 	
 	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
-	gs.load.json("messages", "assets/texts/chap2.json");
+	gs.load.json("messages", "assets/texts/"+lang+"/chap2.json");
 	
 	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -1567,7 +1589,7 @@ Chap2Level.prototype.preload = function() {
 	gs.load.image("hourglass", "assets/sprites/sablier.png");
 	gs.load.image("plante64", "assets/sprites/plante64.png");
 	
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1592,8 +1614,8 @@ Chap2Level.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
 	
-	gs.music = game.add.audio('intro');
-	gs.music.play();
+	gs.music = game.add.audio('music');
+    gs.music.play('', 0, 0.2);
 	
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -1738,7 +1760,7 @@ Chap3Level.prototype.preload = function() {
 	gs.load.image("flame", "assets/sprites/flame.png");
 	gs.load.image("chair", "assets/sprites/chair.png");
 
-	gs.load.audio('intro', [
+	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 }
@@ -1773,10 +1795,11 @@ Chap3Level.prototype.create = function() {
 	}
 	this.crystals = this.mapLayers.crystals.objects;
 
-	gs.music = game.add.audio('intro');
-	gs.music.play();
+	gs.music = game.add.audio('music');
+    gs.music.play('', 0, 0.2);
 
-	this.enablePlayerLight = false;
+
+    this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
 	gs.displayMessage("messages", "intro", true);
@@ -1943,7 +1966,7 @@ BossLevel.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	gs.dagfin = new Dagfin(gs.game, TILE_SIZE*32.5, 10*TILE_SIZE);
+	gs.dagfin = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
 	
 	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
 	
@@ -1955,7 +1978,7 @@ BossLevel.prototype.create = function() {
 		});
 	};
 	
-}
+};
 
 BossLevel.prototype.update = function() {
 	'use strict';
@@ -1964,14 +1987,14 @@ BossLevel.prototype.update = function() {
 	
 	this.processTriggers();
 	
-//	gs.dagfin.overTimeBehavior();
-}
+	//gs.dagfin.overTimeBehavior();
+};
 
 BossLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////

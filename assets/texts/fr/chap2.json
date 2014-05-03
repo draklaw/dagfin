@@ -1,24 +1,61 @@
 {
 	"intro" : [
-		"Chapter Two : The Wreckeds\n\nThe realm of Yl'her was empty, and Dagfin was bored of it.\nHe called back the Chaos, and once again the Chaos melted.\nIt obeyed The Odd One, and the Wreckeds appeared.\nBut the Chaos cannot create from scratch.\nThe Odd One made a pact with Brims, The Moisty One.\nBut the Moisty One sent its dead ones to Dagfin.\nThe chaos could not create true life from the dead.\nAnd the Wreckeds sprang."
+		"Chaptitre 2 : Les Destructeurs\n\nLa réalité de Yl'her était vide, et Dagfin s'en lassait.\nIl rappela le Chaos, et une fois encore le Chaos fut modelé.\nIl obéit au Grand Ancien, et les Destructeurs apparurent.\nMais le Chaos ne pouvait pas créer quelque chose à partir de rien.",
+		"\nLe Grand Ancien passa un pacte avec Brims, Celui des profondeurs.\nMais Celui des profondeurs envoya ses morts à Dagfin.\nLe chaos ne pouvait pas créer de la vie à partir des morts.\nEt les destructeurs apparurent."
 	],
 	
-	"indice1" : [
-	"I hope some parts of the book were only myths."
+	"dialog1" : [
+		"J'éspère que ces dessins effrayants que j'ai apperçu dans le livre\nont juste été ajouté pour le show..."
 	],
 	
-	"indice2" : [
-	"THEY'RE REAL !!!"
-	],	
-
-	"indice3" : [
-	"They bite, too.\nIt hurts a lot."
-	],	
+	"dialog2" : [
+		"Oh mince... leur dents n'étaient *PAS* à l'échelle !"
+	],
 	
-	"obj" : [
-	"There's a carnivorous flower, but it doesn't seem dangerous. Should I take it ?",
-	">Yes\n>No",
-	"Hope it won't bite my sandwich. Oh, nevermind, I didn't took a sandwich."
-	"I don't want to pet a flower."
-	]
+	"doorSwitch" : [
+		" On dirait qu'une porte vient de s'ouvrir.\nJe ne suis pas sur que ce soit une bonne chose...\n\nSi la créature que j'ai vu est en liberté maintenant,\nJe devrait essayer de rester hors de sa vue."
+	],
+	
+	"hourglassNoteFirst" : [
+		"note de Matt: J'ai été mordu par un Wrecked, et ça fait très mal!\nJ'éspère qu'ils ne sont pas venimeux ou autre...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
+		"Well, let's hope I'll have more luck finding it than Matt."
+	],
+	
+	"hourglassNoteLast" : [
+		"Matt's note: I just got bitten by a Wrecked, and it hurts a lot!\nI hope they're not poisonous or something...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
+		"He must be talking about that hourglass I've picked up.\nI can use it against these creatures !",
+		"[Press SPACE to defend yourself.\nMonsters will be frozen... momentarily.]"
+	],
+	
+	"hourglassFirst" : [
+		"There's a shiny hourglass here.\nWell... I'll just pick it up.",
+		"Say, was that the sound of a door opening ?"
+	],
+	
+	"hourglassLast" : [
+		"Here's the Hourglass that Matt mentionned.\nI hope I won't actually have to use it.",
+		"[Press SPACE to defend yourself.\nMonsters will be frozen... momentarily.]",
+		"I heard the sound of a door opening... now to find which one."
+	],
+	
+	"importantNote" : [
+		"Matt's note: The Path That Goes Deeper is straight ahead...\nthough I feel there is something else to be found in this Chapter.\nNo matter. The Path is ahead. I must pursue my Descent..."
+	],
+	
+	"scaredNote" : [
+		"???'s note: Oh Lord, the foul spawn of the Odd One is everywhere !\nYet, I must complete this unholy quest I undertook.\nI shall just lay there a while, till the creature I hear\nchooses to leave the room next to mine...",
+		"I can make off weird, worn out stains on that note...\n\nwait, what did I just stepped on ? Is that a bone ?"
+	],
+	
+	"carnivorousPlant" : {
+		"question": "There's a carnivorous flower, but it doesn't seem dangerous.\n\nShould I take it ?",
+		"choices": [
+			{ "ans": "Yes",
+				"message": [ "Hope it won't bite my sandwich.\n\nOh, nevermind, I didn't take a sandwich." ]
+			},
+			{ "ans": "No",
+				"message": [ "I don't want to pet a flower." ]
+			}
+		]
+	}
 }

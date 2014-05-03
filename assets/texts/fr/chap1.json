@@ -1,37 +1,37 @@
 {
 	"intro" : [
-		"Chapter One : The Odd One\n\nAt the begining there was nothing, and nothing was all.\nThe elements laid still.",
-		"Then The Odd One came, and The Odd One brought the Chaos.\nThe Chaos created movement, and the elements melted.\nIt pleased The Odd One and The Odd One molded the Chaos.\nThe Earth and the other realms were created.",
-		"The Odd One chose the inner realm for himself, and left the others\nto the other Ones.\nThe Odd One named himself Dagfin, and the realm Yl'her."
+		"Chapitre 1 : Le Grand Ancien\n\nAu commencement il n'y avait rien,et rien était tout.\nLes élèments restaient immobiles.",
+		"Puis le Grand Ancien vint, et le Grand Ancien ammena le Chaos.\nLe Chaos crea le mouvement, et les éléments fondirent.\nCelà plut au Grand Ancien et le Grand Ancien modela le Chaos.\nLa terre et les autres réalités furent crées.",
+		"Le Grand Ancien se choisit une réalité pour son usage, et laissa les autres réalités\naux autres.\nLe Grand Ancien s'appelait Dagfin, et sa réalité Yl'her."
 	],
 	
 	"indice1" : [
-		"Simply fascinating.\nCan't believe I'm truly here."
+		"C'est fascinant.\nJe n'en revient pas d'être vraiment là."
 	],
 	
 	"indice2" : [
-		"I should have taken my charm.\nIt may have been useful."
+		"J'aurais du prendre mon porte-bonheur.\nCa aurait pu être utile."
 	],	
 	
 	"indice3" : [
-		"I need to go deeper."
+		"je dois avancer plus loin."
 	],
 	
 	"clock" : {
-		"question": "It seems to be a rusty clock. Should I take it ?",
+		"question": "On dirait une horloge rouillée. Dois-je la prendre ?",
 		"choices": [
 			{
-				"ans": "Yes",
-				"message": [ "It's still working, but in normal direction... And the speed is not\nconstant." ]
+				"ans": "Oui",
+				"message": [ "Ca marche toujours, mais dans une direction normale... Et la vitesse n'est pas\nconstante." ]
 			},
 			{
-				"ans": "No",
-				"message": [ "I don't have any butter nor jam to repair it." ]
+				"ans": "Non",
+				"message": [ "Je n'ai ni beurre ni confiture pour la réparer." ]
 			}
 		]
 	},
 	
 	"secret" : [
-		"The distance between these two torches is exactly 9m 3/4..."
+		"La distance entre ces deux torches est d'exactement 9m 3/4..."
 	]
 }
