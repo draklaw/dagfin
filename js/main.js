@@ -930,18 +930,17 @@ Zombie.prototype = Object.create(Dood.prototype);
 
 function Dagfin(game, x, y) {
 	'use strict';
-	
-	this.game = game;
-	var dagfin = this;
-
 	Dood.call(this, game, x, y, "dagfin");
+
+	var dagfin = this;
+	var gs = this.gs;
 	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
 	this.animations.add("move", null, 16, true);
 	this.animations.play("move");
 
 	this.revive();
 
-	this.game.physics.arcade.enable(this);
+	game.physics.arcade.enable(this);
 
 	this.ritualItemPlaced = 0;
 	this.lastZombieSpawn = 0;
@@ -950,29 +949,29 @@ function Dagfin(game, x, y) {
 		console.log("You Win");
 		//TODO : death sound, death music, win screen
 	});
-	this.lastTime = (new Date()).getTime();
+	dagfin.lastTime = (new Date()).getTime();
 	this.overTimeBehavior = function(){
-		this.now = (new Date()).getTime();
+		dagfin.now = (new Date()).getTime();
 
 		//this.body.velocity.y = this.speed();
-		this.aggroPlayer(DAGFIN_SPOTTING_RANGE);
-		this.game.physics.arcade.collide(dagfin, this.mapLayer);
+		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
+		game.physics.arcade.collide(dagfin, dagfin.mapLayer);
 
 		// when aggro, spawn zombie over time
-		if(this.behavior == AGGRO && this.lastZombieSpawn < this.now + DAGFIN_ZOMBIE_SPAWN_FREQUENCY*1000){
+		if(dagfin.behavior == AGGRO && dagfin.lastZombieSpawn + DAGFIN_ZOMBIE_SPAWN_FREQUENCY*1000 < dagfin.now){
 			dagfin.spawnZombie();
-			this.lastZombieSpawn = this.now;
+			dagfin.lastZombieSpawn = dagfin.now;
 		}
-		this.lastTime = this.now;
+		dagfin.lastTime = dagfin.now;
 	};
 	
 	this.ritualStepBehavior = function(){
-		this.ritualItemPlaced++; // will increase Speed
+		dagfin.ritualItemPlaced++; // will increase Speed
 		dagfin.spawnZombie();
 	};
 	this.spawnZombie = function(){
-		//gs.dagfin = new Dagfin(gs.game, TILE_SIZE*32.5, 10*TILE_SIZE);
-	}
+		gs.mobs.push(new Zombie(gs.game, dagfin.x, dagfin.y));
+	};
 	this.speed = function(){
 		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
 	}
@@ -1979,7 +1978,7 @@ BossLevel.prototype.create = function() {
 		});
 	};
 	
-}
+};
 
 BossLevel.prototype.update = function() {
 	'use strict';
@@ -1988,14 +1987,14 @@ BossLevel.prototype.update = function() {
 	
 	this.processTriggers();
 	
-//	gs.dagfin.overTimeBehavior();
-}
+	//gs.dagfin.overTimeBehavior();
+};
 
 BossLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
