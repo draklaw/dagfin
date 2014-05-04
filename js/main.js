@@ -248,7 +248,7 @@ GameState.prototype.create = function () {
 	this.player = new Player(this.game, rawPlayerData.x, rawPlayerData.y);
 
 	// Zombies
-	this.mobs = new Array();
+	this.mobs = [];
 	var zombieList = gs.map.objects.doods;
 	for (var i = 1 ; i < zombieList.length ; i++)
 		gs.mobs.push(new Zombie(gs.game, zombieList[i].x, zombieList[i].y));
@@ -613,7 +613,7 @@ GameState.prototype.toggleLights = function(toggle) {
 			}
 		}
 	}
-}
+};
 
 GameState.prototype.stringToColor = function(str) {
 	if(!str) {
@@ -1072,7 +1072,7 @@ TestLevel.prototype.preload = function() {
 	                  Phaser.Tilemap.TILED_JSON);
 	gs.load.image("defaultTileset", "assets/tilesets/test.png");
 
-}
+};
 
 TestLevel.prototype.create = function() {
 	'use strict';
@@ -1092,19 +1092,19 @@ TestLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-}
+};
 
 TestLevel.prototype.update = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 TestLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Quack experimantal level
@@ -1121,7 +1121,7 @@ ExperimentalLevel.prototype.preload = function() {
 	gs.load.tilemap("map", "assets/maps/test2.json", null, Phaser.Tilemap.TILED_JSON);
 	gs.load.image("terrainTileset", "assets/tilesets/test.png");
 	gs.load.image("specialsTileset", "assets/tilesets/basic.png");
-}
+};
 
 ExperimentalLevel.prototype.create = function() {
 	var gs = this.gameState;
@@ -1191,7 +1191,7 @@ ExperimentalLevel.prototype.create = function() {
 		this.infectedTiles = newlyInfected;
 	};
 	gs.time.events.loop(FLOOR_CRUMBLING_DELAY, this.crumble, this);
-}
+};
 
 ExperimentalLevel.prototype.getNeighbours = function (x, y) {
 	return [[x+1,y],[x,y+1],[x-1,y],[x,y-1]]
@@ -1211,12 +1211,12 @@ ExperimentalLevel.prototype.isVulnerable = function (map, coords, infected) {
 ExperimentalLevel.prototype.update = function() {
 	var gs = this.gameState;
 	
-}
+};
 
 ExperimentalLevel.prototype.render = function() {
 	var gs = this.gameState;
 	
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Intro
@@ -1246,7 +1246,7 @@ IntroLevel.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 IntroLevel.prototype.create = function() {
 	'use strict';
@@ -1280,7 +1280,7 @@ IntroLevel.prototype.create = function() {
 	this.carpetFound = false;
 	this.found = {};
 	this.exiting = false;
-}
+};
 
 IntroLevel.prototype.update = function() {
 	'use strict';
@@ -1312,7 +1312,7 @@ IntroLevel.prototype.update = function() {
 			case LEFT:
 				x -= 32;
 				break;
-		};
+		}
 		
 		for(var id in gs.objects) {
 			var obj = gs.objects[id];
@@ -1361,13 +1361,13 @@ IntroLevel.prototype.update = function() {
 			});
 		});
 	}
-}
+};
 
 IntroLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1399,7 +1399,7 @@ Chap1Level.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 Chap1Level.prototype.create = function() {
 	'use strict';
@@ -1506,7 +1506,7 @@ Chap1Level.prototype.create = function() {
 		that.infectedTiles = [ [ 6, 22 ] ];
 		that.crumbleTimer = gs.time.events.loop(
 			200, that.crumble, that);
-	}
+	};
 	
 	this.triggers.secret_tip.onEnter = function() {
 		that.triggers.secret_tip.onEnter = null;
@@ -1534,7 +1534,7 @@ Chap1Level.prototype.create = function() {
 	this.triggers.exit.onEnter = function() {
 		gs.game.state.restart(true, false, null, 'chap2');
 	}
-}
+};
 
 Chap1Level.prototype.update = function() {
 	'use strict';
@@ -1553,7 +1553,7 @@ Chap1Level.prototype.update = function() {
 			
 		}
 	}
-}
+};
 
 Chap1Level.prototype.render = function() {
 	'use strict';
@@ -1561,7 +1561,7 @@ Chap1Level.prototype.render = function() {
 	var gs = this.gameState;
 	
 	
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter II
@@ -1593,7 +1593,7 @@ Chap2Level.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 Chap2Level.prototype.create = function() {
 	'use strict';
@@ -1718,7 +1718,7 @@ Chap2Level.prototype.create = function() {
 	this.triggers.exit.onEnter = function() {
 		gs.game.state.restart(true, false, null, 'chap3');
 	}
-}
+};
 
 Chap2Level.prototype.update = function() {
 	'use strict';
@@ -1726,13 +1726,13 @@ Chap2Level.prototype.update = function() {
 	var gs = this.gameState;
 	
 	this.processTriggers();
-}
+};
 
 Chap2Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter III
@@ -1764,7 +1764,7 @@ Chap3Level.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 Chap3Level.prototype.create = function() {
 	'use strict';
@@ -1814,7 +1814,7 @@ Chap3Level.prototype.create = function() {
 			gs.playerLight.revive();
 			gs.toggleLights('flame');
 		});
-	}
+	};
 
 	this.triggers.indice1.onEnter = function() {
 		that.triggers.indice1.onEnter = null;
@@ -1853,7 +1853,7 @@ Chap3Level.prototype.create = function() {
 		gs.game.state.restart(true, false, null, 'boss');
 	}
 
-}
+};
 
 Chap3Level.prototype.update = function() {
 	'use strict';
@@ -1886,7 +1886,7 @@ Chap3Level.prototype.update = function() {
 			case LEFT:
 				x -= 32;
 				break;
-		};
+		}
 		
 		for(var i=0; i<this.crystals.length; ++i) {
 			if(this.crystals[i].rect.contains(x, y)) {
@@ -1895,7 +1895,7 @@ Chap3Level.prototype.update = function() {
 			}
 		}
 	}
-}
+};
 
 Chap3Level.prototype.render = function() {
 	'use strict';
@@ -1903,7 +1903,7 @@ Chap3Level.prototype.render = function() {
 	var gs = this.gameState;
 	
 	
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1935,7 +1935,7 @@ BossLevel.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 BossLevel.prototype.create = function() {
 	'use strict';
