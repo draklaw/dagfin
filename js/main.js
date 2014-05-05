@@ -37,6 +37,7 @@ var DAGFIN_WIDTH = 5*TILE_SIZE;
 var DAGFIN_DISPLAY_HEIGHT = 4*TILE_SIZE;
 var DAGFIN_COLLISION_HEIGHT = 2*TILE_SIZE;
 var DAGFIN_SPOTTING_RANGE = 10*TILE_SIZE;
+var DAGFIN_RETARGETING_DELAY = 50;
 var DAGFIN_BASE_VELOCITY = 50;
 var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
 var DAGFIN_ZOMBIE_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
@@ -952,9 +953,10 @@ function Dagfin(game, x, y) {
 	});
 	dagfin.lastTime = (new Date()).getTime();
 	this.overTimeBehavior = function(){
+		if(!dagfin.activate) return;
+
 		dagfin.now = (new Date()).getTime();
 
-		//this.body.velocity.y = this.speed();
 		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
 		game.physics.arcade.collide(dagfin, dagfin.mapLayer);
 
@@ -975,7 +977,9 @@ function Dagfin(game, x, y) {
 	};
 	this.speed = function(){
 		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
-	}
+	};
+
+	gs.time.events.loop(DAGFIN_RETARGETING_DELAY, dagfin.overTimeBehavior, gs);
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
@@ -1974,8 +1978,9 @@ BossLevel.prototype.create = function() {
 //	gs.displayMessage("messages", "intro", true);
 	
 	this.triggers.boss.onEnter = function() {
-		gs.displayMessage("messages", "aaarg", true, function() {
-			gs.player.kill();
+		if(!gs.dagfin.activate) gs.displayMessage("messages", "aaarg", true, function() {
+			gs.dagfin.activate = true;
+			//gs.player.kill();
 		});
 	};
 	
@@ -1983,18 +1988,13 @@ BossLevel.prototype.create = function() {
 
 BossLevel.prototype.update = function() {
 	'use strict';
-	
-	var gs = this.gameState;
-	
+	//var gs = this.gameState;
 	this.processTriggers();
-	
-	//gs.dagfin.overTimeBehavior();
 };
 
 BossLevel.prototype.render = function() {
 	'use strict';
-	
-	var gs = this.gameState;
+	//var gs = this.gameState;
 };
 
 
@@ -2005,10 +2005,3 @@ BossLevel.prototype.render = function() {
 ////////////////////////////////////////////////////////////////////////////
 
 var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, 'game', GameState);
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-// FUCK IT !
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
