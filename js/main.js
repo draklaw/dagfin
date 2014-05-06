@@ -27,7 +27,6 @@ var ZOMBIE_STUNNED_VELOCITY = 0;
 var ZOMBIE_SPOTTING_RANGE = TILE_SIZE*5;
 var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
-var ZOMBIE_CHARGE_DELAY = 0;
 var ZOMBIE_STUN_DELAY = 1000;
 var ZOMBIE_IDEA_DELAY = 5000;
 var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
@@ -37,7 +36,6 @@ var DAGFIN_WIDTH = 5*TILE_SIZE;
 var DAGFIN_DISPLAY_HEIGHT = 4*TILE_SIZE;
 var DAGFIN_COLLISION_HEIGHT = 2*TILE_SIZE;
 var DAGFIN_SPOTTING_RANGE = 10*TILE_SIZE;
-var DAGFIN_RETARGETING_DELAY = 50;
 var DAGFIN_BASE_VELOCITY = 50;
 var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
 var DAGFIN_ZOMBIE_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
@@ -48,7 +46,6 @@ var AGGRO = 2;
 
 var FLOOR_CRUMBLING_DELAY = 500;
 
-var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
@@ -75,6 +72,7 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.init = function(levelId) {
 	'use strict';
+	this.updateTasks = [];
 	
 	levelId = levelId || location.href.split('level=')[1] || 'intro';
 	
@@ -361,10 +359,18 @@ GameState.prototype.create = function () {
 ////////////////////////////////////////////////////////////////////////////
 // Update
 
+GameState.prototype.updateInjector = function (injectedFunction) {
+	'use strict';
+	this.updateTasks.push(injectedFunction);
+};
+
 GameState.prototype.update = function () {
 	'use strict';
 	var gs = this;
-	
+	this.updateTasks.forEach(function(injectedFunction){
+		injectedFunction(gs);
+	});
+
 	// Debug cheats !
 	if(this.debugMode) {
 		if(this.k_debug3.justPressed(1)) {
@@ -382,11 +388,6 @@ GameState.prototype.update = function () {
 	
 	var player = this.player;
 	
-	if(this.enableCollisions) {
-		this.game.physics.arcade.collide(player, this.mapLayer);
-		this.game.physics.arcade.collide(player, this.doorsGroup);
-	}
-
 	// React to controls.
 	player.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
@@ -450,8 +451,6 @@ GameState.prototype.update = function () {
 		var zed = this.mobs[i];
 		
 		// Stumble against the walls.
-		this.game.physics.arcade.collide(zed, this.mapLayer);
-		this.game.physics.arcade.collide(zed, this.doorsGroup);
 		var zblock = zed.body.blocked;
 		if (zblock.up || zblock.down || zblock.left || zblock.right)
 			zed.shamble();
@@ -756,6 +755,13 @@ function Dood(game, x, y, spritesheet, group) {
 	if (!group) group = gs.characters;
 	group.add(this);
 
+	var dood = this;
+	this.onUpdateBehavior = function(){
+		gs.game.physics.arcade.collide(dood, gs.mapLayer);
+		gs.game.physics.arcade.collide(dood, gs.doorsGroup);
+	};
+	gs.updateInjector(dood.onUpdateBehavior);
+
 	this.aggroPlayer = function (aggroRange, aggroFrontConeAngle, aggroThroughWall) {
 		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
 				&& 	( aggroThroughWall || this.isDirectPathObstructed(gs.player) )
@@ -952,22 +958,28 @@ function Dagfin(game, x, y) {
 		//TODO : death sound, death music, win screen
 	});
 	dagfin.lastTime = (new Date()).getTime();
-	this.overTimeBehavior = function(){
+	this.onUpdateBehavior = function(){
 		if(!dagfin.activate) return;
 
 		dagfin.now = (new Date()).getTime();
 
 		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
-		game.physics.arcade.collide(dagfin, dagfin.mapLayer);
 
 		// when aggro, spawn zombie over time
 		if(dagfin.behavior == AGGRO && dagfin.lastZombieSpawn + DAGFIN_ZOMBIE_SPAWN_FREQUENCY*1000 < dagfin.now){
 			dagfin.spawnZombie();
 			dagfin.lastZombieSpawn = dagfin.now;
 		}
+
 		dagfin.lastTime = dagfin.now;
+
+		// kill player if contact
+		if(dagfin.body.hitTest(gs.player.x, gs.player.y)){
+			gs.player.kill();
+		}
 	};
-	
+	gs.updateInjector(dagfin.onUpdateBehavior);
+
 	this.ritualStepBehavior = function(){
 		dagfin.ritualItemPlaced++; // will increase Speed
 		dagfin.spawnZombie();
@@ -978,8 +990,6 @@ function Dagfin(game, x, y) {
 	this.speed = function(){
 		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
 	};
-
-	gs.time.events.loop(DAGFIN_RETARGETING_DELAY, dagfin.overTimeBehavior, gs);
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
