@@ -502,15 +502,16 @@ GameState.prototype.update = function () {
 		//console.log(distance, intensity);
 		return intensity;
 	}
+
 	this.level.update();
-	
+
 	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
 	this.camera.update();
 	this.postProcessGroup.x = this.camera.x;
 	this.postProcessGroup.y = this.camera.y;
-	
+
 	// Update lighting.
 	if(this.enableLighting) {
 		this.playerLight.x = this.player.x;
@@ -526,7 +527,10 @@ GameState.prototype.update = function () {
 		this.lightLayer.kill();
 	}
 	this.player.regenerate();
+
 	this.damageSprite.alpha = 1 - this.player.abilityRate();
+	if(this.damageSprite.alpha == 0) this.damageSprite.kill();
+	else this.damageSprite.revive();
 };
 
 
