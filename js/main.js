@@ -448,59 +448,35 @@ GameState.prototype.update = function () {
 	// Everyday I'm shambling.
 	for (var i = 0 ; i < this.mobs.length ; i++)
 	{
-		var zed = this.mobs[i];
-		
-		// Stumble against the walls.
-		var zblock = zed.body.blocked;
-		if (zblock.up || zblock.down || zblock.left || zblock.right)
-			zed.shamble();
-		zed.frame = zed.behavior*4 + zed.facing;
+		var zombie = this.mobs[i];
 
-		if(zed.body.velocity.x || zed.body.velocity.y) {
-			zed.sfx.play(
-				'zombieFootStep',0,
-				intensityDistanceDependant(zed),
-				false,false);
-		}
-		
 		// EXTERMINATE ! EXTERMINATE !
-		if (zed.behavior != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
+		if (zombie.behavior != STUNNED && zombie.body.hitTest(this.player.x, this.player.y))
 		{
 			player.body.velocity.set(0, 0);
 			if(punch) {
-				zed.behavior = STUNNED;
-				zed.body.velocity.set(0, 0);
+				zombie.behavior = STUNNED;
+				zombie.body.velocity.set(0, 0);
 				this.time.events.add(
 					ZOMBIE_STUN_DELAY,
 					function () {
-						zed.behavior = NORMAL;
+						zombie.behavior = NORMAL;
 					}, this);
-			} else if (!zed.hitCooldown) {
-				zed.behavior = AGGRO;
-				zed.body.velocity.set(0, 0);
-				zed.hitCooldown = true;
+			} else if (!zombie.hitCooldown) {
+				zombie.behavior = AGGRO;
+				zombie.body.velocity.set(0, 0);
+				zombie.hitCooldown = true;
 				this.time.events.add(
 					HIT_COOLDOWN,
 					function () {
-						zed.hitCooldown = false;
+						zombie.hitCooldown = false;
 					}, this);
-				zed.sfx.play('zombieHit',0,1,false,true); //hit by zombie
+				zombie.sfx.play('zombieHit',0,1,false,true); //hit by zombie
 				player.damage(1);
 			}
 		}
-		else if (zed.behavior == AGGRO && !this.lineOfSight(zed, this.player))
-			zed.behavior = NORMAL;
-	}
-	function intensityDistanceDependant(mob){
-		var distance = gs.game.physics.arcade.distanceBetween(player, mob);
-		var intensity = Math.max(0,Math.min(1,
-			1 - ( 
-					( distance - FULL_SOUND_RANGE )
-				/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
-			)
-		));
-		//console.log(distance, intensity);
-		return intensity;
+		else if (zombie.behavior == AGGRO && !this.lineOfSight(zombie, this.player))
+			zombie.behavior = NORMAL;
 	}
 
 	this.level.update();
@@ -526,11 +502,6 @@ GameState.prototype.update = function () {
 	else {
 		this.lightLayer.kill();
 	}
-	this.player.regenerate();
-
-	this.damageSprite.alpha = 1 - this.player.abilityRate();
-	if(this.damageSprite.alpha == 0) this.damageSprite.kill();
-	else this.damageSprite.revive();
 };
 
 
@@ -795,6 +766,17 @@ function Dood(game, x, y, spritesheet, group) {
 	this.triggerAggroSoundEffect = function(){
 		this.sfx.play('aggro',0,1,false,true);
 	};
+	this.intensityDistanceDependant = function(){
+		var distance = gs.game.physics.arcade.distanceBetween(gs.player, dood);
+		var intensity = Math.max(0,Math.min(1,
+				1 - (
+				( distance - FULL_SOUND_RANGE )
+				/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
+				)
+		));
+		return intensity;
+	};
+
 	this.speed = function(){
 		console.warn('override this method to let your dood move');
 		return 0;
@@ -818,6 +800,15 @@ function Player(game, x, y) {
 
 	player.health = PLAYER_MAX_LIFE;
 	player.canPunch = true;
+
+	this.onUpdateBehavior = function(){
+		player.regenerate();
+
+		gs.damageSprite.alpha = 1 - player.abilityRate();
+		if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
+		else gs.damageSprite.revive();
+	};
+	gs.updateInjector(player.onUpdateBehavior);
 
 	player.events.onKilled.add(function(){
 		gs.gameOver.revive();
@@ -864,7 +855,19 @@ function Zombie(game, x, y) {
 	var zombie = this;
 	var gs = this.gs;
 
-	zombie.shamble = function () {
+	this.onUpdateBehavior = function(){
+		zombie.stumbleAgainstWall();
+		zombie.footNoise();
+	};
+	gs.updateInjector(zombie.onUpdateBehavior);
+
+	this.stumbleAgainstWall = function(){
+		var zblock = zombie.body.blocked;
+		if (zblock.up || zblock.down || zblock.left || zblock.right)
+			zombie.shamble();
+		zombie.frame = zombie.behavior*4 + zombie.facing;
+	};
+	this.shamble = function () {
 		if (zombie.behavior == STUNNED)
 			return;
 		zombie.facing = gs.rnd.integer()%4;
@@ -885,6 +888,14 @@ function Zombie(game, x, y) {
 				zombie.body.velocity.y = 0;
 				zombie.body.velocity.x = -zombie.speed();
 				break;
+		}
+	};
+	this.footNoise = function(){
+		if(zombie.body.velocity.x || zombie.body.velocity.y) {
+			zombie.sfx.play(
+				'zombieFootStep',0,
+				this.intensityDistanceDependant(),
+				false,false);
 		}
 	};
 	this.spot = function () {
