@@ -1829,6 +1829,8 @@ Chap3Level.prototype.create = function() {
 		gs.displayMessage("messages", "flame", true, function() {
 			gs.objects.flame.kill();
 			gs.playerLight.revive();
+			gs.playerLight.powerFailure = 0;
+			gs.playerLight.lastLightSize = 1;
 			gs.toggleLights('flame');
 		});
 	};
@@ -1878,9 +1880,23 @@ Chap3Level.prototype.update = function() {
 	this.processTriggers();
 	
 	if(gs.playerLight.alive) {
-		gs.playerLight.lightSize -= gs.time.elapsed / 12000;
-		if(gs.playerLight.lightSize < 1) {
-			gs.playerLight.lightSize = 1;
+		gs.playerLight.lightSize -= (1-gs.playerLight.powerFailure) * gs.time.elapsed / 12000;
+		if(gs.playerLight.lightSize<=0) gs.playerLight.lightSize=0;
+		else if(gs.playerLight.lightSize<0.5) gs.playerLight.lightSize=0.5;
+		var theoricalLight = Math.max(gs.playerLight.lightSize, gs.playerLight.lastLightSize);
+		if(theoricalLight < 2 && !gs.playerLight.powerFailure) gs.playerLight.powerFailure = 0.2;
+		if(theoricalLight < 1.5 && gs.playerLight.powerFailure<0.2) gs.playerLight.powerFailure = 0.4;
+		if(theoricalLight < 1.2 && gs.playerLight.powerFailure<0.4) gs.playerLight.powerFailure = 0.6;
+		if(theoricalLight < 1 && gs.playerLight.powerFailure<0.6) gs.playerLight.powerFailure = 0.8;
+		if(theoricalLight < 0.8 && gs.playerLight.powerFailure<0.8) gs.playerLight.powerFailure = 0.9;
+		if(theoricalLight <= 0.5 && gs.playerLight.powerFailure<0.9) gs.playerLight.powerFailure = 0.95;
+		if(gs.playerLight.powerFailure){
+			if(Math.random() > gs.playerLight.powerFailure) {
+				gs.playerLight.lightSize = gs.playerLight.lightSize || gs.playerLight.lastLightSize;
+			}else{
+				gs.playerLight.lastLightSize = gs.playerLight.lightSize || gs.playerLight.lastLightSize;
+				gs.playerLight.lightSize = 0;
+			}
 		}
 	}
 	
@@ -1906,6 +1922,7 @@ Chap3Level.prototype.update = function() {
 		for(var i=0; i<this.crystals.length; ++i) {
 			if(this.crystals[i].rect.contains(x, y)) {
 				gs.playerLight.lightSize = 3;
+				gs.playerLight.powerFailure = 0;
 				break;
 			}
 		}
