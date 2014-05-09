@@ -1079,6 +1079,27 @@ function Dood(game, x, y, spritesheet, group) {
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
+Dood.prototype.facingPosition = function() {
+	var pos = new Phaser.Point(this.x, this.y);
+
+	switch(this.facing) {
+		case DOWN:
+			pos.y += 32;
+			break;
+		case UP:
+			pos.y -= 32;
+			break;
+		case RIGHT:
+			pos.x += 32;
+			break;
+		case LEFT:
+			pos.x -= 32;
+			break;
+	}
+	
+	return pos;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Player
@@ -1626,28 +1647,12 @@ IntroLevel.prototype.update = function() {
 	}
 		
 	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-		var x = gs.player.x;
-		var y = gs.player.y;
-
-		switch(gs.player.facing) {
-			case DOWN:
-				y += 32;
-				break;
-			case UP:
-				y -= 32;
-				break;
-			case RIGHT:
-				x += 32;
-				break;
-			case LEFT:
-				x -= 32;
-				break;
-		}
+		var pos = gs.player.facingPosition();
 		
 		for(var id in gs.objects) {
 			var obj = gs.objects[id];
 			var name = obj.objName;
-			if(!this.found[name] && obj.body.hitTest(x, y)) {
+			if(!this.found[name] && obj.body.hitTest(pos.x, pos.y)) {
 				switch(name) {
 				case "blood":
 				case "femur":
@@ -2211,26 +2216,10 @@ Chap3Level.prototype.update = function() {
 	}
 	
 	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-		var x = gs.player.x;
-		var y = gs.player.y;
+		var pos = gs.player.facingPosition();
 
-		switch(gs.player.facing) {
-			case DOWN:
-				y += 32;
-				break;
-			case UP:
-				y -= 32;
-				break;
-			case RIGHT:
-				x += 32;
-				break;
-			case LEFT:
-				x -= 32;
-				break;
-		}
-		
 		for(var i=0; i<this.crystals.length; ++i) {
-			if(this.crystals[i].rect.contains(x, y)) {
+			if(this.crystals[i].rect.contains(pos.x, pos.y)) {
 				gs.playerLight.lightSize = 3;
 				gs.playerLight.powerFailure = 0;
 				break;
