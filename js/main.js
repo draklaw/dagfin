@@ -59,14 +59,12 @@ var LIGHT_COLOR_RAND = .2;
 function DagfinGame(width, height, renderer, parent) {
 	'use strict';
 
-	console.log("DagfinGame constructor...");
 	this.game = new Phaser.Game(width, height, renderer, parent);
-	this.game.dagfin = this;
 
-	this.game.state.add('Boot', BootState);
-	this.game.state.add('Loading', LoadingState);
-//	this.game.state.add('Menu', MenuState);
-	this.game.state.add('Game', GameState);
+	this.game.state.add('Boot', new BootState(this));
+	this.game.state.add('Loading', new LoadingState(this));
+	this.game.state.add('Menu', new MenuState(this));
+	this.game.state.add('Game', new GameState(this));
 
 	this.lastSave = null;
 	this.levelName = 'Intro';
@@ -143,10 +141,12 @@ DagfinGame.prototype.goToLevel = function(levelName) {
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-function BootState() {
+function BootState(dagfin) {
 	'use strict';
 
 	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
 }
 
 BootState.prototype = Object.create(Phaser.State.prototype);
@@ -172,10 +172,12 @@ BootState.prototype.create = function() {
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-function LoadingState() {
+function LoadingState(dagfin) {
 	'use strict';
 
 	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
 }
 
 LoadingState.prototype = Object.create(Phaser.State.prototype);
@@ -183,7 +185,6 @@ LoadingState.prototype = Object.create(Phaser.State.prototype);
 LoadingState.prototype.preload = function() {
 	'use strict';
 
-	console.log("Loading preload...");
 	// Loaded by the 'Boot' state.
 	this.add.sprite(0, 0, 'splash');
 	this.add.sprite(0, 0, 'progressBarBg');
@@ -198,6 +199,12 @@ LoadingState.prototype.preload = function() {
 
 	this.load.image("radial_light", "assets/sprites/radial_light.png");
 
+	// Menu
+	this.load.image('menu_bg', 'assets/menu_bg.png');
+	this.load.image('menu_arrow', 'assets/menu_arrow.png');
+	this.load.image('menu_newGame', 'assets/sprites/'+lang+'/new_game.png');
+	this.load.image('menu_continue', 'assets/sprites/'+lang+'/continue.png');
+	
 	// Message stuff
 	this.load.image("message_bg", "assets/message_bg.png");
 	this.load.bitmapFont("message_font", "assets/fonts/font.png",
@@ -220,16 +227,12 @@ LoadingState.prototype.preload = function() {
 LoadingState.prototype.create = function() {
 	'use strict';
 
-	// TODO: Remove the timer !
-//	this.game.dagfin.newGame();
-	this.time.events.add(1000, function() {
-		var level = location.href.split('level=')[1]
-		console.log("Level:", level);
-		if(level) {
-			this.game.dagfin.goToLevel(level);
-		}
-		this.game.dagfin.continueFromSave();
-	}, this);
+	var level = location.href.split('level=')[1]
+	if(level) {
+		this.dagfin.goToLevel(level);
+	}
+
+	this.game.state.start('Menu');
 };
 
 
@@ -239,10 +242,12 @@ LoadingState.prototype.create = function() {
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-function MenuState() {
+function MenuState(dagfin) {
 	'use strict';
 
 	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
 }
 
 MenuState.prototype = Object.create(Phaser.State.prototype);
@@ -250,11 +255,88 @@ MenuState.prototype = Object.create(Phaser.State.prototype);
 MenuState.prototype.create = function() {
 	'use strict';
 
+	this.MIN_CHOICE = 0;
+	this.MAX_CHOICE = 1;
+
+	this.NEW_GAME = 0;
+	this.CONTINUE = 1;
+
+	this.arrowPos = [ 455, 520 ];
+
+	this.choice = this.NEW_GAME;
+
+	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
+	this.k_down = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+	this.k_space = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	this.k_enter = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+
+	this.k_up.onDown.add(this.menuUp, this);
+	this.k_down.onDown.add(this.menuDown, this);
+	this.k_space.onDown.add(this.menuValidate, this);
+	this.k_enter.onDown.add(this.menuValidate, this);
+
+	this.add.sprite(0, 0, 'menu_bg');
+	this.arrow = this.add.sprite(0, this.arrowPos[this.choice], 'menu_arrow');
+
+	this.newGameButton = this.add.button(60, 440, 'menu_newGame', this.newGame, this);
+	this.newGameButton.onInputOver.add(function() {
+		this.choice = this.NEW_GAME;
+	}, this);
+
+	this.continueButton = this.add.button(60, 500, 'menu_continue', this.continue, this);
+	this.continueButton.onInputOver.add(function() {
+		this.choice = this.CONTINUE;
+	}, this);
 };
 
 MenuState.prototype.update = function() {
 	'use strict';
 
+	this.arrow.y = this.arrowPos[this.choice];
+};
+
+MenuState.prototype.shutdown = function() {
+	'use strict';
+
+	// Hard reset the keybord to forget event handlers.
+	this.input.keyboard.reset(true);
+};
+
+MenuState.prototype.newGame = function() {
+	'use strict';
+
+	this.dagfin.newGame();
+};
+
+MenuState.prototype.continue = function() {
+	'use strict';
+
+	this.dagfin.continueFromSave();
+};
+
+MenuState.prototype.menuDown = function() {
+	'use strict';
+
+	this.choice = this.math.min(this.choice + 1, this.MAX_CHOICE);
+};
+
+MenuState.prototype.menuUp = function() {
+	'use strict';
+
+	this.choice = this.math.max(this.choice - 1, this.MIN_CHOICE);
+};
+
+MenuState.prototype.menuValidate = function() {
+	'use strict';
+
+	switch(this.choice) {
+	case this.NEW_GAME:
+		this.newGame();
+		break;
+	case this.CONTINUE:
+		this.continue();
+		break;
+	}
 };
 
 
@@ -264,10 +346,12 @@ MenuState.prototype.update = function() {
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-function GameState() {
+function GameState(dagfin) {
 	'use strict';
 	Phaser.State.call(this);
 
+
+	this.dagfin = dagfin;
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -279,12 +363,10 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.init = function(levelId) {
 	'use strict';
 
-	this.dagfin = this.game.dagfin;
-	
 	this.updateTasks = [];
 
 	levelId = levelId || 'intro';
-	
+
 	this.levelId = levelId;
 
 	var levelConstructor = levelId.substring(0,1).toUpperCase() + levelId.substring(1).toLowerCase() + 'Level';
