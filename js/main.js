@@ -73,34 +73,17 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.init = function(levelId) {
 	'use strict';
 	this.updateTasks = [];
-	
-	levelId = levelId || location.href.split('level=')[1] || 'intro';
+	var savedGame = loadSavedGameData();
+
+	levelId = levelId || location.href.split('level=')[1] || savedGame.level || 'intro';
 	
 	this.levelId = levelId;
-	if(levelId === 'intro') {
-		this.level = new IntroLevel(this);
-	}
-	else if(levelId === 'chap1') {
-		this.level = new Chap1Level(this);
-	}
-	else if(levelId === 'chap2') {
-		this.level = new Chap2Level(this);
-	}
-	else if(levelId === 'chap3') {
-		this.level = new Chap3Level(this);
-	}
-	else if(levelId === 'boss') {
-		this.level = new BossLevel(this);
-	}
-	else if(levelId === 'test') {
-		this.level = new TestLevel(this);
-	}
-	else if(levelId === 'expe') {
-		this.level = new ExperimentalLevel(this);
-	}
-	else {
+
+	var levelConstructor = levelId.substring(0,1).toUpperCase() + levelId.substring(1).toLowerCase() + 'Level';
+	if(typeof window[levelConstructor] === 'function')
+		this.level = new window[levelConstructor](this);
+	else
 		console.error("Unknown level '"+levelId+"'.");
-	}
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -764,7 +747,7 @@ function Dood(game, x, y, spritesheet, group) {
 			&& Math.abs(Math.sin(staring_angle)) < frontConeAngle;
 	};
 	this.triggerAggroSoundEffect = function(){
-		this.sfx.play('aggro',0,1,false,true);
+		this.sfx.play('aggro',0,1,false,false);
 	};
 	this.intensityDistanceDependant = function(){
 		var distance = gs.game.physics.arcade.distanceBetween(gs.player, dood);
@@ -800,6 +783,10 @@ function Player(game, x, y) {
 
 	player.health = PLAYER_MAX_LIFE;
 	player.canPunch = true;
+
+	var savedGame = loadSavedGameData();
+	player.inventory = savedGame.inventory || [];
+
 
 	this.onUpdateBehavior = function(){
 		player.regenerate();
@@ -839,6 +826,10 @@ function Player(game, x, y) {
 	player.speed = function(){
 		if(SLOW_PLAYER_WHEN_DAMAGED) return PLAYER_VELOCITY * player.abilityRate();
 		else return PLAYER_VELOCITY;
+	};
+	player.loot = function(item){
+		player.inventory.push(item.objName);
+		item.kill();
 	};
 }
 
@@ -1030,7 +1021,7 @@ Level.prototype.parseLevel = function(mapJson) {
 	var gs = this.gameState;
 		
 	this.triggersLayer = null;
-	this.mapLayers = {}
+	this.mapLayers = {};
 	for(var i=0; i<mapJson.layers.length; ++i) {
 		var layer = mapJson.layers[i];
 		if(layer.name === 'triggers') {
@@ -1354,7 +1345,7 @@ IntroLevel.prototype.update = function() {
 					if(this.found['pillar']) {
 						this.found[name] = true;
 						gs.displayMessage("messages", name+"2", true, function(obj) {
-							obj.kill();
+							gs.player.loot(obj);
 						}, obj);
 					}
 					else {
@@ -1386,7 +1377,7 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				gs.game.state.restart(true, false, null, 'chap1');
+				goToLevel('chap1');
 			});
 		});
 	}
@@ -1469,24 +1460,24 @@ Chap1Level.prototype.create = function() {
 	
 	gs.displayMessage("messages", "intro", true);
 	
-	var that = this;
+	var level = this;
 
 	this.triggers.indice1.onEnter = function() {
-		that.triggers.indice1.onEnter = null;
+		level.triggers.indice1.onEnter = null;
 		gs.displayMessage("messages", "indice1", true, function() {
 			gs.objects.indice1.kill();
 		});
 	};
 	
 	this.triggers.indice2.onEnter = function() {
-		that.triggers.indice2.onEnter = null;
+		level.triggers.indice2.onEnter = null;
 		gs.displayMessage("messages", "indice2", true, function() {
 			gs.objects.indice2.kill();
 		});
 	};
 	
 	this.triggers.indice3.onEnter = function() {
-		that.triggers.indice3.onEnter = null;
+		level.triggers.indice3.onEnter = null;
 		gs.displayMessage("messages", "indice3", true, function() {
 			gs.objects.indice3.kill();
 		});
@@ -1531,29 +1522,27 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.lava_fail.onEnter = function() {
-		that.triggers.lava_fail.onEnter = null;
-		that.infectedTiles = [ [ 6, 22 ] ];
-		that.crumbleTimer = gs.time.events.loop(
-			200, that.crumble, that);
+		level.triggers.lava_fail.onEnter = null;
+		level.infectedTiles = [ [ 6, 22 ] ];
+		level.crumbleTimer = gs.time.events.loop(
+			200, level.crumble, level);
 	};
 	
 	this.triggers.secret_tip.onEnter = function() {
-		that.triggers.secret_tip.onEnter = null;
+		level.triggers.secret_tip.onEnter = null;
 		gs.displayMessage("messages", "secret", true);
 	};
 
 	this.triggers.reveal_secret.onEnter = function() {
-		that.triggers.reveal_secret.onEnter = null;
+		level.triggers.reveal_secret.onEnter = null;
 		gs.ceiling.remove(gs.secretLayer);
 	};
 	
-	gs.game.hasClock = false;
 	this.triggers.clock.onEnter = function() {
-		that.triggers.clock.onEnter = null;
 		gs.askQuestion("messages", "clock", [
 			function() {
-				gs.objects.clock.kill();
-				gs.game.hasClock = true;
+				gs.player.loot(gs.objects.clock);
+				level.triggers.clock.onEnter = null;
 			},
 			function() {
 			}
@@ -1561,7 +1550,7 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap2');
+		goToLevel('chap2');
 	}
 };
 
@@ -1652,18 +1641,18 @@ Chap2Level.prototype.create = function() {
 	
 	gs.displayMessage("messages", "intro", true);
 	
-	var that = this;
+	var level = this;
 	
 	//FIXME: Ugly hack. Disables punching when there will be a player.
 	gs.time.events.add(0, function () {gs.player.canPunch = false;}, this);
 	
 	this.triggers.dialog1.onEnter = function() {
-		that.triggers.dialog1.onEnter = null;
+		level.triggers.dialog1.onEnter = null;
 		gs.displayMessage("messages", "dialog1", true);
 	};
 	
 	this.triggers.dialog2.onEnter = function() {
-		that.triggers.dialog2.onEnter = null;
+		level.triggers.dialog2.onEnter = null;
 		gs.displayMessage("messages", "dialog2", true);
 	};
 	
@@ -1672,14 +1661,14 @@ Chap2Level.prototype.create = function() {
 	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
 	
 	this.noteLast = function() {
-		that.triggers.hourglassNote.onEnter = null;
+		level.triggers.hourglassNote.onEnter = null;
 		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
 			gs.objects.hourglassNote.kill();
 		});
 	};
 	
 	this.hourglassLast = function() {
-		that.triggers.hourglass.onEnter = null;
+		level.triggers.hourglass.onEnter = null;
 		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
 			if (gs.map.objects.doors[i].properties.trigger === "two")
 				gs.map.objects.doors[i].sprite.kill();
@@ -1690,16 +1679,16 @@ Chap2Level.prototype.create = function() {
 	};
 	
 	this.noteFirst = function() {
-		that.triggers.hourglassNote.onEnter = null;
-		that.triggers.hourglass.onEnter = that.hourglassLast;
+		level.triggers.hourglassNote.onEnter = null;
+		level.triggers.hourglass.onEnter = level.hourglassLast;
 		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
 			gs.objects.hourglassNote.kill();
 		});
 	};
 	
 	this.hourglassFirst = function() {
-		that.triggers.hourglass.onEnter = null;
-		that.triggers.hourglassNote.onEnter = that.noteLast;
+		level.triggers.hourglass.onEnter = null;
+		level.triggers.hourglassNote.onEnter = level.noteLast;
 		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
 			if (gs.map.objects.doors[i].properties.trigger === "two")
 				gs.map.objects.doors[i].sprite.kill();
@@ -1713,21 +1702,21 @@ Chap2Level.prototype.create = function() {
 	this.triggers.hourglass.onEnter = this.hourglassFirst;
 	
 	this.triggers.importantNote.onEnter = function() {
-		that.triggers.importantNote.onEnter = null;
+		level.triggers.importantNote.onEnter = null;
 		gs.displayMessage("messages", "importantNote", true, function() {
 			gs.objects.importantNote.kill();
 		});
 	};
 	
 	this.triggers.scaredNote.onEnter = function() {
-		that.triggers.scaredNote.onEnter = null;
+		level.triggers.scaredNote.onEnter = null;
 		gs.displayMessage("messages", "scaredNote", true, function() {
 			gs.objects.scaredNote.kill();
 		});
 	};
 	
 	this.triggers.doorSwitch.onEnter = function() {
-		that.triggers.doorSwitch.onEnter = null;
+		level.triggers.doorSwitch.onEnter = null;
 		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
 			if (gs.map.objects.doors[i].properties.trigger === "one")
 				gs.map.objects.doors[i].sprite.kill();
@@ -1737,18 +1726,17 @@ Chap2Level.prototype.create = function() {
 	this.triggers.carnivorousPlant.onEnter = function() {
 		gs.askQuestion("messages", "carnivorousPlant", [
 			function () {
-				that.triggers.carnivorousPlant.onEnter = null;
-				gs.objects.carnivorousPlant.kill();
+				gs.player.loot(gs.objects.carnivorousPlant);
+				level.triggers.carnivorousPlant.onEnter = null;
 			},
 			null
 		]);
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap3');
+		goToLevel('chap3');
 	}
 };
-
 Chap2Level.prototype.update = function() {
 	'use strict';
 	
@@ -1866,20 +1854,18 @@ Chap3Level.prototype.create = function() {
 		});
 	};
 	
-	gs.game.hasChair = false;
 	this.triggers.chair.onEnter = function() {
-		that.triggers.chair.onEnter = null;
 		gs.askQuestion("messages", "chair", [
 			function() {
-				gs.objects.chair.kill();
-				gs.game.hasChair = true;
+				gs.player.loot(gs.objects.chair);
+				that.triggers.chair.onEnter = null;
 			},
 			null
 		]);
 	};
 
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'boss');
+		goToLevel('boss');
 	}
 
 };
@@ -2022,6 +2008,24 @@ BossLevel.prototype.render = function() {
 	//var gs = this.gameState;
 };
 
+
+// TODO : find a better place for this function. Game method ? gs method ?
+function goToLevel(levelName){
+	var gs = game.state.getCurrentState();
+	var save = {'level':levelName, 'inventory':gs.player.inventory};
+	localStorage.setItem('save',JSON.stringify(save));
+	gs.game.state.restart(true, false, null, save.level);
+
+}
+function loadSavedGameData(){
+	var stringData = localStorage.getItem('save');
+	if (stringData) return JSON.parse(stringData);
+	else return {'level':'','inventory':[]};
+}
+function newGame(){
+	localStorage.clear();
+	goToLevel('intro');
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
