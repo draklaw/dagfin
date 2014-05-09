@@ -155,6 +155,8 @@ BootState.prototype.preload = function() {
 	'use strict';
 
 	this.game.load.image('splash', 'assets/couverturev2.png');
+	this.game.load.image('progressBarBg', 'assets/progress_bar_bg.png');
+	this.game.load.image('progressBar', 'assets/progress_bar.png');
 
 };
 
@@ -184,6 +186,10 @@ LoadingState.prototype.preload = function() {
 	console.log("Loading preload...");
 	// Loaded by the 'Boot' state.
 	this.add.sprite(0, 0, 'splash');
+	this.add.sprite(0, 0, 'progressBarBg');
+	this.progressBar = this.add.sprite(0, 0, 'progressBar');
+	
+	this.load.setPreloadSprite(this.progressBar);
 
 	// Full-screen effects
 	this.load.image("black", "assets/sprites/black.png");
@@ -225,6 +231,32 @@ LoadingState.prototype.create = function() {
 		this.game.dagfin.continueFromSave();
 	}, this);
 };
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// MENU STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function MenuState() {
+	'use strict';
+
+	Phaser.State.call(this);
+}
+
+MenuState.prototype = Object.create(Phaser.State.prototype);
+
+MenuState.prototype.create = function() {
+	'use strict';
+
+};
+
+MenuState.prototype.update = function() {
+	'use strict';
+
+};
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
