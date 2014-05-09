@@ -1112,7 +1112,7 @@ function Player(game, x, y) {
 		gs.gameOverText.text = "You disapeard deep beneath the surface...";
 		//		console.log("Humanity lost you beneath the surface !");
 		gs.time.events.repeat(1500, 1, function() {
-			gs.state.restart(true, false, null, gs.levelId);
+			gs.dagfin.reloadLastSave();
 		}, gs);
 		//TODO : death sound, death music
 	});
