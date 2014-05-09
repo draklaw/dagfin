@@ -7,7 +7,7 @@
 		"Dagfin:\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
-	"d1" : {
+	"welcome" : {
 		"question": [
 			"Dagfin:\nYoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
 			"Matt:\nOh, it's you Andrew !\nYou too were tired of this forsaken world ?",
@@ -28,23 +28,17 @@
 		]
 	},
 	
-	"d2" : [
-	],
-	
-	"d3" : [
-	],
-	
-	"d4" : [
+	"death" : [
 		"Dagfin:\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
 	
-	"d5" : [
+	"win" : [
 		"Dagfin:\nI CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\nI Am thE pUpIL oF yOUr EyE\nI aM tHe iNexTIngUiSHablE rED-hAiReD tORch\nI am The StAR oF ChAoS.\n",
 		"Dagfin:\nWiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
 	],
 	
-	"d6" : {
+	"matt" : {
 		"question": [
 			"Matt:\nAndrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\n",
 			"Andrew:\nHear what ?",
