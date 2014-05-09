@@ -59,7 +59,8 @@ var LIGHT_COLOR_RAND = .2;
 function DagfinGame(width, height, renderer, parent) {
 	'use strict';
 
-	this.game = new Phaser.Game(width, height, renderer, parent);
+	this.game = new Phaser.Game(width, height, renderer, parent,
+								null, false, false);
 
 	this.game.state.add('Boot', new BootState(this));
 	this.game.state.add('Loading', new LoadingState(this));
@@ -71,7 +72,6 @@ function DagfinGame(width, height, renderer, parent) {
 	this.inventory = [];
 
 	this.game.state.start('Boot');
-
 };
 
 DagfinGame.prototype.saveGameData = function() {
@@ -134,6 +134,31 @@ DagfinGame.prototype.goToLevel = function(levelName) {
 	this.reloadLastSave();
 };
 
+DagfinGame.prototype.initState = function(levelName) {
+	'use strict';
+
+	// Keys are reset when state changes, so each stat should call this
+	// in preload in order to get global initialization.
+
+	this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+
+	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
+	this.k_fullscreen.onDown.add(this.toggleFullScreen, this);
+
+};
+
+DagfinGame.prototype.toggleFullScreen = function() {
+	'use strict';
+
+	if(this.game.scale.isFullScreen) {
+		// FIXME: This call seems broken. Update Phaser and try again.
+		//this.game.scale.stopFullScreen();
+	}
+	else {
+		this.game.scale.startFullScreen(false);
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -153,6 +178,8 @@ BootState.prototype = Object.create(Phaser.State.prototype);
 
 BootState.prototype.preload = function() {
 	'use strict';
+
+	this.dagfin.initState();
 
 	this.game.load.image('splash', 'assets/couverturev2.png');
 	this.game.load.image('progressBarBg', 'assets/progress_bar_bg.png');
@@ -184,6 +211,8 @@ LoadingState.prototype = Object.create(Phaser.State.prototype);
 
 LoadingState.prototype.preload = function() {
 	'use strict';
+
+	this.dagfin.initState();
 
 	// Loaded by the 'Boot' state.
 	this.add.sprite(0, 0, 'splash');
@@ -255,6 +284,8 @@ MenuState.prototype = Object.create(Phaser.State.prototype);
 MenuState.prototype.create = function() {
 	'use strict';
 
+	this.dagfin.initState();
+
 	this.MIN_CHOICE = 0;
 	this.MAX_CHOICE = 1;
 
@@ -293,13 +324,6 @@ MenuState.prototype.update = function() {
 	'use strict';
 
 	this.arrow.y = this.arrowPos[this.choice];
-};
-
-MenuState.prototype.shutdown = function() {
-	'use strict';
-
-	// Hard reset the keybord to forget event handlers.
-	this.input.keyboard.reset(true);
 };
 
 MenuState.prototype.newGame = function() {
@@ -382,6 +406,8 @@ GameState.prototype.init = function(levelId) {
 GameState.prototype.preload = function () {
 	'use strict';
 	
+	this.dagfin.initState();
+
 	this.level.preload();
 };
 
@@ -429,16 +455,6 @@ GameState.prototype.create = function () {
 		this.k_debug3 = this.game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_3);
 	}
 	//TODO: m et M (sound control)
-
-	//this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT; // Stretch to fill
-	// this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE; // Keep original size
-	this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL; // Maintain aspect ratio
-	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
-	this.k_fullscreen.onDown.add(toggleFullScreen, this);
-	
-	function toggleFullScreen(){
-		this.scale.startFullScreen();
-	}
 
 	// Group all the stuff on the ground (always in background)
 	this.objectsGroup = this.make.group();
