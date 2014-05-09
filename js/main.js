@@ -59,8 +59,7 @@ var LIGHT_COLOR_RAND = .2;
 function DagfinGame(width, height, renderer, parent) {
 	'use strict';
 
-	this.game = new Phaser.Game(width, height, renderer, parent,
-								null, false, false);
+	this.game = new Phaser.Game(width, height, renderer, parent);
 
 	this.game.state.add('Boot', new BootState(this));
 	this.game.state.add('Loading', new LoadingState(this));
@@ -260,8 +259,9 @@ LoadingState.prototype.create = function() {
 	if(level) {
 		this.dagfin.goToLevel(level);
 	}
-
-	this.game.state.start('Menu');
+	else {
+		this.game.state.start('Menu');
+	}
 };
 
 
@@ -919,7 +919,7 @@ GameState.prototype.nextMessage = function() {
 	}
 	else {
 		this.messageGroup.callAll('revive');
-		this.message.text = this.messageQueue.shift();
+		this.message.text = this.messageQueue.shift().replace(/\n/g, '\n  ');
 	}
 };
 
