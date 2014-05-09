@@ -50,7 +50,181 @@ var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// GAME CLASS !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
+function DagfinGame(width, height, renderer, parent) {
+	'use strict';
+
+	console.log("DagfinGame constructor...");
+	this.game = new Phaser.Game(width, height, renderer, parent);
+	this.game.dagfin = this;
+
+	this.game.state.add('Boot', BootState);
+	this.game.state.add('Loading', LoadingState);
+//	this.game.state.add('Menu', MenuState);
+	this.game.state.add('Game', GameState);
+
+	this.lastSave = null;
+	this.levelName = 'Intro';
+	this.inventory = [];
+
+	this.game.state.start('Boot');
+
+};
+
+DagfinGame.prototype.saveGameData = function() {
+	'use strict';
+
+	this.lastSave = {
+		'levelName': this.levelName,
+		'inventory': this.inventory.splice()
+	};
+	localStorage.setItem('save', JSON.stringify(this.lastSave));
+};
+
+DagfinGame.prototype.loadGameData = function() {
+	'use strict';
+
+	var stringData = localStorage.getItem('save');
+	if (stringData) {
+		return JSON.parse(stringData);
+	}
+	return null;
+};
+
+DagfinGame.prototype.newGame = function() {
+	'use strict';
+
+	this.levelName = 'Intro';
+	this.inventory = [];
+	this.saveGameData();
+
+	this.reloadLastSave();
+};
+
+DagfinGame.prototype.continueFromSave = function() {
+	'use strict';
+
+	var save = this.loadGameData();
+	if(save) {
+		this.lastSave = save;
+		this.reloadLastSave();
+	}
+	else {
+		this.newGame();
+	}
+};
+
+DagfinGame.prototype.reloadLastSave = function() {
+	'use strict';
+
+	this.levelName = this.lastSave.levelName;
+	this.inventory = this.lastSave.inventory.splice();
+	this.game.state.start('Game', true, false, this.levelName);
+};
+
+DagfinGame.prototype.goToLevel = function(levelName) {
+	'use strict';
+
+	this.levelName = levelName;
+	
+	this.saveGameData();
+	this.reloadLastSave();
+};
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// BOOT STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function BootState() {
+	'use strict';
+
+	Phaser.State.call(this);
+}
+
+BootState.prototype = Object.create(Phaser.State.prototype);
+
+BootState.prototype.preload = function() {
+	'use strict';
+
+	this.game.load.image('splash', 'assets/couverturev2.png');
+
+};
+
+BootState.prototype.create = function() {
+	'use strict';
+
+	this.state.start('Loading');
+};
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// LOADING STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function LoadingState() {
+	'use strict';
+
+	Phaser.State.call(this);
+}
+
+LoadingState.prototype = Object.create(Phaser.State.prototype);
+
+LoadingState.prototype.preload = function() {
+	'use strict';
+
+	console.log("Loading preload...");
+	// Loaded by the 'Boot' state.
+	this.add.sprite(0, 0, 'splash');
+
+	// Full-screen effects
+	this.load.image("black", "assets/sprites/black.png");
+	this.load.image("damage", "assets/sprites/damage.png");
+	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
+
+	this.load.image("radial_light", "assets/sprites/radial_light.png");
+
+	// Message stuff
+	this.load.image("message_bg", "assets/message_bg.png");
+	this.load.bitmapFont("message_font", "assets/fonts/font.png",
+						 "assets/fonts/font.fnt");
+
+	// Characters
+	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
+
+	// Props
+	this.load.image("hdoor", "assets/sprites/hdoor.png");
+	this.load.image("vdoor", "assets/sprites/vdoor.png");
+
+	// Sounds
+	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
+	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
+
+};
+
+LoadingState.prototype.create = function() {
+	'use strict';
+
+	// TODO: Remove the timer !
+//	this.game.dagfin.newGame();
+	this.time.events.add(1000, function() {
+		var level = location.href.split('level=')[1]
+		console.log("Level:", level);
+		if(level) {
+			this.game.dagfin.goToLevel(level);
+		}
+		this.game.dagfin.continueFromSave();
+	}, this);
+};
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -72,10 +246,12 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.init = function(levelId) {
 	'use strict';
-	this.updateTasks = [];
-	var savedGame = loadSavedGameData();
 
-	levelId = levelId || location.href.split('level=')[1] || savedGame.level || 'intro';
+	this.dagfin = this.game.dagfin;
+	
+	this.updateTasks = [];
+
+	levelId = levelId || 'intro';
 	
 	this.levelId = levelId;
 
@@ -91,25 +267,6 @@ GameState.prototype.init = function(levelId) {
 
 GameState.prototype.preload = function () {
 	'use strict';
-	
-	this.load.image("black", "assets/sprites/black.png");
-	this.load.image("damage", "assets/sprites/damage.png");
-	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
-	
-	this.load.image("message_bg", "assets/message_bg.png");
-	this.load.bitmapFont("message_font", "assets/fonts/font.png",
-						 "assets/fonts/font.fnt");
-
-	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
-	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
-	
-	this.load.image("hdoor", "assets/sprites/hdoor.png");
-	this.load.image("vdoor", "assets/sprites/vdoor.png");
-	
-	this.load.image("radial_light", "assets/sprites/radial_light.png");
-	
-	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
-	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
 	
 	this.level.preload();
 };
@@ -159,9 +316,9 @@ GameState.prototype.create = function () {
 	}
 	//TODO: m et M (sound control)
 
-	game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT; // Stretch to fill
-	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE; // Keep original size
-	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL; // Maintain aspect ratio
+	//this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT; // Stretch to fill
+	// this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE; // Keep original size
+	this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL; // Maintain aspect ratio
 	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
 	this.k_fullscreen.onDown.add(toggleFullScreen, this);
 	
@@ -172,11 +329,11 @@ GameState.prototype.create = function () {
 	// Group all the stuff on the ground (always in background)
 	this.objectsGroup = this.make.group();
 	// Group all the doors.
-	this.doorsGroup = this.make.group();	
+	this.doorsGroup = this.make.group();
 	// Group all the stuff that should be sorted by depth.
-	this.characters = this.make.group();	
+	this.characters = this.make.group();
 	// Group all the stuff that should be sorted above the rest.
-	this.ceiling = this.make.group();	
+	this.ceiling = this.make.group();
 
 	// Map.
 	this.level.create();
@@ -332,7 +489,7 @@ GameState.prototype.create = function () {
 
 	/*
 	// Noises pass
-	this.sounds = game.add.audio("sounds");
+	this.sounds = this.game.add.audio("sounds");
 	this.sounds.addMarker("grunt", 0, 0.8);
 	this.sounds.addMarger("growling", 1, 1.6);
 	//... */
@@ -784,8 +941,7 @@ function Player(game, x, y) {
 	player.health = PLAYER_MAX_LIFE;
 	player.canPunch = true;
 
-	var savedGame = loadSavedGameData();
-	player.inventory = savedGame.inventory || [];
+	player.inventory = gs.dagfin.inventory;
 
 
 	this.onUpdateBehavior = function(){
@@ -1288,7 +1444,7 @@ IntroLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-	gs.music = game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -1377,7 +1533,7 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				goToLevel('chap1');
+				gs.dagfin.goToLevel('chap1');
 			});
 		});
 	}
@@ -1452,7 +1608,7 @@ Chap1Level.prototype.create = function() {
 	this.LAVA_TILE = 7;
 	
 	
-   	gs.music = game.add.audio('music');
+   	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -1550,7 +1706,7 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		goToLevel('chap2');
+		gs.dagfin.goToLevel('chap2');
 	}
 };
 
@@ -1633,7 +1789,7 @@ Chap2Level.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
 	
-	gs.music = game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
     gs.music.play('', 0, 0.2);
 	
 	this.enablePlayerLight = false;
@@ -1734,7 +1890,7 @@ Chap2Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		goToLevel('chap3');
+		gs.dagfin.goToLevel('chap3');
 	}
 };
 Chap2Level.prototype.update = function() {
@@ -1813,7 +1969,7 @@ Chap3Level.prototype.create = function() {
 	}
 	this.crystals = this.mapLayers.crystals.objects;
 
-	gs.music = game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
     gs.music.play('', 0, 0.2);
 
 
@@ -1867,7 +2023,7 @@ Chap3Level.prototype.create = function() {
 	};
 
 	this.triggers.exit.onEnter = function() {
-		goToLevel('boss');
+		gs.dagfin.goToLevel('boss');
 	}
 
 };
@@ -1993,7 +2149,7 @@ BossLevel.prototype.create = function() {
 	gs.overlayLayer = gs.map.createLayer("overlay");
 	
 
-   	gs.music = game.add.audio('music');
+   	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -2026,28 +2182,10 @@ BossLevel.prototype.render = function() {
 };
 
 
-// TODO : find a better place for this function. Game method ? gs method ?
-function goToLevel(levelName){
-	var gs = game.state.getCurrentState();
-	var save = {'level':levelName, 'inventory':gs.player.inventory};
-	localStorage.setItem('save',JSON.stringify(save));
-	gs.game.state.restart(true, false, null, save.level);
-
-}
-function loadSavedGameData(){
-	var stringData = localStorage.getItem('save');
-	if (stringData) return JSON.parse(stringData);
-	else return {'level':'','inventory':[]};
-}
-function newGame(){
-	localStorage.clear();
-	goToLevel('intro');
-}
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // MAIN !
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, 'game', GameState);
+var dagfin = new DagfinGame(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, 'game');
