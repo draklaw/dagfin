@@ -905,6 +905,7 @@ GameState.prototype.nextMessage = function() {
 		this.messageCallbackParam = this.questionCallbackParam;
 		this.question = null;
 	}
+
 	if(this.messageQueue.length === 0) {
 		this.messageGroup.callAll('kill');
 		this.message.text = "";
@@ -914,10 +915,12 @@ GameState.prototype.nextMessage = function() {
 			// reset callback before calling it allow to reset it in the callback.
 			var callback = this.messageCallback;
 			this.messageCallback = null;
-			callback(this.messageCallbackParam);
+			callback.apply(this, this.messageCallbackParam);
 		}
 	}
-	else {
+
+	// Callback may have refilled the message queue.
+	if(this.messageQueue.length !== 0) {
 		this.messageGroup.callAll('revive');
 		this.message.text = this.messageQueue.shift().replace(/\n/g, '\n  ');
 	}
@@ -938,20 +941,41 @@ GameState.prototype.updateQuestionText = function() {
 };
 
 GameState.prototype.askQuestion = function(key, msg, callbacks, param) {
+	callbacks = callbacks || [];
+
+	var question = this.cache.getJSON(key)[msg];
+
+	this.blocPlayerWhileMsg = true;
+	if(Array.isArray(question.question)) {
+		this.messageQueue = question.question.slice(0, -1);
+		question.question = question.question.slice(-1);
+		this.messageCallback = this._askQuestion;
+		this.messageCallbackParam = [
+			question, callbacks,
+			Array.prototype.slice.call(arguments, 3)
+		];
+		this.nextMessage();
+	}
+	else {
+		this._askQuestion(question, callbacks, param);
+	}
+};
+
+GameState.prototype._askQuestion = function(question, callbacks, params) {
 	this.blocPlayerWhileMsg = true;
 	this.questionCallbacks = callbacks || [];
-	this.questionCallbackParam = param;
-	this.question = this.cache.getJSON(key)[msg];
+	this.questionCallbackParam = Array.prototype.slice.call(arguments, 2);
+	this.question = question;
 	this.questionChoice = 0;
 
 	this.messageGroup.callAll('revive');
 	this.updateQuestionText();
-};
+}
 
-GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, param) {
+GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, params) {
 	this.blocPlayerWhileMsg = blocPlayer || false;
 	this.messageCallback = callback || null;
-	this.messageCallbackParam = param;
+	this.messageCallbackParam = Array.prototype.slice.call(arguments, 4);
 	this.messageQueue = this.cache.getJSON(key)[msg].slice();
 	this.nextMessage();
 	if(!Array.isArray(this.messageQueue)) {
@@ -2292,10 +2316,16 @@ BossLevel.prototype.create = function() {
 //	gs.displayMessage("messages", "intro", true);
 	
 	this.triggers.boss.onEnter = function() {
-		if(!gs.dagfinDood.activate) gs.displayMessage("messages", "aaarg", true, function() {
-			gs.dagfinDood.activate = true;
-			//gs.player.kill();
-		});
+		if(!gs.dagfinDood.activate) {
+			gs.askQuestion("messages", "welcome", [
+				function() {
+					gs.dagfinDood.activate = true;
+				},
+				function() {
+					gs.player.kill();
+				}
+			]);
+		}
 	};
 	
 };
