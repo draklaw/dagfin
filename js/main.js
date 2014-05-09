@@ -2285,15 +2285,15 @@ BossLevel.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	gs.dagfin = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
+	gs.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
 	
 	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
 	
 //	gs.displayMessage("messages", "intro", true);
 	
 	this.triggers.boss.onEnter = function() {
-		if(!gs.dagfin.activate) gs.displayMessage("messages", "aaarg", true, function() {
-			gs.dagfin.activate = true;
+		if(!gs.dagfinDood.activate) gs.displayMessage("messages", "aaarg", true, function() {
+			gs.dagfinDood.activate = true;
 			//gs.player.kill();
 		});
 	};
