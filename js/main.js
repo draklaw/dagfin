@@ -27,7 +27,6 @@ var ZOMBIE_STUNNED_VELOCITY = 0;
 var ZOMBIE_SPOTTING_RANGE = TILE_SIZE*5;
 var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
-var ZOMBIE_CHARGE_DELAY = 0;
 var ZOMBIE_STUN_DELAY = 1000;
 var ZOMBIE_IDEA_DELAY = 5000;
 var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
@@ -47,7 +46,6 @@ var AGGRO = 2;
 
 var FLOOR_CRUMBLING_DELAY = 500;
 
-var LIGHT_SCALE = 8;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
@@ -74,34 +72,18 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.init = function(levelId) {
 	'use strict';
-	
-	levelId = levelId || location.href.split('level=')[1] || 'intro';
+	this.updateTasks = [];
+	var savedGame = loadSavedGameData();
+
+	levelId = levelId || location.href.split('level=')[1] || savedGame.level || 'intro';
 	
 	this.levelId = levelId;
-	if(levelId === 'intro') {
-		this.level = new IntroLevel(this);
-	}
-	else if(levelId === 'chap1') {
-		this.level = new Chap1Level(this);
-	}
-	else if(levelId === 'chap2') {
-		this.level = new Chap2Level(this);
-	}
-	else if(levelId === 'chap3') {
-		this.level = new Chap3Level(this);
-	}
-	else if(levelId === 'boss') {
-		this.level = new BossLevel(this);
-	}
-	else if(levelId === 'test') {
-		this.level = new TestLevel(this);
-	}
-	else if(levelId === 'expe') {
-		this.level = new ExperimentalLevel(this);
-	}
-	else {
+
+	var levelConstructor = levelId.substring(0,1).toUpperCase() + levelId.substring(1).toLowerCase() + 'Level';
+	if(typeof window[levelConstructor] === 'function')
+		this.level = new window[levelConstructor](this);
+	else
 		console.error("Unknown level '"+levelId+"'.");
-	}
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -248,7 +230,7 @@ GameState.prototype.create = function () {
 	this.player = new Player(this.game, rawPlayerData.x, rawPlayerData.y);
 
 	// Zombies
-	this.mobs = new Array();
+	this.mobs = [];
 	var zombieList = gs.map.objects.doods;
 	for (var i = 1 ; i < zombieList.length ; i++)
 		gs.mobs.push(new Zombie(gs.game, zombieList[i].x, zombieList[i].y));
@@ -360,10 +342,18 @@ GameState.prototype.create = function () {
 ////////////////////////////////////////////////////////////////////////////
 // Update
 
+GameState.prototype.updateInjector = function (injectedFunction) {
+	'use strict';
+	this.updateTasks.push(injectedFunction);
+};
+
 GameState.prototype.update = function () {
 	'use strict';
 	var gs = this;
-	
+	this.updateTasks.forEach(function(injectedFunction){
+		injectedFunction(gs);
+	});
+
 	// Debug cheats !
 	if(this.debugMode) {
 		if(this.k_debug3.justPressed(1)) {
@@ -381,11 +371,6 @@ GameState.prototype.update = function () {
 	
 	var player = this.player;
 	
-	if(this.enableCollisions) {
-		this.game.physics.arcade.collide(player, this.mapLayer);
-		this.game.physics.arcade.collide(player, this.doorsGroup);
-	}
-
 	// React to controls.
 	player.body.velocity.set(0, 0);
 	if(!this.blocPlayerWhileMsg) {
@@ -446,71 +431,46 @@ GameState.prototype.update = function () {
 	// Everyday I'm shambling.
 	for (var i = 0 ; i < this.mobs.length ; i++)
 	{
-		var zed = this.mobs[i];
-		
-		// Stumble against the walls.
-		this.game.physics.arcade.collide(zed, this.mapLayer);
-		this.game.physics.arcade.collide(zed, this.doorsGroup);
-		var zblock = zed.body.blocked;
-		if (zblock.up || zblock.down || zblock.left || zblock.right)
-			zed.shamble();
-		zed.frame = zed.behavior*4 + zed.facing;
+		var zombie = this.mobs[i];
 
-		if(zed.body.velocity.x || zed.body.velocity.y) {
-			zed.sfx.play(
-				'zombieFootStep',0,
-				intensityDistanceDependant(zed),
-				false,false);
-		}
-		
 		// EXTERMINATE ! EXTERMINATE !
-		if (zed.behavior != STUNNED && zed.body.hitTest(this.player.x, this.player.y))
+		if (zombie.behavior != STUNNED && zombie.body.hitTest(this.player.x, this.player.y))
 		{
 			player.body.velocity.set(0, 0);
 			if(punch) {
-				zed.behavior = STUNNED;
-				zed.body.velocity.set(0, 0);
+				zombie.behavior = STUNNED;
+				zombie.body.velocity.set(0, 0);
 				this.time.events.add(
 					ZOMBIE_STUN_DELAY,
 					function () {
-						zed.behavior = NORMAL;
+						zombie.behavior = NORMAL;
 					}, this);
-			} else if (!zed.hitCooldown) {
-				zed.behavior = AGGRO;
-				zed.body.velocity.set(0, 0);
-				zed.hitCooldown = true;
+			} else if (!zombie.hitCooldown) {
+				zombie.behavior = AGGRO;
+				zombie.body.velocity.set(0, 0);
+				zombie.hitCooldown = true;
 				this.time.events.add(
 					HIT_COOLDOWN,
 					function () {
-						zed.hitCooldown = false;
+						zombie.hitCooldown = false;
 					}, this);
-				zed.sfx.play('zombieHit',0,1,false,true); //hit by zombie
+				zombie.sfx.play('zombieHit',0,1,false,true); //hit by zombie
 				player.damage(1);
 			}
 		}
-		else if (zed.behavior == AGGRO && !this.lineOfSight(zed, this.player))
-			zed.behavior = NORMAL;
+		else if (zombie.behavior == AGGRO && !this.lineOfSight(zombie, this.player))
+			zombie.behavior = NORMAL;
 	}
-	function intensityDistanceDependant(mob){
-		var distance = gs.game.physics.arcade.distanceBetween(player, mob);
-		var intensity = Math.max(0,Math.min(1,
-			1 - ( 
-					( distance - FULL_SOUND_RANGE )
-				/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
-			)
-		));
-		//console.log(distance, intensity);
-		return intensity;
-	}
+
 	this.level.update();
-	
+
 	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
 	this.camera.update();
 	this.postProcessGroup.x = this.camera.x;
 	this.postProcessGroup.y = this.camera.y;
-	
+
 	// Update lighting.
 	if(this.enableLighting) {
 		this.playerLight.x = this.player.x;
@@ -525,8 +485,6 @@ GameState.prototype.update = function () {
 	else {
 		this.lightLayer.kill();
 	}
-	this.player.regenerate();
-	this.damageSprite.alpha = 1 - this.player.abilityRate();
 };
 
 
@@ -613,7 +571,7 @@ GameState.prototype.toggleLights = function(toggle) {
 			}
 		}
 	}
-}
+};
 
 GameState.prototype.stringToColor = function(str) {
 	if(!str) {
@@ -755,6 +713,13 @@ function Dood(game, x, y, spritesheet, group) {
 	if (!group) group = gs.characters;
 	group.add(this);
 
+	var dood = this;
+	this.onUpdateBehavior = function(){
+		gs.game.physics.arcade.collide(dood, gs.mapLayer);
+		gs.game.physics.arcade.collide(dood, gs.doorsGroup);
+	};
+	gs.updateInjector(dood.onUpdateBehavior);
+
 	this.aggroPlayer = function (aggroRange, aggroFrontConeAngle, aggroThroughWall) {
 		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
 				&& 	( aggroThroughWall || this.isDirectPathObstructed(gs.player) )
@@ -782,8 +747,19 @@ function Dood(game, x, y, spritesheet, group) {
 			&& Math.abs(Math.sin(staring_angle)) < frontConeAngle;
 	};
 	this.triggerAggroSoundEffect = function(){
-		this.sfx.play('aggro',0,1,false,true);
+		this.sfx.play('aggro',0,1,false,false);
 	};
+	this.intensityDistanceDependant = function(){
+		var distance = gs.game.physics.arcade.distanceBetween(gs.player, dood);
+		var intensity = Math.max(0,Math.min(1,
+				1 - (
+				( distance - FULL_SOUND_RANGE )
+				/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
+				)
+		));
+		return intensity;
+	};
+
 	this.speed = function(){
 		console.warn('override this method to let your dood move');
 		return 0;
@@ -807,6 +783,19 @@ function Player(game, x, y) {
 
 	player.health = PLAYER_MAX_LIFE;
 	player.canPunch = true;
+
+	var savedGame = loadSavedGameData();
+	player.inventory = savedGame.inventory || [];
+
+
+	this.onUpdateBehavior = function(){
+		player.regenerate();
+
+		gs.damageSprite.alpha = 1 - player.abilityRate();
+		if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
+		else gs.damageSprite.revive();
+	};
+	gs.updateInjector(player.onUpdateBehavior);
 
 	player.events.onKilled.add(function(){
 		gs.gameOver.revive();
@@ -838,6 +827,10 @@ function Player(game, x, y) {
 		if(SLOW_PLAYER_WHEN_DAMAGED) return PLAYER_VELOCITY * player.abilityRate();
 		else return PLAYER_VELOCITY;
 	};
+	player.loot = function(item){
+		player.inventory.push(item.objName);
+		item.kill();
+	};
 }
 
 Player.prototype = Object.create(Dood.prototype);
@@ -853,7 +846,19 @@ function Zombie(game, x, y) {
 	var zombie = this;
 	var gs = this.gs;
 
-	zombie.shamble = function () {
+	this.onUpdateBehavior = function(){
+		zombie.stumbleAgainstWall();
+		zombie.footNoise();
+	};
+	gs.updateInjector(zombie.onUpdateBehavior);
+
+	this.stumbleAgainstWall = function(){
+		var zblock = zombie.body.blocked;
+		if (zblock.up || zblock.down || zblock.left || zblock.right)
+			zombie.shamble();
+		zombie.frame = zombie.behavior*4 + zombie.facing;
+	};
+	this.shamble = function () {
 		if (zombie.behavior == STUNNED)
 			return;
 		zombie.facing = gs.rnd.integer()%4;
@@ -874,6 +879,14 @@ function Zombie(game, x, y) {
 				zombie.body.velocity.y = 0;
 				zombie.body.velocity.x = -zombie.speed();
 				break;
+		}
+	};
+	this.footNoise = function(){
+		if(zombie.body.velocity.x || zombie.body.velocity.y) {
+			zombie.sfx.play(
+				'zombieFootStep',0,
+				this.intensityDistanceDependant(),
+				false,false);
 		}
 	};
 	this.spot = function () {
@@ -951,21 +964,28 @@ function Dagfin(game, x, y) {
 		//TODO : death sound, death music, win screen
 	});
 	dagfin.lastTime = (new Date()).getTime();
-	this.overTimeBehavior = function(){
+	this.onUpdateBehavior = function(){
+		if(!dagfin.activate) return;
+
 		dagfin.now = (new Date()).getTime();
 
-		//this.body.velocity.y = this.speed();
 		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
-		game.physics.arcade.collide(dagfin, dagfin.mapLayer);
 
 		// when aggro, spawn zombie over time
 		if(dagfin.behavior == AGGRO && dagfin.lastZombieSpawn + DAGFIN_ZOMBIE_SPAWN_FREQUENCY*1000 < dagfin.now){
 			dagfin.spawnZombie();
 			dagfin.lastZombieSpawn = dagfin.now;
 		}
+
 		dagfin.lastTime = dagfin.now;
+
+		// kill player if contact
+		if(dagfin.body.hitTest(gs.player.x, gs.player.y)){
+			gs.player.kill();
+		}
 	};
-	
+	gs.updateInjector(dagfin.onUpdateBehavior);
+
 	this.ritualStepBehavior = function(){
 		dagfin.ritualItemPlaced++; // will increase Speed
 		dagfin.spawnZombie();
@@ -975,7 +995,7 @@ function Dagfin(game, x, y) {
 	};
 	this.speed = function(){
 		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
-	}
+	};
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
@@ -1001,7 +1021,7 @@ Level.prototype.parseLevel = function(mapJson) {
 	var gs = this.gameState;
 		
 	this.triggersLayer = null;
-	this.mapLayers = {}
+	this.mapLayers = {};
 	for(var i=0; i<mapJson.layers.length; ++i) {
 		var layer = mapJson.layers[i];
 		if(layer.name === 'triggers') {
@@ -1072,7 +1092,7 @@ TestLevel.prototype.preload = function() {
 	                  Phaser.Tilemap.TILED_JSON);
 	gs.load.image("defaultTileset", "assets/tilesets/test.png");
 
-}
+};
 
 TestLevel.prototype.create = function() {
 	'use strict';
@@ -1092,19 +1112,19 @@ TestLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-}
+};
 
 TestLevel.prototype.update = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 TestLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Quack experimantal level
@@ -1121,7 +1141,7 @@ ExperimentalLevel.prototype.preload = function() {
 	gs.load.tilemap("map", "assets/maps/test2.json", null, Phaser.Tilemap.TILED_JSON);
 	gs.load.image("terrainTileset", "assets/tilesets/test.png");
 	gs.load.image("specialsTileset", "assets/tilesets/basic.png");
-}
+};
 
 ExperimentalLevel.prototype.create = function() {
 	var gs = this.gameState;
@@ -1191,7 +1211,7 @@ ExperimentalLevel.prototype.create = function() {
 		this.infectedTiles = newlyInfected;
 	};
 	gs.time.events.loop(FLOOR_CRUMBLING_DELAY, this.crumble, this);
-}
+};
 
 ExperimentalLevel.prototype.getNeighbours = function (x, y) {
 	return [[x+1,y],[x,y+1],[x-1,y],[x,y-1]]
@@ -1211,12 +1231,12 @@ ExperimentalLevel.prototype.isVulnerable = function (map, coords, infected) {
 ExperimentalLevel.prototype.update = function() {
 	var gs = this.gameState;
 	
-}
+};
 
 ExperimentalLevel.prototype.render = function() {
 	var gs = this.gameState;
 	
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Intro
@@ -1246,7 +1266,7 @@ IntroLevel.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 IntroLevel.prototype.create = function() {
 	'use strict';
@@ -1280,7 +1300,7 @@ IntroLevel.prototype.create = function() {
 	this.carpetFound = false;
 	this.found = {};
 	this.exiting = false;
-}
+};
 
 IntroLevel.prototype.update = function() {
 	'use strict';
@@ -1312,7 +1332,7 @@ IntroLevel.prototype.update = function() {
 			case LEFT:
 				x -= 32;
 				break;
-		};
+		}
 		
 		for(var id in gs.objects) {
 			var obj = gs.objects[id];
@@ -1325,7 +1345,7 @@ IntroLevel.prototype.update = function() {
 					if(this.found['pillar']) {
 						this.found[name] = true;
 						gs.displayMessage("messages", name+"2", true, function(obj) {
-							obj.kill();
+							gs.player.loot(obj);
 						}, obj);
 					}
 					else {
@@ -1357,17 +1377,17 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				gs.game.state.restart(true, false, null, 'chap1');
+				goToLevel('chap1');
 			});
 		});
 	}
-}
+};
 
 IntroLevel.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1399,7 +1419,7 @@ Chap1Level.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 Chap1Level.prototype.create = function() {
 	'use strict';
@@ -1440,24 +1460,24 @@ Chap1Level.prototype.create = function() {
 	
 	gs.displayMessage("messages", "intro", true);
 	
-	var that = this;
+	var level = this;
 
 	this.triggers.indice1.onEnter = function() {
-		that.triggers.indice1.onEnter = null;
+		level.triggers.indice1.onEnter = null;
 		gs.displayMessage("messages", "indice1", true, function() {
 			gs.objects.indice1.kill();
 		});
 	};
 	
 	this.triggers.indice2.onEnter = function() {
-		that.triggers.indice2.onEnter = null;
+		level.triggers.indice2.onEnter = null;
 		gs.displayMessage("messages", "indice2", true, function() {
 			gs.objects.indice2.kill();
 		});
 	};
 	
 	this.triggers.indice3.onEnter = function() {
-		that.triggers.indice3.onEnter = null;
+		level.triggers.indice3.onEnter = null;
 		gs.displayMessage("messages", "indice3", true, function() {
 			gs.objects.indice3.kill();
 		});
@@ -1502,29 +1522,27 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.lava_fail.onEnter = function() {
-		that.triggers.lava_fail.onEnter = null;
-		that.infectedTiles = [ [ 6, 22 ] ];
-		that.crumbleTimer = gs.time.events.loop(
-			200, that.crumble, that);
-	}
+		level.triggers.lava_fail.onEnter = null;
+		level.infectedTiles = [ [ 6, 22 ] ];
+		level.crumbleTimer = gs.time.events.loop(
+			200, level.crumble, level);
+	};
 	
 	this.triggers.secret_tip.onEnter = function() {
-		that.triggers.secret_tip.onEnter = null;
+		level.triggers.secret_tip.onEnter = null;
 		gs.displayMessage("messages", "secret", true);
 	};
 
 	this.triggers.reveal_secret.onEnter = function() {
-		that.triggers.reveal_secret.onEnter = null;
+		level.triggers.reveal_secret.onEnter = null;
 		gs.ceiling.remove(gs.secretLayer);
 	};
 	
-	gs.game.hasClock = false;
 	this.triggers.clock.onEnter = function() {
-		that.triggers.clock.onEnter = null;
 		gs.askQuestion("messages", "clock", [
 			function() {
-				gs.objects.clock.kill();
-				gs.game.hasClock = true;
+				gs.player.loot(gs.objects.clock);
+				level.triggers.clock.onEnter = null;
 			},
 			function() {
 			}
@@ -1532,9 +1550,9 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap2');
+		goToLevel('chap2');
 	}
-}
+};
 
 Chap1Level.prototype.update = function() {
 	'use strict';
@@ -1553,7 +1571,7 @@ Chap1Level.prototype.update = function() {
 			
 		}
 	}
-}
+};
 
 Chap1Level.prototype.render = function() {
 	'use strict';
@@ -1561,7 +1579,7 @@ Chap1Level.prototype.render = function() {
 	var gs = this.gameState;
 	
 	
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter II
@@ -1593,7 +1611,7 @@ Chap2Level.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 Chap2Level.prototype.create = function() {
 	'use strict';
@@ -1623,18 +1641,18 @@ Chap2Level.prototype.create = function() {
 	
 	gs.displayMessage("messages", "intro", true);
 	
-	var that = this;
+	var level = this;
 	
 	//FIXME: Ugly hack. Disables punching when there will be a player.
 	gs.time.events.add(0, function () {gs.player.canPunch = false;}, this);
 	
 	this.triggers.dialog1.onEnter = function() {
-		that.triggers.dialog1.onEnter = null;
+		level.triggers.dialog1.onEnter = null;
 		gs.displayMessage("messages", "dialog1", true);
 	};
 	
 	this.triggers.dialog2.onEnter = function() {
-		that.triggers.dialog2.onEnter = null;
+		level.triggers.dialog2.onEnter = null;
 		gs.displayMessage("messages", "dialog2", true);
 	};
 	
@@ -1643,14 +1661,14 @@ Chap2Level.prototype.create = function() {
 	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
 	
 	this.noteLast = function() {
-		that.triggers.hourglassNote.onEnter = null;
+		level.triggers.hourglassNote.onEnter = null;
 		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
 			gs.objects.hourglassNote.kill();
 		});
 	};
 	
 	this.hourglassLast = function() {
-		that.triggers.hourglass.onEnter = null;
+		level.triggers.hourglass.onEnter = null;
 		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
 			if (gs.map.objects.doors[i].properties.trigger === "two")
 				gs.map.objects.doors[i].sprite.kill();
@@ -1661,16 +1679,16 @@ Chap2Level.prototype.create = function() {
 	};
 	
 	this.noteFirst = function() {
-		that.triggers.hourglassNote.onEnter = null;
-		that.triggers.hourglass.onEnter = that.hourglassLast;
+		level.triggers.hourglassNote.onEnter = null;
+		level.triggers.hourglass.onEnter = level.hourglassLast;
 		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
 			gs.objects.hourglassNote.kill();
 		});
 	};
 	
 	this.hourglassFirst = function() {
-		that.triggers.hourglass.onEnter = null;
-		that.triggers.hourglassNote.onEnter = that.noteLast;
+		level.triggers.hourglass.onEnter = null;
+		level.triggers.hourglassNote.onEnter = level.noteLast;
 		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
 			if (gs.map.objects.doors[i].properties.trigger === "two")
 				gs.map.objects.doors[i].sprite.kill();
@@ -1684,21 +1702,21 @@ Chap2Level.prototype.create = function() {
 	this.triggers.hourglass.onEnter = this.hourglassFirst;
 	
 	this.triggers.importantNote.onEnter = function() {
-		that.triggers.importantNote.onEnter = null;
+		level.triggers.importantNote.onEnter = null;
 		gs.displayMessage("messages", "importantNote", true, function() {
 			gs.objects.importantNote.kill();
 		});
 	};
 	
 	this.triggers.scaredNote.onEnter = function() {
-		that.triggers.scaredNote.onEnter = null;
+		level.triggers.scaredNote.onEnter = null;
 		gs.displayMessage("messages", "scaredNote", true, function() {
 			gs.objects.scaredNote.kill();
 		});
 	};
 	
 	this.triggers.doorSwitch.onEnter = function() {
-		that.triggers.doorSwitch.onEnter = null;
+		level.triggers.doorSwitch.onEnter = null;
 		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
 			if (gs.map.objects.doors[i].properties.trigger === "one")
 				gs.map.objects.doors[i].sprite.kill();
@@ -1708,31 +1726,30 @@ Chap2Level.prototype.create = function() {
 	this.triggers.carnivorousPlant.onEnter = function() {
 		gs.askQuestion("messages", "carnivorousPlant", [
 			function () {
-				that.triggers.carnivorousPlant.onEnter = null;
-				gs.objects.carnivorousPlant.kill();
+				gs.player.loot(gs.objects.carnivorousPlant);
+				level.triggers.carnivorousPlant.onEnter = null;
 			},
 			null
 		]);
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'chap3');
+		goToLevel('chap3');
 	}
-}
-
+};
 Chap2Level.prototype.update = function() {
 	'use strict';
 	
 	var gs = this.gameState;
 	
 	this.processTriggers();
-}
+};
 
 Chap2Level.prototype.render = function() {
 	'use strict';
 	
 	var gs = this.gameState;
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter III
@@ -1764,7 +1781,7 @@ Chap3Level.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 Chap3Level.prototype.create = function() {
 	'use strict';
@@ -1812,9 +1829,11 @@ Chap3Level.prototype.create = function() {
 		gs.displayMessage("messages", "flame", true, function() {
 			gs.objects.flame.kill();
 			gs.playerLight.revive();
+			gs.playerLight.powerFailure = 0;
+			gs.playerLight.lastLightSize = 1;
 			gs.toggleLights('flame');
 		});
-	}
+	};
 
 	this.triggers.indice1.onEnter = function() {
 		that.triggers.indice1.onEnter = null;
@@ -1837,23 +1856,21 @@ Chap3Level.prototype.create = function() {
 		});
 	};
 	
-	gs.game.hasChair = false;
 	this.triggers.chair.onEnter = function() {
-		that.triggers.chair.onEnter = null;
 		gs.askQuestion("messages", "chair", [
 			function() {
-				gs.objects.chair.kill();
-				gs.game.hasChair = true;
+				gs.player.loot(gs.objects.chair);
+				that.triggers.chair.onEnter = null;
 			},
 			null
 		]);
 	};
 
 	this.triggers.exit.onEnter = function() {
-		gs.game.state.restart(true, false, null, 'boss');
+		goToLevel('boss');
 	}
 
-}
+};
 
 Chap3Level.prototype.update = function() {
 	'use strict';
@@ -1863,9 +1880,23 @@ Chap3Level.prototype.update = function() {
 	this.processTriggers();
 	
 	if(gs.playerLight.alive) {
-		gs.playerLight.lightSize -= gs.time.elapsed / 12000;
-		if(gs.playerLight.lightSize < 1) {
-			gs.playerLight.lightSize = 1;
+		gs.playerLight.lightSize -= (1-gs.playerLight.powerFailure) * gs.time.elapsed / 12000;
+		if(gs.playerLight.lightSize<=0) gs.playerLight.lightSize=0;
+		else if(gs.playerLight.lightSize<0.5) gs.playerLight.lightSize=0.5;
+		var theoricalLight = Math.max(gs.playerLight.lightSize, gs.playerLight.lastLightSize);
+		if(theoricalLight < 2 && !gs.playerLight.powerFailure) gs.playerLight.powerFailure = 0.2;
+		if(theoricalLight < 1.5 && gs.playerLight.powerFailure<0.2) gs.playerLight.powerFailure = 0.4;
+		if(theoricalLight < 1.2 && gs.playerLight.powerFailure<0.4) gs.playerLight.powerFailure = 0.6;
+		if(theoricalLight < 1 && gs.playerLight.powerFailure<0.6) gs.playerLight.powerFailure = 0.8;
+		if(theoricalLight < 0.8 && gs.playerLight.powerFailure<0.8) gs.playerLight.powerFailure = 0.9;
+		if(theoricalLight <= 0.5 && gs.playerLight.powerFailure<0.9) gs.playerLight.powerFailure = 0.95;
+		if(gs.playerLight.powerFailure){
+			if(Math.random() > gs.playerLight.powerFailure) {
+				gs.playerLight.lightSize = gs.playerLight.lightSize || gs.playerLight.lastLightSize;
+			}else{
+				gs.playerLight.lastLightSize = gs.playerLight.lightSize || gs.playerLight.lastLightSize;
+				gs.playerLight.lightSize = 0;
+			}
 		}
 	}
 	
@@ -1886,16 +1917,17 @@ Chap3Level.prototype.update = function() {
 			case LEFT:
 				x -= 32;
 				break;
-		};
+		}
 		
 		for(var i=0; i<this.crystals.length; ++i) {
 			if(this.crystals[i].rect.contains(x, y)) {
 				gs.playerLight.lightSize = 3;
+				gs.playerLight.powerFailure = 0;
 				break;
 			}
 		}
 	}
-}
+};
 
 Chap3Level.prototype.render = function() {
 	'use strict';
@@ -1903,7 +1935,7 @@ Chap3Level.prototype.render = function() {
 	var gs = this.gameState;
 	
 	
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1935,7 +1967,7 @@ BossLevel.prototype.preload = function() {
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
-}
+};
 
 BossLevel.prototype.create = function() {
 	'use strict';
@@ -1974,8 +2006,9 @@ BossLevel.prototype.create = function() {
 //	gs.displayMessage("messages", "intro", true);
 	
 	this.triggers.boss.onEnter = function() {
-		gs.displayMessage("messages", "aaarg", true, function() {
-			gs.player.kill();
+		if(!gs.dagfin.activate) gs.displayMessage("messages", "aaarg", true, function() {
+			gs.dagfin.activate = true;
+			//gs.player.kill();
 		});
 	};
 	
@@ -1983,20 +2016,33 @@ BossLevel.prototype.create = function() {
 
 BossLevel.prototype.update = function() {
 	'use strict';
-	
-	var gs = this.gameState;
-	
+	//var gs = this.gameState;
 	this.processTriggers();
-	
-	//gs.dagfin.overTimeBehavior();
 };
 
 BossLevel.prototype.render = function() {
 	'use strict';
-	
-	var gs = this.gameState;
+	//var gs = this.gameState;
 };
 
+
+// TODO : find a better place for this function. Game method ? gs method ?
+function goToLevel(levelName){
+	var gs = game.state.getCurrentState();
+	var save = {'level':levelName, 'inventory':gs.player.inventory};
+	localStorage.setItem('save',JSON.stringify(save));
+	gs.game.state.restart(true, false, null, save.level);
+
+}
+function loadSavedGameData(){
+	var stringData = localStorage.getItem('save');
+	if (stringData) return JSON.parse(stringData);
+	else return {'level':'','inventory':[]};
+}
+function newGame(){
+	localStorage.clear();
+	goToLevel('intro');
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -2005,10 +2051,3 @@ BossLevel.prototype.render = function() {
 ////////////////////////////////////////////////////////////////////////////
 
 var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, 'game', GameState);
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-// FUCK IT !
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
