@@ -1,64 +1,64 @@
 {
 	"intro": [
-		"It's been two years since Matt diseapered.\nThe police gave up long ago, but not myself.",
-		"I've finally been granted the rights to search the house.\nI don't have much hope, but...",
-		"I won't give up."
+		"Andrew:\nIt's been two years since Matt diseapered.\nThe police gave up long ago, but not myself.",
+		"Andrew:\nI've finally been granted the rights to search the house.\nI don't have much hope, but...",
+		"Andrew:\nI won't give up."
 	],
 	
 	"room" : [
-		"It's the room where Matt did his researches.\nI did not imagine it like that.\nIt's quite unusual for a physician.", 
-		"I should begin searching..."
+		"Andrew:\nIt's the room where Matt did his researches.\nI did not imagine it like that.\nIt's quite unusual for a physician.", 
+		"Andrew:\nI should begin searching..."
 	],
 	
 	"book" : [
-		"The book seems ancient and precious.\nI cannot read the whole title,\nI can only read \"Dagfin\"",
-		"\"Help me, please !\"",
-		"It's the handwritting of Matt !\nIt's dated of yesterday !\nI knew Matt was still alive !",
-		"There's also... a recipe ?",
-		"Deep blood of a Wrecked\nEye of the fortuneteller\nCenter of the One",
-		"I should search for these objects."
+		"Andrew:\nThe book seems ancient and precious.\nI cannot read the whole title,\nI can only read \"Dagfin\"",
+		"\n\"Help me, please !\"",
+		"Andrew:\nIt's the handwritting of Matt !\nIt's dated of yesterday !\nI knew Matt was still alive !",
+		"Andrew:\nThere's also... a recipe ?",
+		"Andrew:\nDeep blood of a Wrecked\nEye of the fortuneteller\nCenter of the One",
+		"Andrew:\nI should search for these objects."
 	],
 	
 	"blood" : [
-		"The smell... ew ! Looks like it's blood.",
-		"It's still liquid, surprisingly."
+		"Andrew:\nThe smell... ew ! Looks like it's blood.",
+		"Andrew:\nIt's still liquid, surprisingly."
 	],
 
 	"blood2" : [
-		"I don't even know what is a Wrecked, but it seems to be blood."
+		"Andrew:\nI don't even know what is a Wrecked, but it seems to be blood."
 	],
 		
 	"femur" : [
-		"It's not even human !"
+		"Andrew:\nIt's not even human !"
 	],
 	
 	"femur2" : [
-		"I wouldn't want to cross the path of the beast which had such bones."
+		"Andrew:\nI wouldn't want to cross the path of the beast which had such bones."
 	],
 
 	"collar" : [
-		"The stone has an eery glow..."
+		"Andrew:\nThe stone has an eery glow..."
 	],
 
 	"collar2" : [
-		"At least, this one is not so twisted."
+		"Andrew:\nAt least, this one is not so twisted."
 	],
 	
 	"carpet" : [
-		"This carpet doesn't fit with the room.\nMatt always had strange taste.",
-		"It seems there's something on the floor, under this awful carpet !"
+		"Andrew:\nThis carpet doesn't fit with the room.\nMatt always had strange taste.",
+		"Andrew:\nIt seems there's something on the floor, under this awful carpet !"
 	],
 	
 	"pentacle" : [
-		"I don't know what matter was used to draw this.\nIt seems freshly drawn."
+		"Andrew:\nI don't know what matter was used to draw this.\nIt seems freshly drawn."
 	],
 	
 	"invoc" : [
-		"There's something else written at the bottom of the first page...\nLet's see that !",
-		" \"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
+		"Andrew:\nThere's something else written at the bottom of the first page...\nLet's see that !",
+		"\n\"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
 	],
 	
 	"invoc2" :[
-		"What the !..."
+		"Andrew:\nWhat the !..."
 	]
 }

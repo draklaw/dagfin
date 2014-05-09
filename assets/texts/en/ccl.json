@@ -1,48 +1,77 @@
 {
 	"aaarg" : [
-		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
-		"Matt : Oh, it's you Andrew !\nYou too were tired of this forsaken world ?",
-		"Andrew: Don't worry Matt, I'll take you back home !",
-		"Matt : But we're together home, now...",
-		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
+		"Dagfin:\nYoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
+		"Matt:\nOh, it's you Andrew !\nYou too were tired of this forsaken world ?",
+		"Andrew:\nDon't worry Matt, I'll take you back home !",
+		"Matt:\nBut we're together home, now...",
+		"Dagfin:\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
-	"d1" : [
-		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
-		"Matt : Oh, it's you Andrew !\nYou too were tired of this forsaken world ?",
-		"Andrew: Don't worry Matt, I'll take you back home !",
-		"Matt : But we're together home, now...\nDagfin : MAy I intErUpt yoU ? I sEE You hAVe mY cEnTEr.\nGive it to me.",
-		"> Give the bone to Dagfin\n> Don't do it."
-	],
+	"d1" : {
+		"question": [
+			"Dagfin:\nYoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
+			"Matt:\nOh, it's you Andrew !\nYou too were tired of this forsaken world ?",
+			"Andrew:\nDon't worry Matt, I'll take you back home !",
+			"Matt:\nBut we're together home, now...",
+			"Dagfin: MAy I intErUpt yoU ? I sEE You hAVe mY cEnTEr.\nGive it to me." ],
+		"choices": [
+			{ "ans": "Give the bone to Dagfin",
+			  "message": [
+				  "Dagfin:\nGoOd ! LeT The fUN beGIN !"
+			  ]
+			},
+			{ "ans": "Don't do it.",
+			  "message": [
+				"Dagfin:\nYoU LiEd To mE.\nGiVE yOUr wIlL tO The ChaOS."
+			  ]
+			}
+		]
+	},
 	
 	"d2" : [
-		"Dagfin : GoOd ! LeT The fUN beGIN !"
 	],
 	
 	"d3" : [
-		"Dagfin : YoU LiEd To mE.\nGiVE yOUr wIlL tO The ChaOS."
 	],
 	
 	"d4" : [
-		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
+		"Dagfin:\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
 	
 	"d5" : [
-		"Dagfin : I CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\nI Am thE pUpIL oF yOUr EyE\nI aM tHe iNexTIngUiSHablE rED-hAiReD tORch\nI am The StAR oF ChAoS.\n",
-		"Dagfin : WiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
+		"Dagfin:\nI CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\nI Am thE pUpIL oF yOUr EyE\nI aM tHe iNexTIngUiSHablE rED-hAiReD tORch\nI am The StAR oF ChAoS.\n",
+		"Dagfin:\nWiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
 	],
 	
-	"d6" : [
-		"Matt : Andrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\nAndrew : Hear what ?\n Matt : ...never mind.",
-		"Andrew : We have to find how to go back. ?\nMatt : Go back ? Where ? We're fine here, aren't we ?\nAndrew : To our world, Matt. I could come because I found your note, with the reciepe for the formula.",
-		"Matt : Me ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming.",
-		"Andrew : So, you had it all the time ?\nMatt : It would have been foolish to come here without it !",
-		"Andrew : Why wouldn't you come back ?\nMatt : Oh, you know... stuff... shiny sand... But you're here.\nWill you stay with me ?",
-		">Let's stay here\n>Let's go home together",
-		"Andrew : Ok, let's stay here a little longer. \nMatt : Wonderful  :D !",
-		"Andrew : I'd rather go home with you.\nMatt : Oh... I'm a bit decived, but ok. Here's the formula."
-	]
-	
-	
+	"d6" : {
+		"question": [
+			"Matt:\nAndrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\n",
+			"Andrew:\nHear what ?",
+			"Matt:\n...never mind.",
+			"Andrew:\nWe have to find how to go back. ?",
+			"Matt:\nGo back ? Where ? We're fine here, aren't we ?",
+			"Andrew:\nTo our world, Matt. I could come because I found your note, with the reciepe for the formula.",
+			"Matt:\nMe ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming.",
+			"Andrew:\nSo, you had it all the time ?",
+			"Matt:\nIt would have been foolish to come here without it !",
+			"Andrew:\nWhy wouldn't you come back ?",
+			"Matt:\nOh, you know... stuff... shiny sand... But you're here.\nWill you stay with me ?"
+		],
+		"choices": [
+			{ "ans": "Let's stay here",
+			  "message": [
+				"Andrew:\nOk, let's stay here a little longer.",
+				"Matt:\nWonderful  :D !"
+			  ]
+			},
+			{ "ans": "Let's go home together",
+			  "message": [
+				"Andrew:\nI'd rather go home with you.",
+				"Matt:\nOh... I'm a bit decived, but ok. Here's the formula."
+			  ]
+			}
+		]
+	}
+
 }

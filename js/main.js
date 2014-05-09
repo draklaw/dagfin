@@ -50,6 +50,318 @@ var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// GAME CLASS !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function DagfinGame(width, height, renderer, parent) {
+	'use strict';
+
+	this.game = new Phaser.Game(width, height, renderer, parent);
+
+	this.game.state.add('Boot', new BootState(this));
+	this.game.state.add('Loading', new LoadingState(this));
+	this.game.state.add('Menu', new MenuState(this));
+	this.game.state.add('Game', new GameState(this));
+
+	this.lastSave = null;
+	this.levelName = 'Intro';
+	this.inventory = [];
+
+	this.game.state.start('Boot');
+};
+
+DagfinGame.prototype.saveGameData = function() {
+	'use strict';
+
+	this.lastSave = {
+		'levelName': this.levelName,
+		'inventory': this.inventory.splice()
+	};
+	localStorage.setItem('save', JSON.stringify(this.lastSave));
+};
+
+DagfinGame.prototype.loadGameData = function() {
+	'use strict';
+
+	var stringData = localStorage.getItem('save');
+	if (stringData) {
+		return JSON.parse(stringData);
+	}
+	return null;
+};
+
+DagfinGame.prototype.newGame = function() {
+	'use strict';
+
+	this.levelName = 'Intro';
+	this.inventory = [];
+	this.saveGameData();
+
+	this.reloadLastSave();
+};
+
+DagfinGame.prototype.continueFromSave = function() {
+	'use strict';
+
+	var save = this.loadGameData();
+	if(save) {
+		this.lastSave = save;
+		this.reloadLastSave();
+	}
+	else {
+		this.newGame();
+	}
+};
+
+DagfinGame.prototype.reloadLastSave = function() {
+	'use strict';
+
+	this.levelName = this.lastSave.levelName;
+	this.inventory = this.lastSave.inventory.splice();
+	this.game.state.start('Game', true, false, this.levelName);
+};
+
+DagfinGame.prototype.goToLevel = function(levelName) {
+	'use strict';
+
+	this.levelName = levelName;
+	
+	this.saveGameData();
+	this.reloadLastSave();
+};
+
+DagfinGame.prototype.initState = function(levelName) {
+	'use strict';
+
+	// Keys are reset when state changes, so each stat should call this
+	// in preload in order to get global initialization.
+
+	this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+
+	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
+	this.k_fullscreen.onDown.add(this.toggleFullScreen, this);
+
+};
+
+DagfinGame.prototype.toggleFullScreen = function() {
+	'use strict';
+
+	if(this.game.scale.isFullScreen) {
+		// FIXME: This call seems broken. Update Phaser and try again.
+		//this.game.scale.stopFullScreen();
+	}
+	else {
+		this.game.scale.startFullScreen(false);
+	}
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// BOOT STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function BootState(dagfin) {
+	'use strict';
+
+	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
+}
+
+BootState.prototype = Object.create(Phaser.State.prototype);
+
+BootState.prototype.preload = function() {
+	'use strict';
+
+	this.dagfin.initState();
+
+	this.game.load.image('splash', 'assets/couverturev2.png');
+	this.game.load.image('progressBarBg', 'assets/progress_bar_bg.png');
+	this.game.load.image('progressBar', 'assets/progress_bar.png');
+
+};
+
+BootState.prototype.create = function() {
+	'use strict';
+
+	this.state.start('Loading');
+};
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// LOADING STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function LoadingState(dagfin) {
+	'use strict';
+
+	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
+}
+
+LoadingState.prototype = Object.create(Phaser.State.prototype);
+
+LoadingState.prototype.preload = function() {
+	'use strict';
+
+	this.dagfin.initState();
+
+	// Loaded by the 'Boot' state.
+	this.add.sprite(0, 0, 'splash');
+	this.add.sprite(0, 0, 'progressBarBg');
+	this.progressBar = this.add.sprite(0, 0, 'progressBar');
+	
+	this.load.setPreloadSprite(this.progressBar);
+
+	// Full-screen effects
+	this.load.image("black", "assets/sprites/black.png");
+	this.load.image("damage", "assets/sprites/damage.png");
+	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
+
+	this.load.image("radial_light", "assets/sprites/radial_light.png");
+
+	// Menu
+	this.load.image('menu_bg', 'assets/menu_bg.png');
+	this.load.image('menu_arrow', 'assets/menu_arrow.png');
+	this.load.image('menu_newGame', 'assets/sprites/'+lang+'/new_game.png');
+	this.load.image('menu_continue', 'assets/sprites/'+lang+'/continue.png');
+	
+	// Message stuff
+	this.load.image("message_bg", "assets/message_bg.png");
+	this.load.bitmapFont("message_font", "assets/fonts/font.png",
+						 "assets/fonts/font.fnt");
+
+	// Characters
+	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
+
+	// Props
+	this.load.image("hdoor", "assets/sprites/hdoor.png");
+	this.load.image("vdoor", "assets/sprites/vdoor.png");
+
+	// Sounds
+	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
+	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
+
+};
+
+LoadingState.prototype.create = function() {
+	'use strict';
+
+	var level = location.href.split('level=')[1]
+	if(level) {
+		this.dagfin.goToLevel(level);
+	}
+	else {
+		this.game.state.start('Menu');
+	}
+};
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// MENU STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function MenuState(dagfin) {
+	'use strict';
+
+	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
+}
+
+MenuState.prototype = Object.create(Phaser.State.prototype);
+
+MenuState.prototype.create = function() {
+	'use strict';
+
+	this.dagfin.initState();
+
+	this.MIN_CHOICE = 0;
+	this.MAX_CHOICE = 1;
+
+	this.NEW_GAME = 0;
+	this.CONTINUE = 1;
+
+	this.arrowPos = [ 455, 520 ];
+
+	this.choice = this.NEW_GAME;
+
+	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
+	this.k_down = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+	this.k_space = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	this.k_enter = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+
+	this.k_up.onDown.add(this.menuUp, this);
+	this.k_down.onDown.add(this.menuDown, this);
+	this.k_space.onDown.add(this.menuValidate, this);
+	this.k_enter.onDown.add(this.menuValidate, this);
+
+	this.add.sprite(0, 0, 'menu_bg');
+	this.arrow = this.add.sprite(0, this.arrowPos[this.choice], 'menu_arrow');
+
+	this.newGameButton = this.add.button(60, 440, 'menu_newGame', this.newGame, this);
+	this.newGameButton.onInputOver.add(function() {
+		this.choice = this.NEW_GAME;
+	}, this);
+
+	this.continueButton = this.add.button(60, 500, 'menu_continue', this.continue, this);
+	this.continueButton.onInputOver.add(function() {
+		this.choice = this.CONTINUE;
+	}, this);
+};
+
+MenuState.prototype.update = function() {
+	'use strict';
+
+	this.arrow.y = this.arrowPos[this.choice];
+};
+
+MenuState.prototype.newGame = function() {
+	'use strict';
+
+	this.dagfin.newGame();
+};
+
+MenuState.prototype.continue = function() {
+	'use strict';
+
+	this.dagfin.continueFromSave();
+};
+
+MenuState.prototype.menuDown = function() {
+	'use strict';
+
+	this.choice = this.math.min(this.choice + 1, this.MAX_CHOICE);
+};
+
+MenuState.prototype.menuUp = function() {
+	'use strict';
+
+	this.choice = this.math.max(this.choice - 1, this.MIN_CHOICE);
+};
+
+MenuState.prototype.menuValidate = function() {
+	'use strict';
+
+	switch(this.choice) {
+	case this.NEW_GAME:
+		this.newGame();
+		break;
+	case this.CONTINUE:
+		this.continue();
+		break;
+	}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -58,10 +370,12 @@ var LIGHT_COLOR_RAND = .2;
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-function GameState() {
+function GameState(dagfin) {
 	'use strict';
 	Phaser.State.call(this);
 
+
+	this.dagfin = dagfin;
 }
 
 GameState.prototype = Object.create(Phaser.State.prototype);
@@ -72,11 +386,11 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 
 GameState.prototype.init = function(levelId) {
 	'use strict';
-	this.updateTasks = [];
-	var savedGame = loadSavedGameData();
 
-	levelId = levelId || location.href.split('level=')[1] || savedGame.level || 'intro';
-	
+	this.updateTasks = [];
+
+	levelId = levelId || 'intro';
+
 	this.levelId = levelId;
 
 	var levelConstructor = levelId.substring(0,1).toUpperCase() + levelId.substring(1).toLowerCase() + 'Level';
@@ -92,25 +406,8 @@ GameState.prototype.init = function(levelId) {
 GameState.prototype.preload = function () {
 	'use strict';
 	
-	this.load.image("black", "assets/sprites/black.png");
-	this.load.image("damage", "assets/sprites/damage.png");
-	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
-	
-	this.load.image("message_bg", "assets/message_bg.png");
-	this.load.bitmapFont("message_font", "assets/fonts/font.png",
-						 "assets/fonts/font.fnt");
+	this.dagfin.initState();
 
-	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
-	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
-	
-	this.load.image("hdoor", "assets/sprites/hdoor.png");
-	this.load.image("vdoor", "assets/sprites/vdoor.png");
-	
-	this.load.image("radial_light", "assets/sprites/radial_light.png");
-	
-	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
-	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
-	
 	this.level.preload();
 };
 
@@ -159,24 +456,14 @@ GameState.prototype.create = function () {
 	}
 	//TODO: m et M (sound control)
 
-	game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT; // Stretch to fill
-	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.NO_SCALE; // Keep original size
-	// game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL; // Maintain aspect ratio
-	this.k_fullscreen = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
-	this.k_fullscreen.onDown.add(toggleFullScreen, this);
-	
-	function toggleFullScreen(){
-		this.scale.startFullScreen();
-	}
-
 	// Group all the stuff on the ground (always in background)
 	this.objectsGroup = this.make.group();
 	// Group all the doors.
-	this.doorsGroup = this.make.group();	
+	this.doorsGroup = this.make.group();
 	// Group all the stuff that should be sorted by depth.
-	this.characters = this.make.group();	
+	this.characters = this.make.group();
 	// Group all the stuff that should be sorted above the rest.
-	this.ceiling = this.make.group();	
+	this.ceiling = this.make.group();
 
 	// Map.
 	this.level.create();
@@ -332,7 +619,7 @@ GameState.prototype.create = function () {
 
 	/*
 	// Noises pass
-	this.sounds = game.add.audio("sounds");
+	this.sounds = this.game.add.audio("sounds");
 	this.sounds.addMarker("grunt", 0, 0.8);
 	this.sounds.addMarger("growling", 1, 1.6);
 	//... */
@@ -632,7 +919,7 @@ GameState.prototype.nextMessage = function() {
 	}
 	else {
 		this.messageGroup.callAll('revive');
-		this.message.text = this.messageQueue.shift();
+		this.message.text = this.messageQueue.shift().replace(/\n/g, '\n  ');
 	}
 };
 
@@ -784,8 +1071,7 @@ function Player(game, x, y) {
 	player.health = PLAYER_MAX_LIFE;
 	player.canPunch = true;
 
-	var savedGame = loadSavedGameData();
-	player.inventory = savedGame.inventory || [];
+	player.inventory = gs.dagfin.inventory;
 
 
 	this.onUpdateBehavior = function(){
@@ -1288,7 +1574,7 @@ IntroLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-	gs.music = game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -1377,7 +1663,7 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("messages", 'invoc2', true, function() {
-				goToLevel('chap1');
+				gs.dagfin.goToLevel('chap1');
 			});
 		});
 	}
@@ -1452,7 +1738,7 @@ Chap1Level.prototype.create = function() {
 	this.LAVA_TILE = 7;
 	
 	
-   	gs.music = game.add.audio('music');
+   	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
@@ -1550,7 +1836,7 @@ Chap1Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		goToLevel('chap2');
+		gs.dagfin.goToLevel('chap2');
 	}
 };
 
@@ -1633,7 +1919,7 @@ Chap2Level.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
 	
-	gs.music = game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
     gs.music.play('', 0, 0.2);
 	
 	this.enablePlayerLight = false;
@@ -1734,7 +2020,7 @@ Chap2Level.prototype.create = function() {
 	};
 	
 	this.triggers.exit.onEnter = function() {
-		goToLevel('chap3');
+		gs.dagfin.goToLevel('chap3');
 	}
 };
 Chap2Level.prototype.update = function() {
@@ -1813,7 +2099,7 @@ Chap3Level.prototype.create = function() {
 	}
 	this.crystals = this.mapLayers.crystals.objects;
 
-	gs.music = game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
     gs.music.play('', 0, 0.2);
 
 
@@ -1867,7 +2153,7 @@ Chap3Level.prototype.create = function() {
 	};
 
 	this.triggers.exit.onEnter = function() {
-		goToLevel('boss');
+		gs.dagfin.goToLevel('boss');
 	}
 
 };
@@ -1993,21 +2279,21 @@ BossLevel.prototype.create = function() {
 	gs.overlayLayer = gs.map.createLayer("overlay");
 	
 
-   	gs.music = game.add.audio('music');
+   	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	gs.dagfin = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
+	gs.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
 	
 	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
 	
 //	gs.displayMessage("messages", "intro", true);
 	
 	this.triggers.boss.onEnter = function() {
-		if(!gs.dagfin.activate) gs.displayMessage("messages", "aaarg", true, function() {
-			gs.dagfin.activate = true;
+		if(!gs.dagfinDood.activate) gs.displayMessage("messages", "aaarg", true, function() {
+			gs.dagfinDood.activate = true;
 			//gs.player.kill();
 		});
 	};
@@ -2026,28 +2312,10 @@ BossLevel.prototype.render = function() {
 };
 
 
-// TODO : find a better place for this function. Game method ? gs method ?
-function goToLevel(levelName){
-	var gs = game.state.getCurrentState();
-	var save = {'level':levelName, 'inventory':gs.player.inventory};
-	localStorage.setItem('save',JSON.stringify(save));
-	gs.game.state.restart(true, false, null, save.level);
-
-}
-function loadSavedGameData(){
-	var stringData = localStorage.getItem('save');
-	if (stringData) return JSON.parse(stringData);
-	else return {'level':'','inventory':[]};
-}
-function newGame(){
-	localStorage.clear();
-	goToLevel('intro');
-}
-
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // MAIN !
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-var game = new Phaser.Game(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, 'game', GameState);
+var dagfin = new DagfinGame(MAX_WIDTH, MAX_HEIGHT, Phaser.AUTO, 'game');
