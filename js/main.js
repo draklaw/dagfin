@@ -78,7 +78,7 @@ DagfinGame.prototype.saveGameData = function() {
 
 	this.lastSave = {
 		'levelName': this.levelName,
-		'inventory': this.inventory.splice()
+		'inventory': this.inventory.slice()
 	};
 	localStorage.setItem('save', JSON.stringify(this.lastSave));
 };
@@ -120,7 +120,7 @@ DagfinGame.prototype.reloadLastSave = function() {
 	'use strict';
 
 	this.levelName = this.lastSave.levelName;
-	this.inventory = this.lastSave.inventory.splice();
+	this.inventory = this.lastSave.inventory.slice();
 	this.game.state.start('Game', true, false, this.levelName);
 };
 
@@ -1114,7 +1114,7 @@ function Player(game, x, y) {
 		else return PLAYER_VELOCITY;
 	};
 	player.loot = function(item){
-		player.inventory.push(item.objName);
+		gs.dagfin.inventory.push(item.objName);
 		item.kill();
 	};
 }
@@ -2279,14 +2279,14 @@ BossLevel.prototype.create = function() {
 	gs.overlayLayer = gs.map.createLayer("overlay");
 	
 
-   	gs.music = gs.game.add.audio('music');
+	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
 	gs.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
-	
+
 	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
 	
 //	gs.displayMessage("messages", "intro", true);
