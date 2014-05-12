@@ -458,10 +458,8 @@ GameState.prototype.create = function () {
 
 	// Group all the stuff on the ground (always in background)
 	this.objectsGroup = this.make.group();
-	// Group all the doors.
-	this.doorsGroup = this.make.group();
 	// Group all the stuff that should be sorted by depth.
-	this.characters = this.make.group();
+	this.depthGroup = this.make.group();
 	// Group all the stuff that should be sorted above the rest.
 	this.ceiling = this.make.group();
 
@@ -470,8 +468,7 @@ GameState.prototype.create = function () {
 		
 	// Add groups after level
 	this.world.add(this.objectsGroup);
-	this.world.add(this.doorsGroup);
-	this.world.add(this.characters);
+	this.world.add(this.depthGroup);
 	this.world.add(this.ceiling);
 
 	// Items in the map
@@ -500,13 +497,13 @@ GameState.prototype.create = function () {
 			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
 			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
 			var key = door.name.toLowerCase(); //FIXME: Should be door.type but it fails.
-			if (key === "hdoor") offset_y -= 32; else offset_y -= 16;
-			var sprite = this.add.sprite(door.x + offset_x + 16,
+			var sprite = this.add.sprite(door.x + offset_x,
 			                             door.y + offset_y,
-			                             key, 0, this.doorsGroup);
-			sprite.anchor.set(.5, .5);
-			sprite.objName = door.name;
+			                             key, 0, this.depthGroup);
 			this.game.physics.arcade.enable(sprite);
+			sprite.anchor.set(0, 1);
+			sprite.body.setSize(TILE_SIZE, TILE_SIZE, 0, 0);
+			sprite.objName = door.name;
 			sprite.body.immovable = true;
 			door.sprite = sprite;
 		}
@@ -751,7 +748,15 @@ GameState.prototype.update = function () {
 
 	this.level.update();
 
-	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
+	this.physics.arcade.collide(this.depthGroup, this.mapLayer);
+	// Tests the collisions among the group itself, but avoid zombie vs player collisions.
+	// TODO: What about Dagfin ?
+	this.physics.arcade.collide(this.depthGroup, undefined, null, function(a, b) {
+		return !((a instanceof Player && b instanceof Zombie) ||
+				 (a instanceof Zombie && b instanceof Player));
+	});
+
+	this.depthGroup.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
 	this.camera.update();
@@ -793,6 +798,9 @@ GameState.prototype.render = function () {
 		this.game.debug.geom(new Phaser.Rectangle(tiles[i].x*32, tiles[i].y*32, tiles[i].width, tiles[i].height), color);
 	}
 	*/
+//	this.depthGroup.forEach(function(body) {
+//		this.game.debug.body(body);
+//	}, this);
 	this.level.render();
 };
 
@@ -1010,6 +1018,7 @@ function Dood(game, x, y, spritesheet, group) {
 
 	game.physics.arcade.enable(this);
 	this.body.setSize(TILE_SIZE, TILE_SIZE, 0, TILE_SIZE/2);
+
 	this.anchor.set(.5, .6666667);
 	this.revive();
 
@@ -1021,15 +1030,10 @@ function Dood(game, x, y, spritesheet, group) {
 	var gs = this.gs;
 	gs.addSfx(this);
 
-	if (!group) group = gs.characters;
+	if (!group) group = gs.depthGroup;
 	group.add(this);
 
 	var dood = this;
-	this.onUpdateBehavior = function(){
-		gs.game.physics.arcade.collide(dood, gs.mapLayer);
-		gs.game.physics.arcade.collide(dood, gs.doorsGroup);
-	};
-	gs.updateInjector(dood.onUpdateBehavior);
 
 	this.aggroPlayer = function (aggroRange, aggroFrontConeAngle, aggroThroughWall) {
 		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
