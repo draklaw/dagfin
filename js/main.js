@@ -180,7 +180,7 @@ BootState.prototype.preload = function() {
 
 	this.dagfin.initState();
 
-	this.game.load.image('splash', 'assets/couverturev2.png');
+	this.game.load.image('splash', 'assets/couverture.png');
 	this.game.load.image('progressBarBg', 'assets/progress_bar_bg.png');
 	this.game.load.image('progressBar', 'assets/progress_bar.png');
 
