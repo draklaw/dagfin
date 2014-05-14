@@ -67,6 +67,7 @@ function DagfinGame(width, height, renderer, parent) {
 	this.game.state.add('Loading', new LoadingState(this));
 	this.game.state.add('Menu', new MenuState(this));
 	this.game.state.add('Game', new GameState(this));
+	this.game.state.add('Credits', new CreditsState(this));
 
 	this.lastSave = null;
 	this.levelName = 'Intro';
@@ -374,6 +375,40 @@ MenuState.prototype.menuValidate = function() {
 		this.continue();
 		break;
 	}
+};
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// CREDITS STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function CreditsState(dagfin) {
+	'use strict';
+
+	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
+}
+
+CreditsState.prototype = Object.create(Phaser.State.prototype);
+
+CreditsState.prototype.create = function() {
+	'use strict';
+
+	this.dagfin.initState();
+
+	this.credits = this.add.text(400, 300,
+		"Programming, graphics & game desing:\n\nAlia Zanetsu\nDoc\nDraKlaW\nGammaNu\n\n---\n\nThank you for playing !",
+		{ font: "32px Arial", fill: "#ffffff", align: "center" });
+	this.credits.anchor.set(.5, .5);
+
+};
+
+CreditsState.prototype.update = function() {
+	'use strict';
+
 };
 
 
@@ -885,6 +920,7 @@ GameState.prototype.nextMessage = function() {
 		var choice = this.question.choices[this.questionChoice];
 		this.messageQueue = choice.message;
 		this.messageCallback = this.questionCallbacks[this.questionChoice];
+		this.messageCallbackContext = this.questionCallbackContext;
 		this.messageCallbackParam = this.questionCallbackParam;
 		this.question = null;
 	}
@@ -922,7 +958,7 @@ GameState.prototype.updateQuestionText = function() {
 	this.message.text = msg;
 };
 
-GameState.prototype.askQuestion = function(key, msg, callbacks, param) {
+GameState.prototype.askQuestion = function(key, msg, callbacks, context, param) {
 	callbacks = callbacks || [];
 
 	var question = this.cache.getJSON(key)[msg];
@@ -934,20 +970,21 @@ GameState.prototype.askQuestion = function(key, msg, callbacks, param) {
 		this.messageCallback = this._askQuestion;
 		this.messageCallbackContext = this;
 		this.messageCallbackParam = [
-			question, callbacks,
-			Array.prototype.slice.call(arguments, 3)
+			question, callbacks, context,
+			Array.prototype.slice.call(arguments, 4)
 		];
 		this.nextMessage();
 	}
 	else {
-		this._askQuestion(question, callbacks, param);
+		this._askQuestion(question, callbacks, context, param);
 	}
 };
 
-GameState.prototype._askQuestion = function(question, callbacks, params) {
+GameState.prototype._askQuestion = function(question, callbacks, context, params) {
 	this.blocPlayerWhileMsg = true;
 	this.questionCallbacks = callbacks || [];
-	this.questionCallbackParam = Array.prototype.slice.call(arguments, 2);
+	this.questionCallbackContext = context;
+	this.questionCallbackParam = Array.prototype.slice.call(arguments, 3);
 	this.question = question;
 	this.questionChoice = 0;
 
@@ -1271,7 +1308,6 @@ function Dagfin(game, x, y) {
 	this.lastZombieSpawn = 0;
 
 	this.events.onKilled.add(function(){
-		console.log("You Win");
 		//TODO : death sound, death music, win screen
 	});
 	dagfin.lastTime = (new Date()).getTime();
@@ -2312,27 +2348,32 @@ BossLevel.prototype.create = function() {
 	this.mapJson = gs.cache.getJSON("boss_map_json");
 	gs.load.tilemap("boss_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
-	
+
 	this.parseLevel(this.mapJson);
 
 	gs.map = gs.game.add.tilemap("boss_map");
 	gs.map.addTilesetImage("basic", "boss_tileset");
 	gs.map.addTilesetImage("spawn2", "spawn2");
 	gs.map.addTilesetImage("trone", "trone");
-	gs.map.setCollision([ 1, 8 ]);
+	gs.map.setCollision([ 1, 8, 10 ]);
 	
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 
 	gs.overlayLayer = gs.map.createLayer("overlay");
-	
+
 
 	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
-	
+
+	this.STATE_BOSS = 0;
+	this.STATE_MISSING = 1;
+	this.STATE_WIN = 2;
+	this.state = this.STATE_BOSS;
+
 	this.slots = { 'blood': 1, 'clock': 2, 'carnivorousPlant': 3, 'collar': 4, 'chair': 5 };
 	for(var name in this.slots) {
 		var slot = this.objects[name];
@@ -2340,14 +2381,13 @@ BossLevel.prototype.create = function() {
 		slot.body.setSize(24, 24, 0, 16);
 		slot.onActivate.add(this.activateSlot, this);
 	}
-	
-	this.placed = {};
-	
-	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
 
-	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
+	this.placed = {};
+
+	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*8.9);
 
 	this.triggers.boss.onEnter.add(this.welcomeDialog, this);
+	this.triggers.matt.onEnter.add(this.mattDialog, this);
 
 };
 
@@ -2375,6 +2415,7 @@ BossLevel.prototype.welcomeDialog = function() {
 	gs.askQuestion("messages", "welcome", [
 		function() {
 			that.dagfinDood.activate = true;
+			that.dagfinDood.y = 22*32;
 		},
 		function() {
 			gs.player.kill();
@@ -2400,6 +2441,7 @@ BossLevel.prototype.activateSlot = function(obj) {
 	}
 	else {
 		gs.displayMessage("messages", obj.objName+'_missing');
+		this.state = this.STATE_MISSING;
 	}
 };
 
@@ -2411,18 +2453,43 @@ BossLevel.prototype.checkVictory = function() {
 	if(this.placed.blood && this.placed.clock && this.placed.carnivorousPlant
 			&& this.placed.collar && this.placed.chair) {
 		this.dagfinDood.activate = false;
+		this.dagfinDood.body.velocity.set(0, 0);
+		gs.depthGroup.forEach(function(dood) {
+			if(dood instanceof Zombie) {
+				dood.kill();
+			}
+		});
+		this.state = this.STATE_WIN;
 		gs.displayMessage("messages", "win", true, this.dagfinDood.kill, this.dagfinDood);
 	}
 }
 
-BossLevel.prototype.sendPlayerBack = function(obj) {
+BossLevel.prototype.mattDialog = function(obj) {
 	'use strict';
 
+	var gs = this.gameState;
+
+	switch(this.state) {
+	case this.STATE_BOSS:
+		gs.displayMessage("messages", "matt_advice");
+		break;
+	case this.STATE_MISSING:
+		gs.displayMessage("messages", "matt_return", true, function() {
+			gs.dagfin.goToLevel("chap1");
+		}, this);
+		break;
+	case this.STATE_WIN:
+		gs.askQuestion("messages", "matt", [ this.startCredits, this.startCredits ], this);
+		break;
+	}
 }
 
-BossLevel.prototype.lastDialog = function(obj) {
+BossLevel.prototype.startCredits = function(obj) {
 	'use strict';
 
+	var gs = this.gameState;
+	
+	gs.game.state.start('Credits');
 }
 
 
