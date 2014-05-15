@@ -1798,6 +1798,7 @@ Chap1Level.prototype.preload = function() {
 
 	gs.load.image("note", "assets/sprites/note.png");
 	gs.load.image("clock", "assets/sprites/clock.png");
+	gs.load.spritesheet("switch", "assets/sprites/switch.png", 32,32);
 
 	gs.load.audio('music', [
 		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
@@ -1866,10 +1867,11 @@ Chap1Level.prototype.create = function() {
 			that.objects.indice3.kill();
 		});
 	}, this);
-	
-	this.triggers.mazeToggle.onEnter.add(function() {
-		gs.toggleLights('maze');
-	}, this);
+
+	this.objects.mazeSwitch.animations.add('toggle', null, 30);
+	this.objects.mazeSwitch.animations.add('toggle2', [ 3, 2, 1, 0 ], 30);
+	this.objects.mazeSwitch.frame = 0
+	this.objects.mazeSwitch.onActivate.add(this.toogleMazeLights, this);
 	
 	this.infectedTiles = [];
 	this.crumble = function () {
@@ -1959,11 +1961,28 @@ Chap1Level.prototype.update = function() {
 
 Chap1Level.prototype.render = function() {
 	'use strict';
-	
+
 	var gs = this.gameState;
-	
-	
 };
+
+Chap1Level.prototype.toogleMazeLights = function() {
+	'use strict';
+
+	this.gameState.toggleLights('maze');
+	
+	var mSwitch = this.objects.mazeSwitch;
+	if(mSwitch.frame === 0) {
+		mSwitch.frame = 3;
+		mSwitch.animations.play('toggle');
+	}
+	else {
+		mSwitch.frame = 0;
+		mSwitch.animations.play('toggle2');
+	}
+	
+	// TODO: Add switch sound !
+};
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter II
