@@ -74,6 +74,15 @@ function DagfinGame(width, height, renderer, parent) {
 	this.inventory = [];
 
 	this.game.state.start('Boot');
+	
+	this.loadToCache = {
+		'image': '_images',
+		'spritesheet': '_images',
+		'bitmapFont': '_bitmapFont',
+		'json': '_json',
+		'audio': '_sounds', // just don't ask...
+		'tilemap': '_tilemap'
+	};
 };
 
 DagfinGame.prototype.saveGameData = function() {
@@ -172,6 +181,34 @@ DagfinGame.prototype.hasObject = function(obj) {
 	return false;
 }
 
+/**
+* Check if something is in the cache. As Phaser does not seems to
+* have an interface for this, we directly check the private members.
+* May break on Phaser updates.
+*/
+DagfinGame.prototype.isLoaded = function(loadMethod, key) {
+	'use strict';
+
+	var cacheField = this.loadToCache[loadMethod]
+	return this.game.cache[cacheField][key]? true: false; // Seriously ?!?
+}
+
+/**
+* 'Intelligent' loading function. Load stuff using Phaser, but only if
+* the key is not already in the cache. This mean that there can NOT be
+* two ressources with the same key, even if they are in different levels.
+*/
+DagfinGame.prototype.load = function(loadMethod, key) {
+	'use strict';
+
+	if(this.isLoaded(loadMethod, key)) {
+		return;
+	}
+
+	this.game.load[loadMethod].apply(this.game.load,
+			Array.prototype.slice.call(arguments, 1));
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -194,9 +231,9 @@ BootState.prototype.preload = function() {
 
 	this.dagfin.initState();
 
-	this.game.load.image('splash', 'assets/couverturev2.png');
-	this.game.load.image('progressBarBg', 'assets/progress_bar_bg.png');
-	this.game.load.image('progressBar', 'assets/progress_bar.png');
+	this.dagfin.load('image', 'splash', 'assets/couverturev2.png');
+	this.dagfin.load('image', 'progressBarBg', 'assets/progress_bar_bg.png');
+	this.dagfin.load('image', 'progressBar', 'assets/progress_bar.png');
 
 };
 
@@ -235,36 +272,40 @@ LoadingState.prototype.preload = function() {
 	this.load.setPreloadSprite(this.progressBar);
 
 	// Full-screen effects
-	this.load.image("black", "assets/sprites/black.png");
-	this.load.image("damage", "assets/sprites/damage.png");
-	this.load.spritesheet("noise", "assets/sprites/noise.png", 200, 150);
+	this.dagfin.load('image', "black", "assets/sprites/black.png");
+	this.dagfin.load('image', "damage", "assets/sprites/damage.png");
+	this.dagfin.load('spritesheet', "noise", "assets/sprites/noise.png", 200, 150);
 
-	this.load.image("radial_light", "assets/sprites/radial_light.png");
+	this.dagfin.load('image', "radial_light", "assets/sprites/radial_light.png");
 
 	// Menu
-	this.load.image('menu_bg', 'assets/menu_bg.png');
-	this.load.image('menu_arrow', 'assets/menu_arrow.png');
-	this.load.image('menu_newGame', 'assets/sprites/'+lang+'/new_game.png');
-	this.load.image('menu_continue', 'assets/sprites/'+lang+'/continue.png');
+	this.dagfin.load('image', 'menu_bg', 'assets/menu_bg.png');
+	this.dagfin.load('image', 'menu_arrow', 'assets/menu_arrow.png');
+	this.dagfin.load('image', 'menu_newGame', 'assets/sprites/'+lang+'/new_game.png');
+	this.dagfin.load('image', 'menu_continue', 'assets/sprites/'+lang+'/continue.png');
 	
 	// Message stuff
-	this.load.image("message_bg", "assets/message_bg.png");
-	this.load.bitmapFont("message_font", "assets/fonts/font.png",
+	this.dagfin.load('image', "message_bg", "assets/message_bg.png");
+	this.dagfin.load('bitmapFont', "message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
 
 	// Characters
-	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
-//	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
-	this.load.spritesheet("player", "assets/sprites/player2.png", DOOD_WIDTH, DOOD_HEIGHT);
-	this.load.image("dead_player", "assets/sprites/dead.png");
+	this.dagfin.load('spritesheet', "zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
+//	this.dagfin.load('spritesheet', "player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.dagfin.load('spritesheet', "player", "assets/sprites/player2.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.dagfin.load('image', "dead_player", "assets/sprites/dead.png");
 
 	// Props
-	this.load.image("hdoor", "assets/sprites/hdoor.png");
-	this.load.image("vdoor", "assets/sprites/vdoor.png");
+	this.dagfin.load('image', "hdoor", "assets/sprites/hdoor.png");
+	this.dagfin.load('image', "vdoor", "assets/sprites/vdoor.png");
 
 	// Sounds
-	this.load.json("sfxInfo", "assets/audio/sfx/sounds.json");
-	this.load.audio('sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
+	this.dagfin.load('json', "sfxInfo", "assets/audio/sfx/sounds.json");
+	this.dagfin.load('audio', 'sfx', ["assets/audio/sfx/sounds.mp3","assets/audio/sfx/sounds.ogg"]);
+
+	this.dagfin.load('audio', 'music', [
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
+		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
 
 };
 
@@ -1519,9 +1560,9 @@ TestLevel.prototype.preload = function() {
 	
 	var gs = this.gameState;
 	
-	gs.load.tilemap("map", "assets/maps/test.json", null,
+	gs.dagfin.load('tilemap', "map", "assets/maps/test.json", null,
 	                  Phaser.Tilemap.TILED_JSON);
-	gs.load.image("defaultTileset", "assets/tilesets/test.png");
+	gs.dagfin.load('image', "defaultTileset", "assets/tilesets/test.png");
 
 };
 
@@ -1569,9 +1610,9 @@ ExperimentalLevel.prototype = Object.create(Level.prototype);
 ExperimentalLevel.prototype.preload = function() {
 	var gs = this.gameState;
 	
-	gs.load.tilemap("map", "assets/maps/test2.json", null, Phaser.Tilemap.TILED_JSON);
-	gs.load.image("terrainTileset", "assets/tilesets/test.png");
-	gs.load.image("specialsTileset", "assets/tilesets/basic.png");
+	gs.dagfin.load('tilemap', "map", "assets/maps/test2.json", null, Phaser.Tilemap.TILED_JSON);
+	gs.dagfin.load('image', "terrainTileset", "assets/tilesets/test.png");
+	gs.dagfin.load('image', "specialsTileset", "assets/tilesets/basic.png");
 };
 
 ExperimentalLevel.prototype.create = function() {
@@ -1685,18 +1726,15 @@ IntroLevel.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("intro_map_json", "assets/maps/intro.json");
-	gs.load.json("intro_messages", "assets/texts/"+lang+"/intro.json");
+	gs.dagfin.load('json', "intro_map_json", "assets/maps/intro.json");
+	gs.dagfin.load('json', "intro_messages", "assets/texts/"+lang+"/intro.json");
 	
-	gs.load.image("intro_tileset", "assets/tilesets/intro.png");
-	gs.load.spritesheet("pillar_item", "assets/sprites/pillar.png", 32, 64);
-	gs.load.image("carpet_item", "assets/sprites/carpet.png");
-	gs.load.image("blood_item", "assets/sprites/blood.png");
-	gs.load.image("femur_item", "assets/sprites/femur.png");
-	gs.load.image("collar_item", "assets/sprites/collar.png");
-	gs.load.audio('music', [
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+	gs.dagfin.load('image', "intro_tileset", "assets/tilesets/intro.png");
+	gs.dagfin.load('spritesheet', "pillar_item", "assets/sprites/pillar.png", 32, 64);
+	gs.dagfin.load('image', "carpet_item", "assets/sprites/carpet.png");
+	gs.dagfin.load('image', "blood_item", "assets/sprites/blood.png");
+	gs.dagfin.load('image', "femur_item", "assets/sprites/femur.png");
+	gs.dagfin.load('image', "collar_item", "assets/sprites/collar.png");
 };
 
 IntroLevel.prototype.create = function() {
@@ -1826,20 +1864,16 @@ Chap1Level.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
-	gs.load.json("chap1_messages", "assets/texts/"+lang+"/chap1.json");
+	gs.dagfin.load('json', "chap1_map_json", "assets/maps/chap1.json");
+	gs.dagfin.load('json', "chap1_messages", "assets/texts/"+lang+"/chap1.json");
 	
-	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
-	gs.load.image("spawn", "assets/tilesets/spawn.png");
-	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	gs.dagfin.load('image', "chap1_tileset", "assets/tilesets/basic.png");
+	gs.dagfin.load('image', "spawn", "assets/tilesets/spawn.png");
+	gs.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
 
-	gs.load.image("note", "assets/sprites/note.png");
-	gs.load.image("clock", "assets/sprites/clock.png");
-	gs.load.spritesheet("switch", "assets/sprites/switch.png", 32,32);
-
-	gs.load.audio('music', [
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+	gs.dagfin.load('image', "note", "assets/sprites/note.png");
+	gs.dagfin.load('image', "clock", "assets/sprites/clock.png");
+	gs.dagfin.load('spritesheet', "switch", "assets/sprites/switch.png", 32,32);
 };
 
 Chap1Level.prototype.create = function() {
@@ -2075,20 +2109,16 @@ Chap2Level.prototype.preload = function() {
 	
 	var gs = this.gameState;
 	
-	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
-	gs.load.json("chap2_messages", "assets/texts/"+lang+"/chap2.json");
+	gs.dagfin.load('json', "chap2_map_json", "assets/maps/chap2.json");
+	gs.dagfin.load('json', "chap2_messages", "assets/texts/"+lang+"/chap2.json");
 	
-	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
-	gs.load.image("spawn", "assets/tilesets/spawn.png");
-	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	gs.dagfin.load('image', "chap2_tileset", "assets/tilesets/basic.png");
+	gs.dagfin.load('image', "spawn", "assets/tilesets/spawn.png");
+	gs.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
 	
-	gs.load.image("note", "assets/sprites/note.png");
-	gs.load.image("hourglass", "assets/sprites/sablier.png");
-	gs.load.image("plante64", "assets/sprites/plante64.png");
-	
-	gs.load.audio('music', [
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+	gs.dagfin.load('image', "note", "assets/sprites/note.png");
+	gs.dagfin.load('image', "hourglass", "assets/sprites/sablier.png");
+	gs.dagfin.load('image', "plante64", "assets/sprites/plante64.png");
 };
 
 Chap2Level.prototype.create = function() {
@@ -2251,20 +2281,16 @@ Chap3Level.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("chap3_map_json", "assets/maps/chap3.json");
-	gs.load.json("chap3_messages", "assets/texts/"+lang+"/chap3.json");
+	gs.dagfin.load('json', "chap3_map_json", "assets/maps/chap3.json");
+	gs.dagfin.load('json', "chap3_messages", "assets/texts/"+lang+"/chap3.json");
 	
-	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
-	gs.load.image("spawn", "assets/tilesets/spawn.png");
-	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
+	gs.dagfin.load('image', "chap3_tileset", "assets/tilesets/basic.png");
+	gs.dagfin.load('image', "spawn", "assets/tilesets/spawn.png");
+	gs.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
 
-	gs.load.image("note", "assets/sprites/note.png");
-	gs.load.image("flame", "assets/sprites/flame.png");
-	gs.load.image("chair", "assets/sprites/chair.png");
-
-	gs.load.audio('music', [
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+	gs.dagfin.load('image', "note", "assets/sprites/note.png");
+	gs.dagfin.load('image', "flame", "assets/sprites/flame.png");
+	gs.dagfin.load('image', "chair", "assets/sprites/chair.png");
 };
 
 Chap3Level.prototype.create = function() {
@@ -2427,20 +2453,16 @@ BossLevel.prototype.preload = function() {
 	
 	var gs = this.gameState;
 
-	gs.load.json("boss_map_json", "assets/maps/boss.json");
-	gs.load.json("boss_messages", "assets/texts/"+lang+"/ccl.json");
+	gs.dagfin.load('json', "boss_map_json", "assets/maps/boss.json");
+	gs.dagfin.load('json', "boss_messages", "assets/texts/"+lang+"/ccl.json");
 	
-	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
-	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
-	gs.load.image("trone", "assets/sprites/trone.png");
-	gs.load.spritesheet("slot", "assets/sprites/pillar_end.png", 32, 64);
+	gs.dagfin.load('image', "boss_tileset", "assets/tilesets/basic.png");
+	gs.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
+	gs.dagfin.load('image', "trone", "assets/sprites/trone.png");
+	gs.dagfin.load('spritesheet', "slot", "assets/sprites/pillar_end.png", 32, 64);
 
-	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
-	gs.load.spritesheet("matt", "assets/sprites/matt.png", 32, 48);
-
-	gs.load.audio('music', [
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.mp3',
-		'assets/audio/music/01 - SAKTO - L_Appel de Cthulhu.ogg']);
+	gs.dagfin.load('spritesheet', "dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
+	gs.dagfin.load('spritesheet', "matt", "assets/sprites/matt.png", 32, 48);
 };
 
 BossLevel.prototype.create = function() {
