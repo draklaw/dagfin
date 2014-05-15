@@ -399,11 +399,13 @@ CreditsState.prototype.create = function() {
 
 	this.dagfin.initState();
 
-	this.credits = this.add.text(400, 300,
-		"Programming, graphics & game desing:\n\nAlia Zanetsu\nDoc\nDraKlaW\nGammaNu\n\n---\n\nThank you for playing !",
+	this.credits = this.add.text(400, 800,
+		"Programming, graphics & game desing\n\nAlia Zanetsu\nDoc\nDraKlaW\nGammaNu\n\n-----\n\nThank you for playing !",
 		{ font: "32px Arial", fill: "#ffffff", align: "center" });
 	this.credits.anchor.set(.5, .5);
 
+	var tween = this.add.tween(this.credits);
+	tween.to({ y: 300 }, 5000, Phaser.Easing.Linear.None, true);
 };
 
 CreditsState.prototype.update = function() {
@@ -2390,7 +2392,6 @@ BossLevel.prototype.create = function() {
 
 	this.triggers.boss.onEnter.add(this.welcomeDialog, this);
 	this.triggers.matt.onEnter.add(this.mattDialog, this);
-
 };
 
 BossLevel.prototype.update = function() {
@@ -2490,8 +2491,17 @@ BossLevel.prototype.startCredits = function(obj) {
 	'use strict';
 
 	var gs = this.gameState;
+
+	var blackScreen = gs.add.sprite(0, 0, 'black', 0, gs.postProcessGroup);
+	blackScreen.scale.set(MAX_WIDTH, MAX_HEIGHT);
+	blackScreen.alpha = 0;
 	
-	gs.game.state.start('Credits');
+	var tween = gs.add.tween(blackScreen);
+	tween.to({ alpha: 1 }, 2000,
+			 Phaser.Easing.Linear.None, true);
+	tween.onComplete.add(function() {
+		gs.game.state.start('Credits');
+	});
 }
 
 
