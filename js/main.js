@@ -1892,7 +1892,11 @@ Chap1Level.prototype.create = function() {
 		level.triggers.reveal_secret.onEnter.removeAll();
 		gs.ceiling.remove(gs.secretLayer);
 	}, this);
-	
+
+	for(var i=1; i<6; ++i) {
+		this.setupAlleyLight(i);
+	}
+
 	this.triggers.clock.onEnter.add(function() {
 		gs.askQuestion("messages", "clock", [
 			function() {
@@ -1903,7 +1907,7 @@ Chap1Level.prototype.create = function() {
 			}
 		]);
 	}, this);
-	
+
 	this.triggers.exit.onEnter.add(function() {
 		gs.dagfin.goToLevel('chap2');
 	}, this);
@@ -2001,6 +2005,16 @@ Chap1Level.prototype.stepCrumbleBridge = function() {
 	if(this.infectedTiles.length === 0) {
 		gs.time.events.remove(this.crumbleTimer);
 	}
+};
+
+Chap1Level.prototype.setupAlleyLight = function(i) {
+	'use strict';
+
+	var id = 'alley'+i.toString();
+	this.triggers[id].onEnter.add(function() {
+		this.gameState.toggleLights(id);
+		this.triggers[id].onEnter.removeAll();
+	}, this);
 };
 
 
