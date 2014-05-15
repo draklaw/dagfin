@@ -717,64 +717,80 @@
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="5"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="320" y="960">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="12"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="448" y="1024">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="18"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="608" y="928">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="24"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="768" y="928">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="29"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="800" y="1088">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="35"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="640" y="1216">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="42"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="448" y="1312">
    <properties>
     <property name="color" value="be732c"/>
     <property name="color_woobling" value="0"/>
+    <property name="enabled" value="false"/>
     <property name="size" value="12"/>
     <property name="size_woobling" value="0"/>
+    <property name="step" value="50"/>
    </properties>
   </object>
   <object name="LavaLight" type="light" gid="17" x="256" y="1312">
@@ -841,7 +857,7 @@
     <property name="color" value="a0a0a0"/>
     <property name="color_woobling" value=".2"/>
     <property name="enabled" value="false"/>
-    <property name="size" value="6"/>
+    <property name="size" value="4"/>
     <property name="size_woobling" value=".01"/>
     <property name="toggle" value="maze"/>
    </properties>
@@ -851,7 +867,7 @@
     <property name="color" value="a0a0a0"/>
     <property name="color_woobling" value=".2"/>
     <property name="enabled" value="false"/>
-    <property name="size" value="6"/>
+    <property name="size" value="4"/>
     <property name="size_woobling" value=".01"/>
     <property name="toggle" value="maze"/>
    </properties>
@@ -861,7 +877,7 @@
     <property name="color" value="a0a0a0"/>
     <property name="color_woobling" value=".2"/>
     <property name="enabled" value="false"/>
-    <property name="size" value="6"/>
+    <property name="size" value="4"/>
     <property name="size_woobling" value=".01"/>
     <property name="toggle" value="maze"/>
    </properties>
@@ -871,7 +887,7 @@
     <property name="color" value="a0a0a0"/>
     <property name="color_woobling" value=".2"/>
     <property name="enabled" value="false"/>
-    <property name="size" value="6"/>
+    <property name="size" value="4"/>
     <property name="size_woobling" value=".01"/>
     <property name="toggle" value="maze"/>
    </properties>

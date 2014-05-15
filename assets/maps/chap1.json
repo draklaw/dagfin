@@ -745,8 +745,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"5"
                     },
                  "type":"light",
                  "visible":true,
@@ -762,8 +764,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"12"
                     },
                  "type":"light",
                  "visible":true,
@@ -779,8 +783,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"18"
                     },
                  "type":"light",
                  "visible":true,
@@ -796,8 +802,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"24"
                     },
                  "type":"light",
                  "visible":true,
@@ -813,8 +821,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"29"
                     },
                  "type":"light",
                  "visible":true,
@@ -830,8 +840,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"35"
                     },
                  "type":"light",
                  "visible":true,
@@ -847,8 +859,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"42"
                     },
                  "type":"light",
                  "visible":true,
@@ -864,8 +878,10 @@
                     {
                      "color":"be732c",
                      "color_woobling":"0",
+                     "enabled":"false",
                      "size":"12",
-                     "size_woobling":"0"
+                     "size_woobling":"0",
+                     "step":"50"
                     },
                  "type":"light",
                  "visible":true,
@@ -1004,7 +1020,7 @@
                      "color":"a0a0a0",
                      "color_woobling":".2",
                      "enabled":"false",
-                     "size":"6",
+                     "size":"4",
                      "size_woobling":".01",
                      "toggle":"maze"
                     },
@@ -1023,7 +1039,7 @@
                      "color":"a0a0a0",
                      "color_woobling":".2",
                      "enabled":"false",
-                     "size":"6",
+                     "size":"4",
                      "size_woobling":".01",
                      "toggle":"maze"
                     },
@@ -1042,7 +1058,7 @@
                      "color":"a0a0a0",
                      "color_woobling":".2",
                      "enabled":"false",
-                     "size":"6",
+                     "size":"4",
                      "size_woobling":".01",
                      "toggle":"maze"
                     },
@@ -1061,7 +1077,7 @@
                      "color":"a0a0a0",
                      "color_woobling":".2",
                      "enabled":"false",
-                     "size":"6",
+                     "size":"4",
                      "size_woobling":".01",
                      "toggle":"maze"
                     },

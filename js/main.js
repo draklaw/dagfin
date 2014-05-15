@@ -1872,46 +1872,15 @@ Chap1Level.prototype.create = function() {
 	this.objects.mazeSwitch.animations.add('toggle2', [ 3, 2, 1, 0 ], 30);
 	this.objects.mazeSwitch.frame = 0
 	this.objects.mazeSwitch.onActivate.add(this.toogleMazeLights, this);
-	
-	this.infectedTiles = [];
-	this.crumble = function () {
-		var newlyInfected = [];
-		
-		for (var i = 0 ; i < this.infectedTiles.length ; i++)
-		{
-			var coord = this.infectedTiles[i];
-			var x = coord[0];
-			var y = coord[1];
-			gs.map.removeTile(x, y, gs.bridgeLayer);
 
-			var neighbours = [
-				[ x - 1, y ],
-				[ x + 1, y ],
-				[ x, y - 1 ],
-				[ x, y + 1 ]
-			];
-			for (var j = 0 ; j < 4 ; j++) {
-				var nb = neighbours[j];
-				var tile = gs.map.getTile(nb[0], nb[1], gs.bridgeLayer);
-				if(tile !== null && !tile.isMarked) {
-					newlyInfected.push(nb);
-					tile.isMarked = true;
-				}
-			}
-		}
-		
-		this.infectedTiles = newlyInfected;
-		if(this.infectedTiles.length === 0) {
-			gs.time.events.remove(this.crumbleTimer);
-		}
-		
-	};
-	
+	this.infectedTiles = [];
+
+	this.crumbleStep = 0;
 	this.triggers.lava_fail.onEnter.add(function() {
 		level.triggers.lava_fail.onEnter.removeAll();
 		level.infectedTiles = [ [ 6, 22 ] ];
 		level.crumbleTimer = gs.time.events.loop(
-			200, level.crumble, level);
+			200, level.stepCrumbleBridge, level);
 	}, this);
 	
 	this.triggers.secret_tip.onEnter.add(function() {
@@ -1981,6 +1950,57 @@ Chap1Level.prototype.toogleMazeLights = function() {
 	}
 	
 	// TODO: Add switch sound !
+};
+
+Chap1Level.prototype.stepCrumbleBridge = function() {
+	'use strict';
+
+	var gs = this.gameState;
+
+	var newlyInfected = [];
+
+	for (var i = 0 ; i < this.infectedTiles.length ; i++)
+	{
+		var coord = this.infectedTiles[i];
+		var x = coord[0];
+		var y = coord[1];
+		gs.map.removeTile(x, y, gs.bridgeLayer);
+
+		var neighbours = [
+			[ x - 1, y ],
+			[ x + 1, y ],
+			[ x, y - 1 ],
+			[ x, y + 1 ]
+		];
+		for (var j = 0 ; j < 4 ; j++) {
+			var nb = neighbours[j];
+			var tile = gs.map.getTile(nb[0], nb[1], gs.bridgeLayer);
+			if(tile !== null && !tile.isMarked) {
+				newlyInfected.push(nb);
+				tile.isMarked = true;
+			}
+		}
+	}
+
+	++this.crumbleStep;
+	for(var i=0; i<gs.lightGroup.length; ++i) {
+		var light = gs.lightGroup.children[i];
+		if(typeof light.properties.step !== 'undefined') {
+			if(light.properties.step < this.crumbleStep+7 &&
+			   light.properties.step > this.crumbleStep) {
+				light.revive();
+				light.lightColor = gs.multColor(
+					gs.stringToColor(light.properties.color),
+					(this.crumbleStep + 7 - light.properties.step) / 6);
+				light.tint = light.lightColor;
+			}
+		}
+	}
+
+	this.infectedTiles = newlyInfected;
+	if(this.infectedTiles.length === 0) {
+		gs.time.events.remove(this.crumbleTimer);
+	}
 };
 
 
