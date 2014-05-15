@@ -256,6 +256,7 @@ LoadingState.prototype.preload = function() {
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 //	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
 	this.load.spritesheet("player", "assets/sprites/player2.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.load.image("dead_player", "assets/sprites/dead.png");
 
 	// Props
 	this.load.image("hdoor", "assets/sprites/hdoor.png");
@@ -535,6 +536,10 @@ GameState.prototype.create = function () {
 	this.playerAnims[UP]    = 'walk_up';
 	this.playerAnims[RIGHT] = 'walk_right';
 	this.playerAnims[LEFT]  = 'walk_left';
+	
+	this.deadPlayer = this.add.sprite(0, 0, 'dead_player', 0, this.objectGroup);
+	this.deadPlayer.anchor.set(.5, .5);
+	this.deadPlayer.kill(); // Kill the dead !
 
 	// Zombies
 	this.mobs = [];
@@ -620,7 +625,11 @@ GameState.prototype.create = function () {
 	this.gameOver.kill();
 	this.gameOverText = this.add.text(40, 280,
 						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
-	
+
+	// Damage pass
+	this.damageSprite = this.add.sprite(0, 0, "damage", 0, this.postProcessGroup);
+	this.damageSprite.scale.set(8, 8);
+
 	// Noise pass
 	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
 	this.noiseSprite.animations.add("noise", null, 24, true);
@@ -630,10 +639,6 @@ GameState.prototype.create = function () {
 	if(!this.level.enableNoisePass) {
 		this.noiseSprite.kill();
 	}
-	
-	// Damage pass
-	this.damageSprite = this.add.sprite(0, 0, "damage", 0, this.postProcessGroup);
-	this.damageSprite.scale.set(MAX_WIDTH, MAX_HEIGHT);
 
 	/*
 	// Noises pass
@@ -1163,14 +1168,23 @@ function Player(game, x, y) {
 	gs.updateInjector(player.onUpdateBehavior);
 
 	player.events.onKilled.add(function(){
+		gs.deadPlayer.revive();
+		gs.deadPlayer.x = this.x;
+		gs.deadPlayer.y = this.y;
+
 		gs.gameOver.revive();
-		gs.gameOverText.text = "You disapeard deep beneath the surface...";
-		//		console.log("Humanity lost you beneath the surface !");
-		gs.time.events.repeat(1500, 1, function() {
-			gs.dagfin.reloadLastSave();
-		}, gs);
+		gs.gameOver.alpha = 0;
+		var tween = gs.add.tween(gs.gameOver);
+		tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, 500);
+		tween.onComplete.add(function() {
+			gs.gameOverText.text = "You disapeard deep beneath the surface...";
+			//		console.log("Humanity lost you beneath the surface !");
+			gs.time.events.add(2000, function() {
+				gs.dagfin.reloadLastSave();
+			}, gs);
+		});
 		//TODO : death sound, death music
-	});
+	}, this);
 	
 	player.lastTime = (new Date()).getTime();
 	player.regenerate = function(){
