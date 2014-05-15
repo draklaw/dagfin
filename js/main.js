@@ -683,7 +683,7 @@ GameState.prototype.update = function () {
 	
 	// React to controls.
 	player.body.velocity.set(0, 0);
-	if(!this.blocPlayerWhileMsg) {
+	if(!this.blocPlayerWhileMsg && this.player.alive) {
 		if (this.k_down.isDown) {
 			player.body.velocity.y = 1;
 			player.facing = DOWN;
@@ -703,7 +703,7 @@ GameState.prototype.update = function () {
 		player.body.velocity.setMagnitude(player.speed());
 	}
 
-	if(this.k_use.triggered && this.hasMessageDisplayed()) {
+	if(this.k_use.triggered && this.hasMessageDisplayed() && this.player.alive) {
 		this.k_use.triggered = false;
 		this.nextMessage();
 	}
@@ -1487,7 +1487,7 @@ Level.prototype.processTriggers = function(mapJson) {
 		}
 	}
 
-	var use = (gs.messageQueue.length === 0 && gs.k_use.triggered);
+	var use = (!gs.hasMessageDisplayed() && gs.player.alive && gs.k_use.triggered);
 	var usePos = gs.player.facingPosition();
 	for(var id in this.objects) {
 		var obj = this.objects[id];
