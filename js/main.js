@@ -254,7 +254,8 @@ LoadingState.prototype.preload = function() {
 
 	// Characters
 	this.load.spritesheet("zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
-	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
+//	this.load.spritesheet("player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
+	this.load.spritesheet("player", "assets/sprites/player2.png", DOOD_WIDTH, DOOD_HEIGHT);
 
 	// Props
 	this.load.image("hdoor", "assets/sprites/hdoor.png");
@@ -525,6 +526,16 @@ GameState.prototype.create = function () {
 	var rawPlayerData = this.map.objects.doods[0];
 	this.player = new Player(this.game, rawPlayerData.x, rawPlayerData.y);
 
+	this.player.animations.add('walk_down',  [0,  1, 0,  2], 8, true);
+	this.player.animations.add('walk_up',    [3,  4, 3,  5], 8, true);
+	this.player.animations.add('walk_right', [6,  7, 6,  8], 8, true);
+	this.player.animations.add('walk_left',  [9, 10, 9, 11], 8, true);
+	this.playerAnims = [];
+	this.playerAnims[DOWN]  = 'walk_down';
+	this.playerAnims[UP]    = 'walk_up';
+	this.playerAnims[RIGHT] = 'walk_right';
+	this.playerAnims[LEFT]  = 'walk_left';
+
 	// Zombies
 	this.mobs = [];
 	var zombieList = gs.map.objects.doods;
@@ -686,15 +697,7 @@ GameState.prototype.update = function () {
 		}
 		player.body.velocity.setMagnitude(player.speed());
 	}
-	player.frame = player.behavior*4 + player.facing;
 
-	// bruit de pas
-	if(	player.body.prev.x !== player.body.position.x
-	   || player.body.prev.y !== player.body.position.y
-	  ){
-		player.sfx.play('playerFootStep', 0, 1, false, false);
-	}
-	
 	if(this.k_use.triggered && this.hasMessageDisplayed()) {
 		this.k_use.triggered = false;
 		this.nextMessage();
@@ -765,6 +768,18 @@ GameState.prototype.update = function () {
 		return !((a instanceof Player && b instanceof Zombie) ||
 				 (a instanceof Zombie && b instanceof Player));
 	});
+
+	// Walk animations and sound must be after collisions.
+	if(Math.abs(player.body.prev.x - player.body.position.x) > 1
+	   || Math.abs(player.body.prev.y - player.body.position.y) > 1
+	  ){
+		player.sfx.play('playerFootStep', 0, 1, false, false);
+		player.animations.play(this.playerAnims[player.facing]);
+	}
+	else {
+		player.animations.stop();
+		player.frame = (player.behavior*4 + player.facing)*3;
+	}
 
 	this.depthGroup.sort('y', Phaser.Group.SORT_ASCENDING);
 	
