@@ -14,6 +14,8 @@ var UP    = 1;
 var RIGHT = 2;
 var LEFT  = 3;
 
+var USE_DIST = 24;
+
 var PLAYER_VELOCITY = 140;
 var PLAYER_MAX_LIFE = 3;
 var PLAYER_FULL_LIFE_RECOVERY_TIME = 60; //in seconds 0 for no regen
@@ -65,6 +67,7 @@ function DagfinGame(width, height, renderer, parent) {
 	this.game.state.add('Loading', new LoadingState(this));
 	this.game.state.add('Menu', new MenuState(this));
 	this.game.state.add('Game', new GameState(this));
+	this.game.state.add('Credits', new CreditsState(this));
 
 	this.lastSave = null;
 	this.levelName = 'Intro';
@@ -78,7 +81,7 @@ DagfinGame.prototype.saveGameData = function() {
 
 	this.lastSave = {
 		'levelName': this.levelName,
-		'inventory': this.inventory.splice()
+		'inventory': this.inventory.slice()
 	};
 	localStorage.setItem('save', JSON.stringify(this.lastSave));
 };
@@ -120,7 +123,7 @@ DagfinGame.prototype.reloadLastSave = function() {
 	'use strict';
 
 	this.levelName = this.lastSave.levelName;
-	this.inventory = this.lastSave.inventory.splice();
+	this.inventory = this.lastSave.inventory.slice();
 	this.game.state.start('Game', true, false, this.levelName);
 };
 
@@ -156,6 +159,17 @@ DagfinGame.prototype.toggleFullScreen = function() {
 	else {
 		this.game.scale.startFullScreen(false);
 	}
+}
+
+DagfinGame.prototype.hasObject = function(obj) {
+	'use strict';
+
+	for(var i=0; i<this.inventory.length; ++i) {
+		if(this.inventory[i] === obj) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -366,6 +380,40 @@ MenuState.prototype.menuValidate = function() {
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+// CREDITS STATE !
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+function CreditsState(dagfin) {
+	'use strict';
+
+	Phaser.State.call(this);
+
+	this.dagfin = dagfin;
+}
+
+CreditsState.prototype = Object.create(Phaser.State.prototype);
+
+CreditsState.prototype.create = function() {
+	'use strict';
+
+	this.dagfin.initState();
+
+	this.credits = this.add.text(400, 300,
+		"Programming, graphics & game desing:\n\nAlia Zanetsu\nDoc\nDraKlaW\nGammaNu\n\n---\n\nThank you for playing !",
+		{ font: "32px Arial", fill: "#ffffff", align: "center" });
+	this.credits.anchor.set(.5, .5);
+
+};
+
+CreditsState.prototype.update = function() {
+	'use strict';
+
+};
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 // GAME STATE !
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -458,10 +506,8 @@ GameState.prototype.create = function () {
 
 	// Group all the stuff on the ground (always in background)
 	this.objectsGroup = this.make.group();
-	// Group all the doors.
-	this.doorsGroup = this.make.group();
 	// Group all the stuff that should be sorted by depth.
-	this.characters = this.make.group();
+	this.depthGroup = this.make.group();
 	// Group all the stuff that should be sorted above the rest.
 	this.ceiling = this.make.group();
 
@@ -470,48 +516,9 @@ GameState.prototype.create = function () {
 		
 	// Add groups after level
 	this.world.add(this.objectsGroup);
-	this.world.add(this.doorsGroup);
-	this.world.add(this.characters);
+	this.world.add(this.depthGroup);
 	this.world.add(this.ceiling);
 
-	// Items in the map
-	this.objects = {};
-	if(this.map.objects.items) {
-		for(var i = 0 ; i < this.map.objects.items.length ; i++) {
-			var item = this.map.objects.items[i];
-			var offset_x = parseInt(item.properties.offset_x, 10) || 0;
-			var offset_y = parseInt(item.properties.offset_y, 10) || 0;
-			var key = item.properties.key || item.name+"_item";
-			var sprite = this.add.sprite(item.x + offset_x + 16,
-										 item.y + offset_y - 16,
-										 key, 0, this.objectsGroup);
-			sprite.anchor.set(.5, .5);
-			this.objects[item.name] = sprite;
-			sprite.objName = item.name;
-			this.game.physics.arcade.enable(sprite);
-		}
-	}
-	
-	// Doors in the map
-	this.doors = [];
-	if(this.map.objects.doors) {
-		for(var i = 0 ; i < this.map.objects.doors.length ; i++) {
-			var door = this.map.objects.doors[i];
-			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
-			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
-			var key = door.name.toLowerCase(); //FIXME: Should be door.type but it fails.
-			if (key === "hdoor") offset_y -= 32; else offset_y -= 16;
-			var sprite = this.add.sprite(door.x + offset_x + 16,
-			                             door.y + offset_y,
-			                             key, 0, this.doorsGroup);
-			sprite.anchor.set(.5, .5);
-			sprite.objName = door.name;
-			this.game.physics.arcade.enable(sprite);
-			sprite.body.immovable = true;
-			door.sprite = sprite;
-		}
-	}
-	
 	// People.
 	var rawPlayerData = this.map.objects.doods[0];
 	this.player = new Player(this.game, rawPlayerData.x, rawPlayerData.y);
@@ -751,7 +758,15 @@ GameState.prototype.update = function () {
 
 	this.level.update();
 
-	this.characters.sort('y', Phaser.Group.SORT_ASCENDING);
+	this.physics.arcade.collide(this.depthGroup, this.mapLayer);
+	// Tests the collisions among the group itself, but avoid zombie vs player collisions.
+	// TODO: What about Dagfin ?
+	this.physics.arcade.collide(this.depthGroup, undefined, null, function(a, b) {
+		return !((a instanceof Player && b instanceof Zombie) ||
+				 (a instanceof Zombie && b instanceof Player));
+	});
+
+	this.depthGroup.sort('y', Phaser.Group.SORT_ASCENDING);
 	
 	// Move full-screen sprite with the camera.
 	this.camera.update();
@@ -793,6 +808,9 @@ GameState.prototype.render = function () {
 		this.game.debug.geom(new Phaser.Rectangle(tiles[i].x*32, tiles[i].y*32, tiles[i].width, tiles[i].height), color);
 	}
 	*/
+//	this.depthGroup.forEach(function(body) {
+//		this.game.debug.body(body);
+//	}, this);
 	this.level.render();
 };
 
@@ -902,9 +920,11 @@ GameState.prototype.nextMessage = function() {
 		var choice = this.question.choices[this.questionChoice];
 		this.messageQueue = choice.message;
 		this.messageCallback = this.questionCallbacks[this.questionChoice];
+		this.messageCallbackContext = this.questionCallbackContext;
 		this.messageCallbackParam = this.questionCallbackParam;
 		this.question = null;
 	}
+
 	if(this.messageQueue.length === 0) {
 		this.messageGroup.callAll('kill');
 		this.message.text = "";
@@ -914,10 +934,12 @@ GameState.prototype.nextMessage = function() {
 			// reset callback before calling it allow to reset it in the callback.
 			var callback = this.messageCallback;
 			this.messageCallback = null;
-			callback(this.messageCallbackParam);
+			callback.apply(this.messageCallbackContext, this.messageCallbackParam);
 		}
 	}
-	else {
+
+	// Callback may have refilled the message queue.
+	if(this.messageQueue.length !== 0) {
 		this.messageGroup.callAll('revive');
 		this.message.text = this.messageQueue.shift().replace(/\n/g, '\n  ');
 	}
@@ -925,7 +947,6 @@ GameState.prototype.nextMessage = function() {
 
 GameState.prototype.updateQuestionText = function() {
 	var msg = this.question.question + "\n";
-	console.log("Update question:", this.questionChoice);
 	for(var i=0; i<this.question.choices.length; ++i) {
 		msg += "\n";
 		if(i === this.questionChoice)
@@ -937,21 +958,45 @@ GameState.prototype.updateQuestionText = function() {
 	this.message.text = msg;
 };
 
-GameState.prototype.askQuestion = function(key, msg, callbacks, param) {
+GameState.prototype.askQuestion = function(key, msg, callbacks, context, param) {
+	callbacks = callbacks || [];
+
+	var question = this.cache.getJSON(key)[msg];
+
+	this.blocPlayerWhileMsg = true;
+	if(Array.isArray(question.question)) {
+		this.messageQueue = question.question.slice(0, -1);
+		question.question = question.question.slice(-1);
+		this.messageCallback = this._askQuestion;
+		this.messageCallbackContext = this;
+		this.messageCallbackParam = [
+			question, callbacks, context,
+			Array.prototype.slice.call(arguments, 4)
+		];
+		this.nextMessage();
+	}
+	else {
+		this._askQuestion(question, callbacks, context, param);
+	}
+};
+
+GameState.prototype._askQuestion = function(question, callbacks, context, params) {
 	this.blocPlayerWhileMsg = true;
 	this.questionCallbacks = callbacks || [];
-	this.questionCallbackParam = param;
-	this.question = this.cache.getJSON(key)[msg];
+	this.questionCallbackContext = context;
+	this.questionCallbackParam = Array.prototype.slice.call(arguments, 3);
+	this.question = question;
 	this.questionChoice = 0;
 
 	this.messageGroup.callAll('revive');
 	this.updateQuestionText();
-};
+}
 
-GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, param) {
+GameState.prototype.displayMessage = function(key, msg, blocPlayer, callback, cbContext, params) {
 	this.blocPlayerWhileMsg = blocPlayer || false;
 	this.messageCallback = callback || null;
-	this.messageCallbackParam = param;
+	this.messageCallbackContext = cbContext || null;
+	this.messageCallbackParam = Array.prototype.slice.call(arguments, 5);
 	this.messageQueue = this.cache.getJSON(key)[msg].slice();
 	this.nextMessage();
 	if(!Array.isArray(this.messageQueue)) {
@@ -985,7 +1030,8 @@ function Dood(game, x, y, spritesheet, group) {
 	Phaser.Sprite.call(this, game, x+DOOD_OFFSET_X, y+DOOD_OFFSET_Y, spritesheet, 0);
 
 	game.physics.arcade.enable(this);
-	this.body.setSize(TILE_SIZE, TILE_SIZE, 0, TILE_SIZE/2);
+	this.body.setSize(28, 20, 0, 14);
+
 	this.anchor.set(.5, .6666667);
 	this.revive();
 
@@ -997,15 +1043,10 @@ function Dood(game, x, y, spritesheet, group) {
 	var gs = this.gs;
 	gs.addSfx(this);
 
-	if (!group) group = gs.characters;
+	if (!group) group = gs.depthGroup;
 	group.add(this);
 
 	var dood = this;
-	this.onUpdateBehavior = function(){
-		gs.game.physics.arcade.collide(dood, gs.mapLayer);
-		gs.game.physics.arcade.collide(dood, gs.doorsGroup);
-	};
-	gs.updateInjector(dood.onUpdateBehavior);
 
 	this.aggroPlayer = function (aggroRange, aggroFrontConeAngle, aggroThroughWall) {
 		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
@@ -1055,6 +1096,27 @@ function Dood(game, x, y, spritesheet, group) {
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
+Dood.prototype.facingPosition = function() {
+	var pos = new Phaser.Point(this.x, this.y+8);
+
+	switch(this.facing) {
+		case DOWN:
+			pos.y += USE_DIST;
+			break;
+		case UP:
+			pos.y -= USE_DIST;
+			break;
+		case RIGHT:
+			pos.x += USE_DIST;
+			break;
+		case LEFT:
+			pos.x -= USE_DIST;
+			break;
+	}
+	
+	return pos;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Player
@@ -1088,7 +1150,7 @@ function Player(game, x, y) {
 		gs.gameOverText.text = "You disapeard deep beneath the surface...";
 		//		console.log("Humanity lost you beneath the surface !");
 		gs.time.events.repeat(1500, 1, function() {
-			gs.state.restart(true, false, null, gs.levelId);
+			gs.dagfin.reloadLastSave();
 		}, gs);
 		//TODO : death sound, death music
 	});
@@ -1114,7 +1176,7 @@ function Player(game, x, y) {
 		else return PLAYER_VELOCITY;
 	};
 	player.loot = function(item){
-		player.inventory.push(item.objName);
+		gs.dagfin.inventory.push(item.objName);
 		item.kill();
 	};
 }
@@ -1246,7 +1308,6 @@ function Dagfin(game, x, y) {
 	this.lastZombieSpawn = 0;
 
 	this.events.onKilled.add(function(){
-		console.log("You Win");
 		//TODO : death sound, death music, win screen
 	});
 	dagfin.lastTime = (new Date()).getTime();
@@ -1304,6 +1365,8 @@ function Level(gameState) {
 Level.prototype.parseLevel = function(mapJson) {
 	'use strict';
 	
+	// TODO: refactor this function.
+	
 	var gs = this.gameState;
 		
 	this.triggersLayer = null;
@@ -1324,35 +1387,82 @@ Level.prototype.parseLevel = function(mapJson) {
 		var tri = this.triggersLayer.objects[i];
 		tri.rect = new Phaser.Rectangle(
 			tri.x, tri.y, tri.width, tri.height);
-		tri.onEnter = null;
-		tri.onLeave = null;
+		tri.onEnter = new Phaser.Signal();
+		tri.onLeave = new Phaser.Signal();
 		tri.isInside = false;
 		this.triggers[tri.name] = tri;
+	}
+
+	// Items in the map
+	this.objects = {};
+	if(this.mapLayers.items) {
+		for(var i = 0 ; i < this.mapLayers.items.objects.length ; i++) {
+			var item = this.mapLayers.items.objects[i];
+			var offset_x = parseInt(item.properties.offset_x, 10) || 0;
+			var offset_y = parseInt(item.properties.offset_y, 10) || 0;
+			var parent = (item.properties.solid === 'true')?
+				gs.depthGroup: gs.objectsGroup;
+			var key = item.properties.key || item.name+"_item";
+			var sprite = gs.add.sprite(item.x + offset_x + 16,
+										 item.y + offset_y - 16,
+										 key, 0, parent);
+			gs.game.physics.arcade.enable(sprite);
+			sprite.objName = item.name;
+			sprite.anchor.set(.5, .5);
+			sprite.body.immovable = true;
+			sprite.onActivate = new Phaser.Signal();
+			this.objects[item.name] = sprite;
+		}
+	}
+	
+	// Doors in the map
+	this.doors = []
+	if(this.mapLayers.doors) {
+		for(var i = 0 ; i < this.mapLayers.doors.objects.length ; i++) {
+			var door = this.mapLayers.doors.objects[i];
+			var offset_x = parseInt(door.properties.offset_x, 10) || 0;
+			var offset_y = parseInt(door.properties.offset_y, 10) || 0;
+			var key = door.type;
+			var sprite = gs.add.sprite(door.x + offset_x,
+			                             door.y + offset_y,
+			                             key, 0, gs.depthGroup);
+			gs.game.physics.arcade.enable(sprite);
+			sprite.anchor.set(0, 1);
+			sprite.body.setSize(TILE_SIZE, TILE_SIZE, 0, 0);
+			sprite.objName = door.name;
+			sprite.body.immovable = true;
+			door.sprite = sprite;
+			this.doors.push(door);
+		}
 	}
 };
 
 Level.prototype.processTriggers = function(mapJson) {
 	'use strict';
-	
+
 	var gs = this.gameState;
-	
+
 	for(var id in this.triggers) {
 		var tri = this.triggers[id];
 		var inside = tri.rect.contains(gs.player.x, gs.player.y);
 
 		if(inside && !tri.isInside) {
-			console.log("Enter:", id);
-			if(tri.onEnter) {
-				tri.onEnter();
-			}
+			tri.onEnter.dispatch();
 			tri.isInside = true;
 		}
 		if(!inside && tri.isInside) {
-			console.log("Leave:", id);
-			if(tri.onLeave) {
-				tri.onLeave();
-			}
+			tri.onLeave.dispatch();
 			tri.isInside = false;
+		}
+	}
+
+	var use = (gs.messageQueue.length === 0 && gs.k_use.triggered);
+	var usePos = gs.player.facingPosition();
+	for(var id in this.objects) {
+		var obj = this.objects[id];
+		
+		if(use && obj.body.hitTest(usePos.x, usePos.y)) {
+			obj.onActivate.dispatch(obj);
 		}
 	}
 };
@@ -1590,40 +1700,25 @@ IntroLevel.prototype.create = function() {
 
 IntroLevel.prototype.update = function() {
 	'use strict';
-	
+
+	var that = this;
 	var gs = this.gameState;
-	
+
 	if(!this.carpetFound &&
-	   gs.physics.arcade.overlap(gs.player, gs.objects.carpet)) {
+	   gs.physics.arcade.overlap(gs.player, this.objects.carpet)) {
 		gs.displayMessage("messages", "carpet", true, function(obj) {
-			gs.objects.carpet.kill();
-		}, obj);
+			that.objects.carpet.kill();
+		});
 		this.carpetFound = true;
 	}
 		
 	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-		var x = gs.player.x;
-		var y = gs.player.y;
-
-		switch(gs.player.facing) {
-			case DOWN:
-				y += 32;
-				break;
-			case UP:
-				y -= 32;
-				break;
-			case RIGHT:
-				x += 32;
-				break;
-			case LEFT:
-				x -= 32;
-				break;
-		}
+		var pos = gs.player.facingPosition();
 		
-		for(var id in gs.objects) {
-			var obj = gs.objects[id];
+		for(var id in this.objects) {
+			var obj = this.objects[id];
 			var name = obj.objName;
-			if(!this.found[name] && obj.body.hitTest(x, y)) {
+			if(!this.found[name] && obj.body.hitTest(pos.x, pos.y)) {
 				switch(name) {
 				case "blood":
 				case "femur":
@@ -1632,7 +1727,7 @@ IntroLevel.prototype.update = function() {
 						this.found[name] = true;
 						gs.displayMessage("messages", name+"2", true, function(obj) {
 							gs.player.loot(obj);
-						}, obj);
+						}, this, obj);
 					}
 					else {
 						gs.displayMessage("messages", name, true);
@@ -1642,7 +1737,7 @@ IntroLevel.prototype.update = function() {
 					this.found[name] = true;
 					gs.displayMessage("messages", 'book', true, function(obj) {
 						obj.frame = 1;
-					}, obj);
+					}, this, obj);
 					break;
 				}
 			}
@@ -1709,7 +1804,8 @@ Chap1Level.prototype.preload = function() {
 
 Chap1Level.prototype.create = function() {
 	'use strict';
-	
+
+	var that = this;
 	var gs = this.gameState;
 
 	// Deferred loading here. But since we have the json, it's instant.
@@ -1748,30 +1844,30 @@ Chap1Level.prototype.create = function() {
 	
 	var level = this;
 
-	this.triggers.indice1.onEnter = function() {
-		level.triggers.indice1.onEnter = null;
+	this.triggers.indice1.onEnter.add(function() {
+		level.triggers.indice1.onEnter.removeAll();
 		gs.displayMessage("messages", "indice1", true, function() {
-			gs.objects.indice1.kill();
+			that.objects.indice1.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.indice2.onEnter = function() {
-		level.triggers.indice2.onEnter = null;
+	this.triggers.indice2.onEnter.add(function() {
+		level.triggers.indice2.onEnter.removeAll();
 		gs.displayMessage("messages", "indice2", true, function() {
-			gs.objects.indice2.kill();
+			that.objects.indice2.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.indice3.onEnter = function() {
-		level.triggers.indice3.onEnter = null;
+	this.triggers.indice3.onEnter.add(function() {
+		level.triggers.indice3.onEnter.removeAll();
 		gs.displayMessage("messages", "indice3", true, function() {
-			gs.objects.indice3.kill();
+			that.objects.indice3.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.mazeToggle.onEnter = function() {
+	this.triggers.mazeToggle.onEnter.add(function() {
 		gs.toggleLights('maze');
-	};
+	}, this);
 	
 	this.infectedTiles = [];
 	this.crumble = function () {
@@ -1807,37 +1903,37 @@ Chap1Level.prototype.create = function() {
 		
 	};
 	
-	this.triggers.lava_fail.onEnter = function() {
-		level.triggers.lava_fail.onEnter = null;
+	this.triggers.lava_fail.onEnter.add(function() {
+		level.triggers.lava_fail.onEnter.removeAll();
 		level.infectedTiles = [ [ 6, 22 ] ];
 		level.crumbleTimer = gs.time.events.loop(
 			200, level.crumble, level);
-	};
+	}, this);
 	
-	this.triggers.secret_tip.onEnter = function() {
-		level.triggers.secret_tip.onEnter = null;
+	this.triggers.secret_tip.onEnter.add(function() {
+		level.triggers.secret_tip.onEnter.removeAll();
 		gs.displayMessage("messages", "secret", true);
-	};
+	}, this);
 
-	this.triggers.reveal_secret.onEnter = function() {
-		level.triggers.reveal_secret.onEnter = null;
+	this.triggers.reveal_secret.onEnter.add(function() {
+		level.triggers.reveal_secret.onEnter.removeAll();
 		gs.ceiling.remove(gs.secretLayer);
-	};
+	}, this);
 	
-	this.triggers.clock.onEnter = function() {
+	this.triggers.clock.onEnter.add(function() {
 		gs.askQuestion("messages", "clock", [
 			function() {
-				gs.player.loot(gs.objects.clock);
-				level.triggers.clock.onEnter = null;
+				gs.player.loot(that.objects.clock);
+				level.triggers.clock.onEnter.removeAll();
 			},
 			function() {
 			}
 		]);
-	};
+	}, this);
 	
-	this.triggers.exit.onEnter = function() {
+	this.triggers.exit.onEnter.add(function() {
 		gs.dagfin.goToLevel('chap2');
-	}
+	}, this);
 };
 
 Chap1Level.prototype.update = function() {
@@ -1901,9 +1997,10 @@ Chap2Level.prototype.preload = function() {
 
 Chap2Level.prototype.create = function() {
 	'use strict';
-	
+
+	var that = this;
 	var gs = this.gameState;
-	
+
 	// Deferred loading here. But since we have the json, it's instant.
 	this.mapJson = gs.cache.getJSON("chap2_map_json");
 	gs.load.tilemap("chap2_map", null, this.mapJson,
@@ -1932,96 +2029,96 @@ Chap2Level.prototype.create = function() {
 	//FIXME: Ugly hack. Disables punching when there will be a player.
 	gs.time.events.add(0, function () {gs.player.canPunch = false;}, this);
 	
-	this.triggers.dialog1.onEnter = function() {
-		level.triggers.dialog1.onEnter = null;
+	this.triggers.dialog1.onEnter.add(function() {
+		level.triggers.dialog1.onEnter.removeAll();
 		gs.displayMessage("messages", "dialog1", true);
-	};
+	}, this);
 	
-	this.triggers.dialog2.onEnter = function() {
-		level.triggers.dialog2.onEnter = null;
+	this.triggers.dialog2.onEnter.add(function() {
+		level.triggers.dialog2.onEnter.removeAll();
 		gs.displayMessage("messages", "dialog2", true);
-	};
+	}, this);
 	
 	//FIXME: Some part of the dialogs can be factorized in the JSON file.
 	// It's also possible to make it so the door noise triggers just before
 	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
 	
 	this.noteLast = function() {
-		level.triggers.hourglassNote.onEnter = null;
+		level.triggers.hourglassNote.onEnter.removeAll();
 		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
-			gs.objects.hourglassNote.kill();
+			that.objects.hourglassNote.kill();
 		});
 	};
 	
 	this.hourglassLast = function() {
-		level.triggers.hourglass.onEnter = null;
-		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
-			if (gs.map.objects.doors[i].properties.trigger === "two")
-				gs.map.objects.doors[i].sprite.kill();
+		level.triggers.hourglass.onEnter.removeAll();
+		for (var i = 0 ; i < that.doors.length ; i++)
+			if (that.doors[i].properties.trigger === "two")
+				that.doors[i].sprite.kill();
 		gs.player.canPunch = true;
 		gs.displayMessage("messages", "hourglassLast", true, function() {
-			gs.objects.hourglass.kill();
+			that.objects.hourglass.kill();
 		});
 	};
 	
 	this.noteFirst = function() {
-		level.triggers.hourglassNote.onEnter = null;
-		level.triggers.hourglass.onEnter = level.hourglassLast;
+		level.triggers.hourglassNote.onEnter.removeAll();
+		level.triggers.hourglass.onEnter.add(level.hourglassLast, that);
 		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
-			gs.objects.hourglassNote.kill();
+			that.objects.hourglassNote.kill();
 		});
 	};
 	
 	this.hourglassFirst = function() {
-		level.triggers.hourglass.onEnter = null;
-		level.triggers.hourglassNote.onEnter = level.noteLast;
-		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
-			if (gs.map.objects.doors[i].properties.trigger === "two")
-				gs.map.objects.doors[i].sprite.kill();
+		level.triggers.hourglass.onEnter.removeAll;
+		level.triggers.hourglassNote.onEnter.add(level.noteLast);
+		for (var i = 0 ; i < that.doors.length ; i++)
+			if (that.doors[i].properties.trigger === "two")
+				that.doors[i].sprite.kill();
 		gs.player.canPunch = true;
 		gs.displayMessage("messages", "hourglassFirst", true, function() {
-			gs.objects.hourglass.kill();
+			that.objects.hourglass.kill();
 		});
 	};
 	
-	this.triggers.hourglassNote.onEnter = this.noteFirst;
-	this.triggers.hourglass.onEnter = this.hourglassFirst;
+	this.triggers.hourglassNote.onEnter.add(this.noteFirst);
+	this.triggers.hourglass.onEnter.add(this.hourglassFirst);
 	
-	this.triggers.importantNote.onEnter = function() {
-		level.triggers.importantNote.onEnter = null;
+	this.triggers.importantNote.onEnter.add(function() {
+		level.triggers.importantNote.onEnter.removeAll();
 		gs.displayMessage("messages", "importantNote", true, function() {
-			gs.objects.importantNote.kill();
+			that.objects.importantNote.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.scaredNote.onEnter = function() {
-		level.triggers.scaredNote.onEnter = null;
+	this.triggers.scaredNote.onEnter.add(function() {
+		level.triggers.scaredNote.onEnter.removeAll();
 		gs.displayMessage("messages", "scaredNote", true, function() {
-			gs.objects.scaredNote.kill();
+			that.objects.scaredNote.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.doorSwitch.onEnter = function() {
-		level.triggers.doorSwitch.onEnter = null;
-		for (var i = 0 ; i < gs.map.objects.doors.length ; i++)
-			if (gs.map.objects.doors[i].properties.trigger === "one")
-				gs.map.objects.doors[i].sprite.kill();
+	this.triggers.doorSwitch.onEnter.add(function() {
+		level.triggers.doorSwitch.onEnter.removeAll();
+		for (var i = 0 ; i < that.doors.length ; i++)
+			if (that.doors[i].properties.trigger === "one")
+				that.doors[i].sprite.kill();
 		gs.displayMessage("messages", "doorSwitch", true);
-	};
+	}, this);
 	
-	this.triggers.carnivorousPlant.onEnter = function() {
+	this.triggers.carnivorousPlant.onEnter.add(function() {
 		gs.askQuestion("messages", "carnivorousPlant", [
 			function () {
-				gs.player.loot(gs.objects.carnivorousPlant);
-				level.triggers.carnivorousPlant.onEnter = null;
+				gs.player.loot(that.objects.carnivorousPlant);
+				level.triggers.carnivorousPlant.onEnter.removeAll();
 			},
 			null
 		]);
-	};
+	}, this);
 	
-	this.triggers.exit.onEnter = function() {
+	this.triggers.exit.onEnter.add(function() {
 		gs.dagfin.goToLevel('chap3');
-	}
+	}, this);
 };
 Chap2Level.prototype.update = function() {
 	'use strict';
@@ -2071,7 +2168,8 @@ Chap3Level.prototype.preload = function() {
 
 Chap3Level.prototype.create = function() {
 	'use strict';
-	
+
+	var that = this;
 	var gs = this.gameState;
 
 	// Deferred loading here. But since we have the json, it's instant.
@@ -2110,51 +2208,52 @@ Chap3Level.prototype.create = function() {
 	
 	var that = this;
 
-	this.triggers.flame.onEnter = function() {
-		that.triggers.flame.onEnter = null;
+	this.triggers.flame.onEnter.add(function() {
+		that.triggers.flame.onEnter.removeAll();
 		gs.displayMessage("messages", "flame", true, function() {
-			gs.objects.flame.kill();
+			that.objects.flame.kill();
 			gs.playerLight.revive();
 			gs.playerLight.powerFailure = 0;
 			gs.playerLight.lastLightSize = 1;
 			gs.toggleLights('flame');
 		});
-	};
+	}, this);
 
-	this.triggers.indice1.onEnter = function() {
-		that.triggers.indice1.onEnter = null;
+	this.triggers.indice1.onEnter.add(function() {
+		that.triggers.indice1.onEnter.removeAll();
 		gs.displayMessage("messages", "indice1", true, function() {
-			gs.objects.indice1.kill();
+			that.objects.indice1.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.indice2.onEnter = function() {
-		that.triggers.indice2.onEnter = null;
+	this.triggers.indice2.onEnter.add(function() {
+		that.triggers.indice2.onEnter.removeAll();
 		gs.displayMessage("messages", "indice2", true, function() {
-			gs.objects.indice2.kill();
+			that.objects.indice2.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.indice3.onEnter = function() {
-		that.triggers.indice3.onEnter = null;
+	this.triggers.indice3.onEnter.add(function() {
+		that.triggers.indice3.onEnter.removeAll();
 		gs.displayMessage("messages", "indice3", true, function() {
-			gs.objects.indice3.kill();
+			that.objects.indice3.kill();
 		});
-	};
+	}, this);
 	
-	this.triggers.chair.onEnter = function() {
+	this.triggers.chair.onEnter.add(function() {
+		this.triggers.chair.onEnter.removeAll();
 		gs.askQuestion("messages", "chair", [
 			function() {
-				gs.player.loot(gs.objects.chair);
-				that.triggers.chair.onEnter = null;
+				gs.player.loot(that.objects.chair);
+				that.triggers.chair.onEnter.removeAll();
 			},
 			null
 		]);
-	};
+	}, this);
 
-	this.triggers.exit.onEnter = function() {
+	this.triggers.exit.onEnter.add(function() {
 		gs.dagfin.goToLevel('boss');
-	}
+	}, this);
 
 };
 
@@ -2187,26 +2286,10 @@ Chap3Level.prototype.update = function() {
 	}
 	
 	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-		var x = gs.player.x;
-		var y = gs.player.y;
+		var pos = gs.player.facingPosition();
 
-		switch(gs.player.facing) {
-			case DOWN:
-				y += 32;
-				break;
-			case UP:
-				y -= 32;
-				break;
-			case RIGHT:
-				x += 32;
-				break;
-			case LEFT:
-				x -= 32;
-				break;
-		}
-		
 		for(var i=0; i<this.crystals.length; ++i) {
-			if(this.crystals[i].rect.contains(x, y)) {
+			if(this.crystals[i].rect.contains(pos.x, pos.y)) {
 				gs.playerLight.lightSize = 3;
 				gs.playerLight.powerFailure = 0;
 				break;
@@ -2246,6 +2329,7 @@ BossLevel.prototype.preload = function() {
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
 	gs.load.image("trone", "assets/sprites/trone.png");
+	gs.load.spritesheet("slot", "assets/sprites/pillar_end.png", 32, 64);
 
 	gs.load.spritesheet("dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
 	gs.load.spritesheet("matt", "assets/sprites/matt.png", 32, 48);
@@ -2264,40 +2348,47 @@ BossLevel.prototype.create = function() {
 	this.mapJson = gs.cache.getJSON("boss_map_json");
 	gs.load.tilemap("boss_map", null, this.mapJson,
 				  Phaser.Tilemap.TILED_JSON);
-	
+
 	this.parseLevel(this.mapJson);
 
 	gs.map = gs.game.add.tilemap("boss_map");
 	gs.map.addTilesetImage("basic", "boss_tileset");
 	gs.map.addTilesetImage("spawn2", "spawn2");
 	gs.map.addTilesetImage("trone", "trone");
-	gs.map.setCollision([ 1, 8 ]);
+	gs.map.setCollision([ 1, 8, 10 ]);
 	
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 
 	gs.overlayLayer = gs.map.createLayer("overlay");
-	
 
-   	gs.music = gs.game.add.audio('music');
+
+	gs.music = gs.game.add.audio('music');
 	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
-	
-	gs.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.9);
-	
-	this.matt = gs.add.sprite(26*32, 9*32, "matt", 0);
-	
-//	gs.displayMessage("messages", "intro", true);
-	
-	this.triggers.boss.onEnter = function() {
-		if(!gs.dagfinDood.activate) gs.displayMessage("messages", "aaarg", true, function() {
-			gs.dagfinDood.activate = true;
-			//gs.player.kill();
-		});
-	};
-	
+
+	this.STATE_BOSS = 0;
+	this.STATE_MISSING = 1;
+	this.STATE_WIN = 2;
+	this.state = this.STATE_BOSS;
+
+	this.slots = { 'blood': 1, 'clock': 2, 'carnivorousPlant': 3, 'collar': 4, 'chair': 5 };
+	for(var name in this.slots) {
+		var slot = this.objects[name];
+		slot.y -= 16;
+		slot.body.setSize(24, 24, 0, 16);
+		slot.onActivate.add(this.activateSlot, this);
+	}
+
+	this.placed = {};
+
+	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*8.9);
+
+	this.triggers.boss.onEnter.add(this.welcomeDialog, this);
+	this.triggers.matt.onEnter.add(this.mattDialog, this);
+
 };
 
 BossLevel.prototype.update = function() {
@@ -2308,8 +2399,98 @@ BossLevel.prototype.update = function() {
 
 BossLevel.prototype.render = function() {
 	'use strict';
-	//var gs = this.gameState;
+//	var gs = this.gameState;
+//	gs.depthGroup.forEach(function(body) {
+//		gs.game.debug.body(body);
+//	}, this);
+//	gs.game.debug.geom(gs.player.facingPosition(), 'rgb(255, 0, 0)');
 };
+
+BossLevel.prototype.welcomeDialog = function() {
+	'use strict';
+
+	var that = this;
+	var gs = this.gameState;
+
+	gs.askQuestion("messages", "welcome", [
+		function() {
+			that.dagfinDood.activate = true;
+			that.dagfinDood.y = 22*32;
+		},
+		function() {
+			gs.player.kill();
+		}
+	]);
+
+	this.triggers.boss.onEnter.removeAll();
+}
+
+BossLevel.prototype.activateSlot = function(obj) {
+	'use strict';
+
+	var gs = this.gameState;
+
+	if(!this.dagfinDood.activate || this.placed[obj.objName]) {
+		return;
+	}
+
+	if(gs.dagfin.hasObject(obj.objName)) {
+		this.placed[obj.objName] = true;
+		obj.frame = this.slots[obj.objName];
+		this.checkVictory();
+	}
+	else {
+		gs.displayMessage("messages", obj.objName+'_missing');
+		this.state = this.STATE_MISSING;
+	}
+};
+
+BossLevel.prototype.checkVictory = function() {
+	'use strict';
+
+	var gs = this.gameState;
+
+	if(this.placed.blood && this.placed.clock && this.placed.carnivorousPlant
+			&& this.placed.collar && this.placed.chair) {
+		this.dagfinDood.activate = false;
+		this.dagfinDood.body.velocity.set(0, 0);
+		gs.depthGroup.forEach(function(dood) {
+			if(dood instanceof Zombie) {
+				dood.kill();
+			}
+		});
+		this.state = this.STATE_WIN;
+		gs.displayMessage("messages", "win", true, this.dagfinDood.kill, this.dagfinDood);
+	}
+}
+
+BossLevel.prototype.mattDialog = function(obj) {
+	'use strict';
+
+	var gs = this.gameState;
+
+	switch(this.state) {
+	case this.STATE_BOSS:
+		gs.displayMessage("messages", "matt_advice");
+		break;
+	case this.STATE_MISSING:
+		gs.displayMessage("messages", "matt_return", true, function() {
+			gs.dagfin.goToLevel("chap1");
+		}, this);
+		break;
+	case this.STATE_WIN:
+		gs.askQuestion("messages", "matt", [ this.startCredits, this.startCredits ], this);
+		break;
+	}
+}
+
+BossLevel.prototype.startCredits = function(obj) {
+	'use strict';
+
+	var gs = this.gameState;
+	
+	gs.game.state.start('Credits');
+}
 
 
 ////////////////////////////////////////////////////////////////////////////

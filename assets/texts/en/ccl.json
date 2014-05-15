@@ -1,4 +1,29 @@
 {
+	"blood_missing" : [
+		"Andrew:\nLooks like a place for a bottle of blood, but I don't have one !",
+		"Matt:\nAndrew ! Come here !"
+	],
+	
+	"clock_missing" : [
+		"Andrew:\nLooks like a place for a clock, but I don't have one !",
+		"Matt:\nAndrew ! Come here !"
+	],
+	
+	"carnivorousPlant_missing" : [
+		"Andrew:\nLooks like a place for a potted plant, but I don't have one !",
+		"Matt:\nAndrew ! Come here !"
+	],
+	
+	"collar_missing" : [
+		"Andrew:\nLooks like a place for a necklace, but I don't have one !",
+		"Matt:\nAndrew ! Come here !"
+	],
+	
+	"chair_missing" : [
+		"Andrew:\nLooks like a place for a chair, but I don't have one !",
+		"Matt:\nAndrew ! Come here !"
+	],
+	
 	"aaarg" : [
 		"Dagfin:\nYoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
 		"Matt:\nOh, it's you Andrew !\nYou too were tired of this forsaken world ?",
@@ -7,7 +32,7 @@
 		"Dagfin:\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
-	"d1" : {
+	"welcome" : {
 		"question": [
 			"Dagfin:\nYoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
 			"Matt:\nOh, it's you Andrew !\nYou too were tired of this forsaken world ?",
@@ -28,30 +53,28 @@
 		]
 	},
 	
-	"d2" : [
-	],
-	
-	"d3" : [
-	],
-	
-	"d4" : [
+	"death" : [
 		"Dagfin:\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
 	
-	"d5" : [
+	"win" : [
 		"Dagfin:\nI CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\nI Am thE pUpIL oF yOUr EyE\nI aM tHe iNexTIngUiSHablE rED-hAiReD tORch\nI am The StAR oF ChAoS.\n",
 		"Dagfin:\nWiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
 	],
 	
-	"d6" : {
+	"matt_advice": [ "Do something !" ],
+	
+	"matt_return": [ "Go back find what is missing." ],
+	
+	"matt" : {
 		"question": [
 			"Matt:\nAndrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\n",
 			"Andrew:\nHear what ?",
 			"Matt:\n...never mind.",
 			"Andrew:\nWe have to find how to go back. ?",
 			"Matt:\nGo back ? Where ? We're fine here, aren't we ?",
-			"Andrew:\nTo our world, Matt. I could come because I found your note, with the reciepe for the formula.",
+			"Andrew:\nTo our world, Matt. I could come because I found your note, with\nthe reciepe for the formula.",
 			"Matt:\nMe ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming.",
 			"Andrew:\nSo, you had it all the time ?",
 			"Matt:\nIt would have been foolish to come here without it !",
