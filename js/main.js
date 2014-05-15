@@ -477,7 +477,7 @@ GameState.prototype.create = function () {
 	
 	
 	// Some settings...
-	this.debugMode = true;
+	this.debugMode = false;
 	this.enableLighting = true;
 	this.enableCollisions = true;
 
@@ -534,72 +534,70 @@ GameState.prototype.create = function () {
 	this.postProcessGroup = this.add.group();
 	
 	// Lighting.
-	if(this.enableLighting) {
-		var margin = 5;
-		this.lightmap = this.make.renderTexture(MAX_WIDTH+margin*2,
-												MAX_HEIGHT+margin*2,
-												"lightmap");
-		this.lightLayer = this.add.sprite(-margin, -margin, this.lightmap, 0, this.postProcessGroup);
-		this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
-		
-		// Contains all the stuff renderer to the lightmap.
-		this.lightLayerGroup = this.make.group();
-		
-		this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
-		this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
-		
-		this.lightGroup = this.add.group(this.lightLayerGroup);
-		this.lightGroup.position.set(margin, margin);
-		
-		var mapLights = this.map.objects.lights;
-		for(var i=0; i<mapLights.length; ++i) {
-			var color = this.stringToColor(mapLights[i].properties.color);
-			var colorWooble = parseInt(mapLights[i].properties.color_wooble, 10);
-			if(isNaN(colorWooble)) {
-				colorWooble = LIGHT_COLOR_RAND;
-			}
-			var sizeWooble = parseInt(mapLights[i].properties.size_wooble, 10);
-			if(isNaN(sizeWooble)) {
-				sizeWooble = LIGHT_RAND;
-			}
-			var light = this.addLight(mapLights[i].x + 16, mapLights[i].y - 16,
-									  mapLights[i].properties.size,
-									  sizeWooble,
-									  color,
-									  colorWooble,
-									  mapLights[i].properties);
-			
-			if(typeof light.properties.enabled !== 'undefined' &&
-			   light.properties.enabled === 'false') {
-				light.kill();
-			}
+	var margin = 5;
+	this.lightmap = this.make.renderTexture(MAX_WIDTH+margin*2,
+											MAX_HEIGHT+margin*2,
+											"lightmap");
+	this.lightLayer = this.add.sprite(-margin, -margin, this.lightmap, 0, this.postProcessGroup);
+	this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
+
+	// Contains all the stuff renderer to the lightmap.
+	this.lightLayerGroup = this.make.group();
+
+	this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
+	this.lightClear.scale.set(this.map.widthInPixels, this.map.heightInPixels);
+
+	this.lightGroup = this.add.group(this.lightLayerGroup);
+	this.lightGroup.position.set(margin, margin);
+
+	var mapLights = this.map.objects.lights;
+	for(var i=0; i<mapLights.length; ++i) {
+		var color = this.stringToColor(mapLights[i].properties.color);
+		var colorWooble = parseInt(mapLights[i].properties.color_wooble, 10);
+		if(isNaN(colorWooble)) {
+			colorWooble = LIGHT_COLOR_RAND;
 		}
-		
-		this.playerLight = this.addLight(this.player.x + 16,
-										 this.player.y - 32,
-										 7,
-										 LIGHT_RAND,
-										 0xa0c0e0,
-										 LIGHT_COLOR_RAND);
-		if(!this.level.enablePlayerLight) {
-			this.playerLight.kill();
+		var sizeWooble = parseInt(mapLights[i].properties.size_wooble, 10);
+		if(isNaN(sizeWooble)) {
+			sizeWooble = LIGHT_RAND;
 		}
-		
-		this.time.events.loop(LIGHT_DELAY, function() {
-			this.lightGroup.forEach(function(light) {
-				var scale = light.lightSize * this.rnd.realInRange(
-					1. - light.lightSizeWooble,
-					1. + light.lightSizeWooble);
-				light.scale.set(scale, scale);
-				light.tint = this.multColor(
-					light.lightColor,
-					this.rnd.realInRange(
-						1. - light.lightColorWooble,
-						1. + light.lightColorWooble));
-			}, this);
-		}, this);
+		var light = this.addLight(mapLights[i].x + 16, mapLights[i].y - 16,
+								  mapLights[i].properties.size,
+								  sizeWooble,
+								  color,
+								  colorWooble,
+								  mapLights[i].properties);
+
+		if(typeof light.properties.enabled !== 'undefined' &&
+		   light.properties.enabled === 'false') {
+			light.kill();
+		}
 	}
-	
+
+	this.playerLight = this.addLight(this.player.x + 16,
+									 this.player.y - 32,
+									 7,
+									 LIGHT_RAND,
+									 0xa0c0e0,
+									 LIGHT_COLOR_RAND);
+	if(!this.level.enablePlayerLight) {
+		this.playerLight.kill();
+	}
+
+	this.time.events.loop(LIGHT_DELAY, function() {
+		this.lightGroup.forEach(function(light) {
+			var scale = light.lightSize * this.rnd.realInRange(
+				1. - light.lightSizeWooble,
+				1. + light.lightSizeWooble);
+			light.scale.set(scale, scale);
+			light.tint = this.multColor(
+				light.lightColor,
+				this.rnd.realInRange(
+					1. - light.lightColorWooble,
+					1. + light.lightColorWooble));
+		}, this);
+	}, this);
+
 	// Add Message box
 	this.postProcessGroup.add(this.messageGroup);
 	
@@ -795,22 +793,24 @@ GameState.prototype.update = function () {
 
 GameState.prototype.render = function () {
 	'use strict';
-	this.game.debug.text("FPS: " + String(this.time.fps), 8, 16);
-	/* CHECK LINE OF SIGHT OF ZOMBIE 1
-	var line = new Phaser.Line(this.player.x, this.player.y, this.mobs[1].x, this.mobs[1].y);
-	this.game.debug.geom(line, "rgb(0, 255, 255)");
-	
-	var tiles = this.mapLayer.getRayCastTiles(line);
-	for (var i = 0 ; i < tiles.length ; i++) {
-		var color = "rgba(0, 0, 255, .5)";
-		if (tiles[i].canCollide)
-			color = "rgba(255, 0, 0, .5)";
-		this.game.debug.geom(new Phaser.Rectangle(tiles[i].x*32, tiles[i].y*32, tiles[i].width, tiles[i].height), color);
+	if(this.debugMode) {
+		this.game.debug.text("FPS: " + String(this.time.fps), 8, 16);
+		/* CHECK LINE OF SIGHT OF ZOMBIE 1
+		var line = new Phaser.Line(this.player.x, this.player.y, this.mobs[1].x, this.mobs[1].y);
+		this.game.debug.geom(line, "rgb(0, 255, 255)");
+
+		var tiles = this.mapLayer.getRayCastTiles(line);
+		for (var i = 0 ; i < tiles.length ; i++) {
+			var color = "rgba(0, 0, 255, .5)";
+			if (tiles[i].canCollide)
+				color = "rgba(255, 0, 0, .5)";
+			this.game.debug.geom(new Phaser.Rectangle(tiles[i].x*32, tiles[i].y*32, tiles[i].width, tiles[i].height), color);
+		}
+		*/
+	//	this.depthGroup.forEach(function(body) {
+	//		this.game.debug.body(body);
+	//	}, this);
 	}
-	*/
-//	this.depthGroup.forEach(function(body) {
-//		this.game.debug.body(body);
-//	}, this);
 	this.level.render();
 };
 
@@ -2356,11 +2356,13 @@ BossLevel.prototype.create = function() {
 	gs.map.addTilesetImage("spawn2", "spawn2");
 	gs.map.addTilesetImage("trone", "trone");
 	gs.map.setCollision([ 1, 8, 10 ]);
-	
-	gs.mapLayer = gs.map.createLayer("map");
+
+	this.layersGroup = gs.game.add.group();
+
+	gs.mapLayer = gs.map.createLayer("map", undefined, undefined, this.layersGroup);
 	gs.mapLayer.resizeWorld();
 
-	gs.overlayLayer = gs.map.createLayer("overlay");
+	gs.overlayLayer = gs.map.createLayer("overlay", undefined, undefined, this.layersGroup);
 
 
 	gs.music = gs.game.add.audio('music');
