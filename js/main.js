@@ -334,6 +334,10 @@ MenuState.prototype.create = function() {
 	this.continueButton.onInputOver.add(function() {
 		this.choice = this.CONTINUE;
 	}, this);
+
+	// Preload next chapter in background.
+	IntroLevel.prototype.preload.call({ gameState: this });
+	this.load.start();
 };
 
 MenuState.prototype.update = function() {
@@ -1682,7 +1686,7 @@ IntroLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("intro_map_json", "assets/maps/intro.json");
-	gs.load.json("messages", "assets/texts/"+lang+"/intro.json");
+	gs.load.json("intro_messages", "assets/texts/"+lang+"/intro.json");
 	
 	gs.load.image("intro_tileset", "assets/tilesets/intro.png");
 	gs.load.spritesheet("pillar_item", "assets/sprites/pillar.png", 32, 64);
@@ -1721,12 +1725,16 @@ IntroLevel.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
 	
-	gs.displayMessage("messages", "intro", true);
+	gs.displayMessage("intro_messages", "intro", true);
 	
 	this.pentacleFound = false;
 	this.carpetFound = false;
 	this.found = {};
 	this.exiting = false;
+
+	// Preload next chapter in background.
+	Chap1Level.prototype.preload.call(this);
+	gs.load.start();
 };
 
 IntroLevel.prototype.update = function() {
@@ -1737,7 +1745,7 @@ IntroLevel.prototype.update = function() {
 
 	if(!this.carpetFound &&
 	   gs.physics.arcade.overlap(gs.player, this.objects.carpet)) {
-		gs.displayMessage("messages", "carpet", true, function(obj) {
+		gs.displayMessage("intro_messages", "carpet", true, function(obj) {
 			that.objects.carpet.kill();
 		});
 		this.carpetFound = true;
@@ -1756,17 +1764,17 @@ IntroLevel.prototype.update = function() {
 				case "collar":
 					if(this.found['pillar']) {
 						this.found[name] = true;
-						gs.displayMessage("messages", name+"2", true, function(obj) {
+						gs.displayMessage("intro_messages", name+"2", true, function(obj) {
 							gs.player.loot(obj);
 						}, this, obj);
 					}
 					else {
-						gs.displayMessage("messages", name, true);
+						gs.displayMessage("intro_messages", name, true);
 					}
 					break;
 				case "pillar":
 					this.found[name] = true;
-					gs.displayMessage("messages", 'book', true, function(obj) {
+					gs.displayMessage("intro_messages", 'book', true, function(obj) {
 						obj.frame = 1;
 					}, this, obj);
 					break;
@@ -1781,14 +1789,14 @@ IntroLevel.prototype.update = function() {
 	var onPentacle = exitRect.contains(gs.player.x, gs.player.y);
 	if(!this.pentacleFound && onPentacle) {
 		this.pentacleFound = true;
-		gs.displayMessage("messages", 'pentacle', true);
+		gs.displayMessage("intro_messages", 'pentacle', true);
 	}
 	else if(foundAll && !this.exiting && onPentacle) {
 		this.exiting = true;
-		gs.displayMessage("messages", 'invoc', true, function() {
+		gs.displayMessage("intro_messages", 'invoc', true, function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
-			gs.displayMessage("messages", 'invoc2', true, function() {
+			gs.displayMessage("intro_messages", 'invoc2', true, function() {
 				gs.dagfin.goToLevel('chap1');
 			});
 		});
@@ -1819,7 +1827,7 @@ Chap1Level.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("chap1_map_json", "assets/maps/chap1.json");
-	gs.load.json("messages", "assets/texts/"+lang+"/chap1.json");
+	gs.load.json("chap1_messages", "assets/texts/"+lang+"/chap1.json");
 	
 	gs.load.image("chap1_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -1872,27 +1880,27 @@ Chap1Level.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	gs.displayMessage("messages", "intro", true);
+	gs.displayMessage("chap1_messages", "intro", true);
 	
 	var level = this;
 
 	this.triggers.indice1.onEnter.add(function() {
 		level.triggers.indice1.onEnter.removeAll();
-		gs.displayMessage("messages", "indice1", true, function() {
+		gs.displayMessage("chap1_messages", "indice1", true, function() {
 			that.objects.indice1.kill();
 		});
 	}, this);
 	
 	this.triggers.indice2.onEnter.add(function() {
 		level.triggers.indice2.onEnter.removeAll();
-		gs.displayMessage("messages", "indice2", true, function() {
+		gs.displayMessage("chap1_messages", "indice2", true, function() {
 			that.objects.indice2.kill();
 		});
 	}, this);
 	
 	this.triggers.indice3.onEnter.add(function() {
 		level.triggers.indice3.onEnter.removeAll();
-		gs.displayMessage("messages", "indice3", true, function() {
+		gs.displayMessage("chap1_messages", "indice3", true, function() {
 			that.objects.indice3.kill();
 		});
 	}, this);
@@ -1914,7 +1922,7 @@ Chap1Level.prototype.create = function() {
 	
 	this.triggers.secret_tip.onEnter.add(function() {
 		level.triggers.secret_tip.onEnter.removeAll();
-		gs.displayMessage("messages", "secret", true);
+		gs.displayMessage("chap1_messages", "secret", true);
 	}, this);
 
 	this.triggers.reveal_secret.onEnter.add(function() {
@@ -1927,7 +1935,7 @@ Chap1Level.prototype.create = function() {
 	}
 
 	this.triggers.clock.onEnter.add(function() {
-		gs.askQuestion("messages", "clock", [
+		gs.askQuestion("chap1_messages", "clock", [
 			function() {
 				gs.player.loot(that.objects.clock);
 				level.triggers.clock.onEnter.removeAll();
@@ -1940,6 +1948,10 @@ Chap1Level.prototype.create = function() {
 	this.triggers.exit.onEnter.add(function() {
 		gs.dagfin.goToLevel('chap2');
 	}, this);
+
+	// Preload next chapter in background.
+	Chap2Level.prototype.preload.call(this);
+	gs.load.start();
 };
 
 Chap1Level.prototype.update = function() {
@@ -2064,7 +2076,7 @@ Chap2Level.prototype.preload = function() {
 	var gs = this.gameState;
 	
 	gs.load.json("chap2_map_json", "assets/maps/chap2.json");
-	gs.load.json("messages", "assets/texts/"+lang+"/chap2.json");
+	gs.load.json("chap2_messages", "assets/texts/"+lang+"/chap2.json");
 	
 	gs.load.image("chap2_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -2106,7 +2118,7 @@ Chap2Level.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	gs.displayMessage("messages", "intro", true);
+	gs.displayMessage("chap2_messages", "intro", true);
 	
 	var level = this;
 	
@@ -2115,12 +2127,12 @@ Chap2Level.prototype.create = function() {
 	
 	this.triggers.dialog1.onEnter.add(function() {
 		level.triggers.dialog1.onEnter.removeAll();
-		gs.displayMessage("messages", "dialog1", true);
+		gs.displayMessage("chap2_messages", "dialog1", true);
 	}, this);
 	
 	this.triggers.dialog2.onEnter.add(function() {
 		level.triggers.dialog2.onEnter.removeAll();
-		gs.displayMessage("messages", "dialog2", true);
+		gs.displayMessage("chap2_messages", "dialog2", true);
 	}, this);
 	
 	//FIXME: Some part of the dialogs can be factorized in the JSON file.
@@ -2129,7 +2141,7 @@ Chap2Level.prototype.create = function() {
 	
 	this.noteLast = function() {
 		level.triggers.hourglassNote.onEnter.removeAll();
-		gs.displayMessage("messages", "hourglassNoteLast", true, function() {
+		gs.displayMessage("chap2_messages", "hourglassNoteLast", true, function() {
 			that.objects.hourglassNote.kill();
 		});
 	};
@@ -2140,7 +2152,7 @@ Chap2Level.prototype.create = function() {
 			if (that.doors[i].properties.trigger === "two")
 				that.doors[i].sprite.kill();
 		gs.player.canPunch = true;
-		gs.displayMessage("messages", "hourglassLast", true, function() {
+		gs.displayMessage("chap2_messages", "hourglassLast", true, function() {
 			that.objects.hourglass.kill();
 		});
 	};
@@ -2148,7 +2160,7 @@ Chap2Level.prototype.create = function() {
 	this.noteFirst = function() {
 		level.triggers.hourglassNote.onEnter.removeAll();
 		level.triggers.hourglass.onEnter.add(level.hourglassLast, that);
-		gs.displayMessage("messages", "hourglassNoteFirst", true, function() {
+		gs.displayMessage("chap2_messages", "hourglassNoteFirst", true, function() {
 			that.objects.hourglassNote.kill();
 		});
 	};
@@ -2160,7 +2172,7 @@ Chap2Level.prototype.create = function() {
 			if (that.doors[i].properties.trigger === "two")
 				that.doors[i].sprite.kill();
 		gs.player.canPunch = true;
-		gs.displayMessage("messages", "hourglassFirst", true, function() {
+		gs.displayMessage("chap2_messages", "hourglassFirst", true, function() {
 			that.objects.hourglass.kill();
 		});
 	};
@@ -2170,14 +2182,14 @@ Chap2Level.prototype.create = function() {
 	
 	this.triggers.importantNote.onEnter.add(function() {
 		level.triggers.importantNote.onEnter.removeAll();
-		gs.displayMessage("messages", "importantNote", true, function() {
+		gs.displayMessage("chap2_messages", "importantNote", true, function() {
 			that.objects.importantNote.kill();
 		});
 	}, this);
 	
 	this.triggers.scaredNote.onEnter.add(function() {
 		level.triggers.scaredNote.onEnter.removeAll();
-		gs.displayMessage("messages", "scaredNote", true, function() {
+		gs.displayMessage("chap2_messages", "scaredNote", true, function() {
 			that.objects.scaredNote.kill();
 		});
 	}, this);
@@ -2187,11 +2199,11 @@ Chap2Level.prototype.create = function() {
 		for (var i = 0 ; i < that.doors.length ; i++)
 			if (that.doors[i].properties.trigger === "one")
 				that.doors[i].sprite.kill();
-		gs.displayMessage("messages", "doorSwitch", true);
+		gs.displayMessage("chap2_messages", "doorSwitch", true);
 	}, this);
 	
 	this.triggers.carnivorousPlant.onEnter.add(function() {
-		gs.askQuestion("messages", "carnivorousPlant", [
+		gs.askQuestion("chap2_messages", "carnivorousPlant", [
 			function () {
 				gs.player.loot(that.objects.carnivorousPlant);
 				level.triggers.carnivorousPlant.onEnter.removeAll();
@@ -2203,7 +2215,12 @@ Chap2Level.prototype.create = function() {
 	this.triggers.exit.onEnter.add(function() {
 		gs.dagfin.goToLevel('chap3');
 	}, this);
+
+	// Preload next chapter in background.
+	Chap3Level.prototype.preload.call(this);
+	gs.load.start();
 };
+
 Chap2Level.prototype.update = function() {
 	'use strict';
 	
@@ -2235,7 +2252,7 @@ Chap3Level.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("chap3_map_json", "assets/maps/chap3.json");
-	gs.load.json("messages", "assets/texts/"+lang+"/chap3.json");
+	gs.load.json("chap3_messages", "assets/texts/"+lang+"/chap3.json");
 	
 	gs.load.image("chap3_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn", "assets/tilesets/spawn.png");
@@ -2288,13 +2305,13 @@ Chap3Level.prototype.create = function() {
     this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
-	gs.displayMessage("messages", "intro", true);
+	gs.displayMessage("chap3_messages", "intro", true);
 	
 	var that = this;
 
 	this.triggers.flame.onEnter.add(function() {
 		that.triggers.flame.onEnter.removeAll();
-		gs.displayMessage("messages", "flame", true, function() {
+		gs.displayMessage("chap3_messages", "flame", true, function() {
 			that.objects.flame.kill();
 			gs.playerLight.revive();
 			gs.playerLight.powerFailure = 0;
@@ -2305,28 +2322,28 @@ Chap3Level.prototype.create = function() {
 
 	this.triggers.indice1.onEnter.add(function() {
 		that.triggers.indice1.onEnter.removeAll();
-		gs.displayMessage("messages", "indice1", true, function() {
+		gs.displayMessage("chap3_messages", "indice1", true, function() {
 			that.objects.indice1.kill();
 		});
 	}, this);
 	
 	this.triggers.indice2.onEnter.add(function() {
 		that.triggers.indice2.onEnter.removeAll();
-		gs.displayMessage("messages", "indice2", true, function() {
+		gs.displayMessage("chap3_messages", "indice2", true, function() {
 			that.objects.indice2.kill();
 		});
 	}, this);
 	
 	this.triggers.indice3.onEnter.add(function() {
 		that.triggers.indice3.onEnter.removeAll();
-		gs.displayMessage("messages", "indice3", true, function() {
+		gs.displayMessage("chap3_messages", "indice3", true, function() {
 			that.objects.indice3.kill();
 		});
 	}, this);
 	
 	this.triggers.chair.onEnter.add(function() {
 		this.triggers.chair.onEnter.removeAll();
-		gs.askQuestion("messages", "chair", [
+		gs.askQuestion("chap3_messages", "chair", [
 			function() {
 				gs.player.loot(that.objects.chair);
 				that.triggers.chair.onEnter.removeAll();
@@ -2339,6 +2356,9 @@ Chap3Level.prototype.create = function() {
 		gs.dagfin.goToLevel('boss');
 	}, this);
 
+	// Preload next chapter in background.
+	BossLevel.prototype.preload.call(this);
+	gs.load.start();
 };
 
 Chap3Level.prototype.update = function() {
@@ -2408,7 +2428,7 @@ BossLevel.prototype.preload = function() {
 	var gs = this.gameState;
 
 	gs.load.json("boss_map_json", "assets/maps/boss.json");
-	gs.load.json("messages", "assets/texts/"+lang+"/ccl.json");
+	gs.load.json("boss_messages", "assets/texts/"+lang+"/ccl.json");
 	
 	gs.load.image("boss_tileset", "assets/tilesets/basic.png");
 	gs.load.image("spawn2", "assets/tilesets/spawn2.png");
@@ -2497,7 +2517,7 @@ BossLevel.prototype.welcomeDialog = function() {
 	var that = this;
 	var gs = this.gameState;
 
-	gs.askQuestion("messages", "welcome", [
+	gs.askQuestion("boss_messages", "welcome", [
 		function() {
 			that.dagfinDood.activate = true;
 			that.dagfinDood.y = 22*32;
@@ -2525,7 +2545,7 @@ BossLevel.prototype.activateSlot = function(obj) {
 		this.checkVictory();
 	}
 	else {
-		gs.displayMessage("messages", obj.objName+'_missing');
+		gs.displayMessage("boss_messages", obj.objName+'_missing');
 		this.state = this.STATE_MISSING;
 	}
 };
@@ -2545,7 +2565,7 @@ BossLevel.prototype.checkVictory = function() {
 			}
 		});
 		this.state = this.STATE_WIN;
-		gs.displayMessage("messages", "win", true, this.dagfinDood.kill, this.dagfinDood);
+		gs.displayMessage("boss_messages", "win", true, this.dagfinDood.kill, this.dagfinDood);
 	}
 }
 
@@ -2556,15 +2576,15 @@ BossLevel.prototype.mattDialog = function(obj) {
 
 	switch(this.state) {
 	case this.STATE_BOSS:
-		gs.displayMessage("messages", "matt_advice");
+		gs.displayMessage("boss_messages", "matt_advice");
 		break;
 	case this.STATE_MISSING:
-		gs.displayMessage("messages", "matt_return", true, function() {
+		gs.displayMessage("boss_messages", "matt_return", true, function() {
 			gs.dagfin.goToLevel("chap1");
 		}, this);
 		break;
 	case this.STATE_WIN:
-		gs.askQuestion("messages", "matt", [ this.startCredits, this.startCredits ], this);
+		gs.askQuestion("boss_messages", "matt", [ this.startCredits, this.startCredits ], this);
 		break;
 	}
 }
