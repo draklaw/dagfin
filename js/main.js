@@ -668,8 +668,9 @@ GameState.prototype.create = function () {
 	this.gameOver = this.add.sprite(0, 0, "black", 0, this.postProcessGroup);
 	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
 	this.gameOver.kill();
-	this.gameOverText = this.add.text(40, 280,
+	this.gameOverText = this.add.text(400, 300,
 						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
+	this.gameOverText.anchor.set(.5, .5);
 
 	// Damage pass
 	this.damageSprite = this.add.sprite(0, 0, "damage", 0, this.postProcessGroup);
@@ -1164,6 +1165,8 @@ function Dood(game, x, y, spritesheet, group) {
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
 Dood.prototype.facingPosition = function() {
+	'use strict';
+
 	var pos = new Phaser.Point(this.x, this.y+8);
 
 	switch(this.facing) {
@@ -1182,6 +1185,17 @@ Dood.prototype.facingPosition = function() {
 	}
 	
 	return pos;
+}
+
+/**
+* kill overload to ensure onKilled is clled only once.
+*/
+Dood.prototype.kill = function() {
+	'use strict';
+
+	if(this.alive) {
+		Phaser.Sprite.prototype.kill.call(this);
+	}
 }
 
 
@@ -1220,14 +1234,14 @@ function Player(game, x, y) {
 		gs.gameOver.revive();
 		gs.gameOver.alpha = 0;
 		var tween = gs.add.tween(gs.gameOver);
-		tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, 500);
 		tween.onComplete.add(function() {
 			gs.gameOverText.text = "You disapeard deep beneath the surface...";
 			//		console.log("Humanity lost you beneath the surface !");
 			gs.time.events.add(2000, function() {
 				gs.dagfin.reloadLastSave();
-			}, gs);
-		});
+			}, this);
+		}, this);
+		tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, true, 500);
 		//TODO : death sound, death music
 	}, this);
 	
