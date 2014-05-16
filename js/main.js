@@ -663,7 +663,11 @@ GameState.prototype.create = function () {
 
 	// Add Message box
 	this.postProcessGroup.add(this.messageGroup);
-	
+
+	// Damage pass
+	this.damageSprite = this.add.sprite(0, 0, "damage", 0, this.postProcessGroup);
+	this.damageSprite.scale.set(8, 8);
+
 	// Game Over
 	this.gameOver = this.add.sprite(0, 0, "black", 0, this.postProcessGroup);
 	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
@@ -671,10 +675,6 @@ GameState.prototype.create = function () {
 	this.gameOverText = this.add.text(400, 300,
 						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
 	this.gameOverText.anchor.set(.5, .5);
-
-	// Damage pass
-	this.damageSprite = this.add.sprite(0, 0, "damage", 0, this.postProcessGroup);
-	this.damageSprite.scale.set(8, 8);
 
 	// Noise pass
 	this.noiseSprite = this.add.sprite(0, 0, "noise", 0, this.postProcessGroup);
@@ -1188,12 +1188,13 @@ Dood.prototype.facingPosition = function() {
 }
 
 /**
-* kill overload to ensure onKilled is clled only once.
+* kill overload to ensure onKilled is called only once.
 */
 Dood.prototype.kill = function() {
 	'use strict';
 
 	if(this.alive) {
+		this.health = 0;
 		Phaser.Sprite.prototype.kill.call(this);
 	}
 }
