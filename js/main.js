@@ -268,7 +268,7 @@ LoadingState.prototype.preload = function() {
 	this.add.sprite(0, 0, 'splash');
 	this.add.sprite(0, 0, 'progressBarBg');
 	this.progressBar = this.add.sprite(0, 0, 'progressBar');
-	
+
 	this.load.setPreloadSprite(this.progressBar);
 
 	// Full-screen effects
@@ -1453,6 +1453,45 @@ function Level(gameState) {
 	this.enableNoisePass = true;
 }
 
+Level.prototype.preload = function(mapJson) {
+	'use strict';
+
+	Phaser.State.prototype.preload.call(this);
+
+	// Load screen : the test prevents the loading screen to pop up when
+	// calling next level's preload.
+	if(!this.loadScreen) {
+		this.loadScreen = this.gameState.add.group();
+		this.gameState.add.sprite(0, 0, 'splash', 0, this.loadScreen);
+		this.gameState.add.sprite(0, 0, 'progressBarBg', 0, this.loadScreen);
+		this.progressBar = this.gameState.add.sprite(0, 0, 'progressBar', 0, this.loadScreen);
+
+		this.gameState.load.setPreloadSprite(this.progressBar);
+	}
+}
+
+Level.prototype.create = function(mapJson) {
+	'use strict';
+
+	Phaser.State.prototype.create.call(this);
+
+	this.loadScreen.callAll('kill');
+}
+
+Level.prototype.update = function(mapJson) {
+	'use strict';
+
+	Phaser.State.prototype.update.call(this);
+
+	this.processTriggers();
+}
+
+Level.prototype.render = function(mapJson) {
+	'use strict';
+
+	Phaser.State.prototype.render.call(this);
+}
+
 Level.prototype.parseLevel = function(mapJson) {
 	'use strict';
 	
@@ -1528,7 +1567,7 @@ Level.prototype.parseLevel = function(mapJson) {
 	}
 };
 
-Level.prototype.processTriggers = function(mapJson) {
+Level.prototype.processTriggers = function() {
 	'use strict';
 
 	var gs = this.gameState;
@@ -1738,7 +1777,9 @@ IntroLevel.prototype = Object.create(Level.prototype);
 
 IntroLevel.prototype.preload = function() {
 	'use strict';
-	
+
+	Level.prototype.preload.call(this);
+
 	var gs = this.gameState;
 
 	gs.dagfin.load('json', "intro_map_json", "assets/maps/intro.json");
@@ -1754,7 +1795,9 @@ IntroLevel.prototype.preload = function() {
 
 IntroLevel.prototype.create = function() {
 	'use strict';
-	
+
+	Level.prototype.create.call(this);
+
 	var gs = this.gameState;
 
 	// Defered loading here. But as we have the json, it's instant.
@@ -1792,6 +1835,8 @@ IntroLevel.prototype.create = function() {
 
 IntroLevel.prototype.update = function() {
 	'use strict';
+
+	Level.prototype.update.call(this);
 
 	var that = this;
 	var gs = this.gameState;
@@ -1858,7 +1903,9 @@ IntroLevel.prototype.update = function() {
 
 IntroLevel.prototype.render = function() {
 	'use strict';
-	
+
+	Level.prototype.render.call(this);
+
 	var gs = this.gameState;
 };
 
@@ -1876,7 +1923,9 @@ Chap1Level.prototype = Object.create(Level.prototype);
 
 Chap1Level.prototype.preload = function() {
 	'use strict';
-	
+
+	Level.prototype.preload.call(this);
+
 	var gs = this.gameState;
 
 	gs.dagfin.load('json', "chap1_map_json", "assets/maps/chap1.json");
@@ -1893,6 +1942,8 @@ Chap1Level.prototype.preload = function() {
 
 Chap1Level.prototype.create = function() {
 	'use strict';
+
+	Level.prototype.create.call(this);
 
 	var that = this;
 	var gs = this.gameState;
@@ -2005,11 +2056,11 @@ Chap1Level.prototype.create = function() {
 
 Chap1Level.prototype.update = function() {
 	'use strict';
-	
+
+	Level.prototype.update.call(this);
+
 	var gs = this.gameState;
-	
-	this.processTriggers();
-	
+
 	var mapTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
 										undefined, undefined, gs.mapLayer);
 	if(mapTile.index == this.LAVA_TILE) {
@@ -2024,6 +2075,8 @@ Chap1Level.prototype.update = function() {
 
 Chap1Level.prototype.render = function() {
 	'use strict';
+
+	Level.prototype.render.call(this);
 
 	var gs = this.gameState;
 };
@@ -2121,9 +2174,11 @@ Chap2Level.prototype = Object.create(Level.prototype);
 
 Chap2Level.prototype.preload = function() {
 	'use strict';
-	
+
+	Level.prototype.preload.call(this);
+
 	var gs = this.gameState;
-	
+
 	gs.dagfin.load('json', "chap2_map_json", "assets/maps/chap2.json");
 	gs.dagfin.load('json', "chap2_messages", "assets/texts/"+lang+"/chap2.json");
 	
@@ -2138,6 +2193,8 @@ Chap2Level.prototype.preload = function() {
 
 Chap2Level.prototype.create = function() {
 	'use strict';
+
+	Level.prototype.create.call(this);
 
 	var that = this;
 	var gs = this.gameState;
@@ -2268,15 +2325,15 @@ Chap2Level.prototype.create = function() {
 
 Chap2Level.prototype.update = function() {
 	'use strict';
-	
-	var gs = this.gameState;
-	
-	this.processTriggers();
+
+	Level.prototype.update.call(this);
 };
 
 Chap2Level.prototype.render = function() {
 	'use strict';
-	
+
+	Level.prototype.render.call(this);
+
 	var gs = this.gameState;
 };
 
@@ -2293,7 +2350,9 @@ Chap3Level.prototype = Object.create(Level.prototype);
 
 Chap3Level.prototype.preload = function() {
 	'use strict';
-	
+
+	Level.prototype.preload.call(this);
+
 	var gs = this.gameState;
 
 	gs.dagfin.load('json', "chap3_map_json", "assets/maps/chap3.json");
@@ -2310,6 +2369,8 @@ Chap3Level.prototype.preload = function() {
 
 Chap3Level.prototype.create = function() {
 	'use strict';
+
+	Level.prototype.create.call(this);
 
 	var that = this;
 	var gs = this.gameState;
@@ -2404,11 +2465,11 @@ Chap3Level.prototype.create = function() {
 
 Chap3Level.prototype.update = function() {
 	'use strict';
-	
+
+	Level.prototype.update.call(this);
+
 	var gs = this.gameState;
-	
-	this.processTriggers();
-	
+
 	if(gs.playerLight.alive) {
 		gs.playerLight.lightSize -= (1-gs.playerLight.powerFailure) * gs.time.elapsed / 12000;
 		if(gs.playerLight.lightSize<=0) gs.playerLight.lightSize=0;
@@ -2445,10 +2506,10 @@ Chap3Level.prototype.update = function() {
 
 Chap3Level.prototype.render = function() {
 	'use strict';
-	
+
+	Level.prototype.render.call(this);
+
 	var gs = this.gameState;
-	
-	
 };
 
 
@@ -2465,7 +2526,9 @@ BossLevel.prototype = Object.create(Level.prototype);
 
 BossLevel.prototype.preload = function() {
 	'use strict';
-	
+
+	Level.prototype.preload.call(this);
+
 	var gs = this.gameState;
 
 	gs.dagfin.load('json', "boss_map_json", "assets/maps/boss.json");
@@ -2482,7 +2545,9 @@ BossLevel.prototype.preload = function() {
 
 BossLevel.prototype.create = function() {
 	'use strict';
-	
+
+	Level.prototype.create.call(this);
+
 	var gs = this.gameState;
 
 	// Defered loading here. But as we have the json, it's instant.
@@ -2535,12 +2600,15 @@ BossLevel.prototype.create = function() {
 
 BossLevel.prototype.update = function() {
 	'use strict';
-	//var gs = this.gameState;
-	this.processTriggers();
+
+	Level.prototype.update.call(this);
 };
 
 BossLevel.prototype.render = function() {
 	'use strict';
+
+	Level.prototype.render.call(this);
+
 //	var gs = this.gameState;
 //	gs.depthGroup.forEach(function(body) {
 //		gs.game.debug.body(body);
