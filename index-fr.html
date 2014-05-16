@@ -7,31 +7,32 @@
         <script type="text/javascript">
         var lang = "fr";
         </script>
-        <script src="js/phaser.min.js"></script>
-        <script src="js/main.js"></script>
 	<style>
 	* {margin:0 auto;padding:0;border:0;font-family:sans-serif;text-align:center; text-decoration: none;}
 	a:hover{text-decoration: underline;}
 	dt {display: inline-block; width:40%;text-align:right;margin-right:20px;}
 	dd {display: inline-block; width:40%;text-align:left;}
+    #game {background: url(assets/couverture.png) center no-repeat;width: 800px; height: 600px;} /* to preload image before phaser launch */
 	</style>
     </head>
     
     <body>
-	<h1>Dagfin</h1>
-	<div id="game"></div>
-	<p>Un petit jeu d'ambiance horreur réalisé pour le <a href="http://www.ludumdare.com/compo/2014/04/23/welcome-to-ludum-dare-29er/">Ludum Dare 29</a> <a href="https://twitter.com/search?q=%23LD48&src=hash">#LD48</a></p>
-	<a href="https://github.com/GammaNu/dagfin">Code source disponnible sur GitHub en licence AGPL.</a>
-	<br/>
-	<br/>
-	<h2>Touches utilisées</h2>
-	<dl>
-		<dt>Touches fléchées</dt><dd>Déplacement</dd>
-		<dt>Espace</dt><dd>Action défensive</dd>
-		<dt>Entrée</dt><dd>Utiliser/prendre/lire</dd>
-		<!--<dt>m</dt><dd>Mute/deMute music</dd>
-		<dt>M</dt><dd>Mute/deMute All</dd>-->
-		<dt>f</dt><dd>Basculer en plein écran</dd>
-	</dl>
+        <h1>Dagfin</h1>
+        <div id="game"></div>
+        <p>Un petit jeu d'ambiance horreur réalisé pour le <a href="http://www.ludumdare.com/compo/2014/04/23/welcome-to-ludum-dare-29er/">Ludum Dare 29</a> <a href="https://twitter.com/search?q=%23LD48&src=hash">#LD48</a></p>
+        <a href="https://github.com/GammaNu/dagfin">Code source disponnible sur GitHub en licence AGPL.</a>
+        <br/>
+        <br/>
+        <h2>Touches utilisées</h2>
+        <dl>
+            <dt>Touches fléchées</dt><dd>Déplacement</dd>
+            <dt>Espace</dt><dd>Action défensive</dd>
+            <dt>Entrée</dt><dd>Utiliser/prendre/lire</dd>
+            <!--<dt>m</dt><dd>Mute/deMute music</dd>
+            <dt>M</dt><dd>Mute/deMute All</dd>-->
+            <dt>f</dt><dd>Basculer en plein écran</dd>
+        </dl>
+        <script src="js/phaser.min.js"></script>
+        <script src="js/main.js"></script>
     </body>
 </html>

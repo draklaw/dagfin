@@ -168,7 +168,7 @@ DagfinGame.prototype.toggleFullScreen = function() {
 	else {
 		this.game.scale.startFullScreen(false);
 	}
-}
+};
 
 DagfinGame.prototype.hasObject = function(obj) {
 	'use strict';
@@ -179,7 +179,7 @@ DagfinGame.prototype.hasObject = function(obj) {
 		}
 	}
 	return false;
-}
+};
 
 /**
 * Check if something is in the cache. As Phaser does not seems to
@@ -231,10 +231,9 @@ BootState.prototype.preload = function() {
 
 	this.dagfin.initState();
 
-	this.dagfin.load('image', 'splash', 'assets/couverturev2.png');
+	this.dagfin.load('image', 'splash', 'assets/couverture.png');
 	this.dagfin.load('image', 'progressBarBg', 'assets/progress_bar_bg.png');
 	this.dagfin.load('image', 'progressBar', 'assets/progress_bar.png');
-
 };
 
 BootState.prototype.create = function() {
@@ -2647,6 +2646,7 @@ BossLevel.prototype.activateSlot = function(obj) {
 	if(gs.dagfin.hasObject(obj.objName)) {
 		this.placed[obj.objName] = true;
 		obj.frame = this.slots[obj.objName];
+		this.dagfinDood.ritualStepBehavior();
 		this.checkVictory();
 	}
 	else {
