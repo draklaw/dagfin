@@ -159,7 +159,7 @@ DagfinGame.prototype.toggleFullScreen = function() {
 	else {
 		this.game.scale.startFullScreen(false);
 	}
-}
+};
 
 DagfinGame.prototype.hasObject = function(obj) {
 	'use strict';
@@ -170,7 +170,7 @@ DagfinGame.prototype.hasObject = function(obj) {
 		}
 	}
 	return false;
-}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -2437,6 +2437,7 @@ BossLevel.prototype.activateSlot = function(obj) {
 	if(gs.dagfin.hasObject(obj.objName)) {
 		this.placed[obj.objName] = true;
 		obj.frame = this.slots[obj.objName];
+		gs.dagfinDood.ritualStepBehavior();
 		this.checkVictory();
 	}
 	else {
