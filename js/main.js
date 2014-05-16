@@ -2542,7 +2542,7 @@ BossLevel.prototype.activateSlot = function(obj) {
 	if(gs.dagfin.hasObject(obj.objName)) {
 		this.placed[obj.objName] = true;
 		obj.frame = this.slots[obj.objName];
-		gs.dagfinDood.ritualStepBehavior();
+		this.dagfinDood.ritualStepBehavior();
 		this.checkVictory();
 	}
 	else {
