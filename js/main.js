@@ -559,6 +559,11 @@ GameState.prototype.create = function () {
 	// Group all the stuff that should be sorted above the rest.
 	this.ceiling = this.make.group();
 
+	// Used by Level.create().
+	this.gameOver = this.make.sprite(0, 0, "black");
+	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
+	this.gameOver.kill();
+
 	// Map.
 	this.level.create();
 		
@@ -668,9 +673,7 @@ GameState.prototype.create = function () {
 	this.damageSprite.scale.set(8, 8);
 
 	// Game Over
-	this.gameOver = this.add.sprite(0, 0, "black", 0, this.postProcessGroup);
-	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
-	this.gameOver.kill();
+	this.postProcessGroup.add(this.gameOver);
 	this.gameOverText = this.add.text(400, 300,
 						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
 	this.gameOverText.anchor.set(.5, .5);
@@ -1475,6 +1478,8 @@ Level.prototype.create = function(mapJson) {
 	Phaser.State.prototype.create.call(this);
 
 	this.loadScreen.callAll('kill');
+
+	this.fade(true);
 }
 
 Level.prototype.update = function(mapJson) {
@@ -1596,6 +1601,37 @@ Level.prototype.processTriggers = function() {
 	}
 };
 
+Level.prototype.fade = function(fadeIn, delay) {
+	'use strict';
+
+	fadeIn = fadeIn? 1: 0;
+	delay = delay || 1000;
+
+	// gameOver is a fullscreen black sprinte, so it does the job.
+	this.gameState.gameOver.revive();
+	this.gameState.gameOver.alpha = fadeIn;
+
+	var fadeTween = this.gameState.add.tween(this.gameState.gameOver);
+	fadeTween.onComplete.add(function() {
+		// May cause a minor bug if player dies before the end.
+		// But this won't happen, right ?
+		this.gameState.gameOver.kill();
+		this.gameState.gameOver.alpha = 1;
+	}, this);
+	fadeTween.to({ alpha: 1-fadeIn }, delay);
+	fadeTween.start();
+	
+	return fadeTween;
+};
+
+Level.prototype.goToLevel = function(level) {
+	'use strict';
+
+	var fadeTween = this.fade(false, 500);
+	fadeTween.onComplete.add(function() {
+		this.gameState.dagfin.goToLevel(level);
+	}, this);
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Test level
@@ -1894,9 +1930,9 @@ IntroLevel.prototype.update = function() {
 			gs.lightGroup.callAll('kill');
 			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
 			gs.displayMessage("intro_messages", 'invoc2', true, function() {
-				gs.dagfin.goToLevel('chap1');
-			});
-		});
+				this.goToLevel('chap1');
+			}, this);
+		}, this);
 	}
 };
 
@@ -2045,7 +2081,7 @@ Chap1Level.prototype.create = function() {
 	}, this);
 
 	this.triggers.exit.onEnter.add(function() {
-		gs.dagfin.goToLevel('chap2');
+		this.goToLevel('chap2');
 	}, this);
 
 	// Preload next chapter in background.
@@ -2314,7 +2350,7 @@ Chap2Level.prototype.create = function() {
 	}, this);
 	
 	this.triggers.exit.onEnter.add(function() {
-		gs.dagfin.goToLevel('chap3');
+		this.goToLevel('chap3');
 	}, this);
 
 	// Preload next chapter in background.
@@ -2454,7 +2490,7 @@ Chap3Level.prototype.create = function() {
 	}, this);
 
 	this.triggers.exit.onEnter.add(function() {
-		gs.dagfin.goToLevel('boss');
+		this.goToLevel('boss');
 	}, this);
 
 	// Preload next chapter in background.
@@ -2685,7 +2721,7 @@ BossLevel.prototype.mattDialog = function(obj) {
 		break;
 	case this.STATE_MISSING:
 		gs.displayMessage("boss_messages", "matt_return", true, function() {
-			gs.dagfin.goToLevel("chap1");
+			this.goToLevel("chap1");
 		}, this);
 		break;
 	case this.STATE_WIN:
