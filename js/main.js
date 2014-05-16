@@ -1459,7 +1459,7 @@ Level.prototype.preload = function(mapJson) {
 
 	// Load screen : the test prevents the loading screen to pop up when
 	// calling next level's preload.
-	if(!this.loadScreen) {
+	if(this instanceof Level && !this.loadScreen) {
 		this.loadScreen = this.gameState.add.group();
 		this.gameState.add.sprite(0, 0, 'splash', 0, this.loadScreen);
 		this.gameState.add.sprite(0, 0, 'progressBarBg', 0, this.loadScreen);
