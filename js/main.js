@@ -2276,65 +2276,26 @@ Chap3Level.prototype.create = function() {
 
 	gs.overlayLayer = gs.map.createLayer("overlay");
 
-	for(var i=0; i<this.mapLayers.crystals.objects.length; ++i) {
-		var crystal = this.mapLayers.crystals.objects[i];
-		crystal.rect = new Phaser.Rectangle(crystal.x, crystal.y, crystal.width, crystal.height);
-	}
-	this.crystals = this.mapLayers.crystals.objects;
-
 	gs.music = gs.game.add.audio('music');
-    gs.music.play('', 0, 0.2);
+	gs.music.play('', 0, 0.2);
 
-
-    this.enablePlayerLight = false;
+	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
 	gs.displayMessage("chap3_messages", "intro", true);
-	
+
 	var that = this;
 
-	this.triggers.flame.onEnter.add(function() {
-		that.triggers.flame.onEnter.removeAll();
-		gs.displayMessage("chap3_messages", "flame", true, function() {
-			that.objects.flame.kill();
-			gs.playerLight.revive();
-			gs.playerLight.powerFailure = 0;
-			gs.playerLight.lastLightSize = 1;
-			gs.toggleLights('flame');
-		});
+	this.objects.flame.onActivate.add(function(obj) {
+		gs.displayMessage("chap3_messages", "flame", true, this.pickUpFlame, this, obj);
 	}, this);
 
-	this.triggers.indice1.onEnter.add(function() {
-		that.triggers.indice1.onEnter.removeAll();
-		gs.displayMessage("chap3_messages", "indice1", true, function() {
-			that.objects.indice1.kill();
-		});
-	}, this);
-	
-	this.triggers.indice2.onEnter.add(function() {
-		that.triggers.indice2.onEnter.removeAll();
-		gs.displayMessage("chap3_messages", "indice2", true, function() {
-			that.objects.indice2.kill();
-		});
-	}, this);
-	
-	this.triggers.indice3.onEnter.add(function() {
-		that.triggers.indice3.onEnter.removeAll();
-		gs.displayMessage("chap3_messages", "indice3", true, function() {
-			that.objects.indice3.kill();
-		});
-	}, this);
-	
-	this.triggers.chair.onEnter.add(function() {
-		this.triggers.chair.onEnter.removeAll();
-		gs.askQuestion("chap3_messages", "chair", [
-			function() {
-				gs.player.loot(that.objects.chair);
-				that.triggers.chair.onEnter.removeAll();
-			},
-			null
-		]);
-	}, this);
+	this.objects.indice1.onEnter.add(this.pickUpMessage, this);
+	this.objects.indice2.onEnter.add(this.pickUpMessage, this);
+	this.objects.indice3.onEnter.add(this.pickUpMessage, this);
+
+	this.objects.chair.body.setSize(32, 32, 0, 16);
+	this.objects.chair.onActivate.add(this.pickUpChair, this);
 
 	this.triggers.exit.onEnter.add(function() {
 		this.goToLevel('boss');
@@ -2352,35 +2313,28 @@ Chap3Level.prototype.update = function() {
 
 	var gs = this.gameState;
 
-	if(gs.playerLight.alive) {
-		gs.playerLight.lightSize -= (1-gs.playerLight.powerFailure) * gs.time.elapsed / 12000;
-		if(gs.playerLight.lightSize<=0) gs.playerLight.lightSize=0;
-		else if(gs.playerLight.lightSize<0.5) gs.playerLight.lightSize=0.5;
-		var theoricalLight = Math.max(gs.playerLight.lightSize, gs.playerLight.lastLightSize);
-		if(theoricalLight < 2 && !gs.playerLight.powerFailure) gs.playerLight.powerFailure = 0.2;
-		if(theoricalLight < 1.5 && gs.playerLight.powerFailure<0.2) gs.playerLight.powerFailure = 0.4;
-		if(theoricalLight < 1.2 && gs.playerLight.powerFailure<0.4) gs.playerLight.powerFailure = 0.6;
-		if(theoricalLight < 1 && gs.playerLight.powerFailure<0.6) gs.playerLight.powerFailure = 0.8;
-		if(theoricalLight < 0.8 && gs.playerLight.powerFailure<0.8) gs.playerLight.powerFailure = 0.9;
-		if(theoricalLight <= 0.5 && gs.playerLight.powerFailure<0.9) gs.playerLight.powerFailure = 0.95;
-		if(gs.playerLight.powerFailure){
-			if(Math.random() > gs.playerLight.powerFailure) {
-				gs.playerLight.lightSize = gs.playerLight.lightSize || gs.playerLight.lastLightSize;
-			}else{
-				gs.playerLight.lastLightSize = gs.playerLight.lightSize || gs.playerLight.lastLightSize;
-				gs.playerLight.lightSize = 0;
-			}
+	if(!this.objects.flame.alive) {
+		gs.playerLight.normalLightSize -= gs.time.elapsed / 12000;
+		if(gs.playerLight.normalLightSize<1) {
+			gs.playerLight.normalLightSize = 1;
 		}
-	}
-	
-	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-		var pos = gs.player.facingPosition();
 
-		for(var i=0; i<this.crystals.length; ++i) {
-			if(this.crystals[i].rect.contains(pos.x, pos.y)) {
-				gs.playerLight.lightSize = 3;
-				gs.playerLight.powerFailure = 0;
-				break;
+		// Maths:
+		//  failure = a - b*lightSize
+		//  b = maxFailure / (startSize - endSize)
+		//  a = b * startSize
+		gs.playerLight.powerFailure = 0.8333 - gs.playerLight.normalLightSize * .3333;
+
+		gs.playerLight.lightSize = gs.playerLight.normalLightSize;
+		if(Math.random() < gs.playerLight.powerFailure) {
+			gs.playerLight.lightSize = 0;
+		}
+
+		if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
+			var pos = gs.player.facingPosition();
+
+			if(gs.map.getTileWorldXY(pos.x, pos.y, 32, 32, gs.mapLayer).index === 10) {
+				this.restoreFlame();
 			}
 		}
 	}
@@ -2393,6 +2347,33 @@ Chap3Level.prototype.render = function() {
 
 	var gs = this.gameState;
 };
+
+Chap3Level.prototype.pickUpFlame = function(obj) {
+	'use strict';
+
+	obj.kill();
+	this.restoreFlame();
+	this.gameState.toggleLights('flame');
+}
+
+Chap3Level.prototype.restoreFlame = function(obj) {
+	'use strict';
+
+	this.gameState.playerLight.revive();
+	this.gameState.playerLight.powerFailure = 0;
+	this.gameState.playerLight.normalLightSize = 3;
+};
+
+Chap3Level.prototype.pickUpChair = function(obj) {
+	'use strict';
+
+	this.gameState.askQuestion("chap3_messages", "chair", [
+		function() {
+			this.gameState.player.loot(obj);
+		},
+		null
+	], this);
+}
 
 
 ////////////////////////////////////////////////////////////////////////////
