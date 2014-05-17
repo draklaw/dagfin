@@ -1627,6 +1627,22 @@ Level.prototype.processTriggers = function() {
 	}
 };
 
+Level.prototype.switchDoors = function(triggerName) {
+	'use strict';
+
+	for (var i = 0 ; i < this.doors.length ; i++) {
+		var door = this.doors[i];
+		if (door.properties.trigger === triggerName) {
+			if(door.sprite.alive) {
+				door.sprite.kill();
+			}
+			else {
+				door.sprite.revive();
+			}
+		}
+	}
+};
+
 Level.prototype.fade = function(fadeIn, delay) {
 	'use strict';
 
@@ -2119,6 +2135,7 @@ Chap1Level.prototype.render = function() {
 	var gs = this.gameState;
 };
 
+// TODO: Factorize these methods in Level, but require to know the chapter name...
 Chap1Level.prototype.findMessage = function(msg) {
 	'use strict';
 
@@ -2242,6 +2259,7 @@ Chap2Level.prototype.preload = function() {
 	gs.dagfin.load('image', "note", "assets/sprites/note.png");
 	gs.dagfin.load('image', "hourglass", "assets/sprites/sablier.png");
 	gs.dagfin.load('image', "plante64", "assets/sprites/plante64.png");
+	gs.dagfin.load('spritesheet', "switch", "assets/sprites/switch.png", 32,32);
 };
 
 Chap2Level.prototype.create = function() {
@@ -2279,93 +2297,30 @@ Chap2Level.prototype.create = function() {
 	
 	//FIXME: Ugly hack. Disables punching when there will be a player.
 	gs.time.events.add(0, function () {gs.player.canPunch = false;}, this);
-	
-	this.triggers.dialog1.onEnter.add(function() {
-		level.triggers.dialog1.onEnter.removeAll();
+
+	this.triggers.dialog1.onEnter.addOnce(function() {
 		gs.displayMessage("chap2_messages", "dialog1", true);
 	}, this);
-	
-	this.triggers.dialog2.onEnter.add(function() {
-		level.triggers.dialog2.onEnter.removeAll();
+
+	this.triggers.dialog2.onEnter.addOnce(function() {
 		gs.displayMessage("chap2_messages", "dialog2", true);
 	}, this);
-	
+
 	//FIXME: Some part of the dialogs can be factorized in the JSON file.
 	// It's also possible to make it so the door noise triggers just before
 	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
+
+	this.objects.hourglassNote.onEnter.addOnce(this.pickUpHourglassNote, this);
+	this.objects.hourglass.onEnter.addOnce(this.pickUpHourglass, this);
+
+	this.objects.importantNote.onEnter.addOnce(this.findMessage, this);
+	this.objects.scaredNote.onEnter.addOnce(this.findMessage, this);
+
+	// TODO: add a message telling that the switch is blocked if reactivated.
+	this.objects.doorSwitch.animations.add('toggle', null, 30);
+	this.objects.doorSwitch.onActivate.addOnce(this.useDoorSwitch, this);
 	
-	this.noteLast = function() {
-		level.triggers.hourglassNote.onEnter.removeAll();
-		gs.displayMessage("chap2_messages", "hourglassNoteLast", true, function() {
-			that.objects.hourglassNote.kill();
-		});
-	};
-	
-	this.hourglassLast = function() {
-		level.triggers.hourglass.onEnter.removeAll();
-		for (var i = 0 ; i < that.doors.length ; i++)
-			if (that.doors[i].properties.trigger === "two")
-				that.doors[i].sprite.kill();
-		gs.player.canPunch = true;
-		gs.displayMessage("chap2_messages", "hourglassLast", true, function() {
-			that.objects.hourglass.kill();
-		});
-	};
-	
-	this.noteFirst = function() {
-		level.triggers.hourglassNote.onEnter.removeAll();
-		level.triggers.hourglass.onEnter.add(level.hourglassLast, that);
-		gs.displayMessage("chap2_messages", "hourglassNoteFirst", true, function() {
-			that.objects.hourglassNote.kill();
-		});
-	};
-	
-	this.hourglassFirst = function() {
-		level.triggers.hourglass.onEnter.removeAll;
-		level.triggers.hourglassNote.onEnter.add(level.noteLast);
-		for (var i = 0 ; i < that.doors.length ; i++)
-			if (that.doors[i].properties.trigger === "two")
-				that.doors[i].sprite.kill();
-		gs.player.canPunch = true;
-		gs.displayMessage("chap2_messages", "hourglassFirst", true, function() {
-			that.objects.hourglass.kill();
-		});
-	};
-	
-	this.triggers.hourglassNote.onEnter.add(this.noteFirst);
-	this.triggers.hourglass.onEnter.add(this.hourglassFirst);
-	
-	this.triggers.importantNote.onEnter.add(function() {
-		level.triggers.importantNote.onEnter.removeAll();
-		gs.displayMessage("chap2_messages", "importantNote", true, function() {
-			that.objects.importantNote.kill();
-		});
-	}, this);
-	
-	this.triggers.scaredNote.onEnter.add(function() {
-		level.triggers.scaredNote.onEnter.removeAll();
-		gs.displayMessage("chap2_messages", "scaredNote", true, function() {
-			that.objects.scaredNote.kill();
-		});
-	}, this);
-	
-	this.triggers.doorSwitch.onEnter.add(function() {
-		level.triggers.doorSwitch.onEnter.removeAll();
-		for (var i = 0 ; i < that.doors.length ; i++)
-			if (that.doors[i].properties.trigger === "one")
-				that.doors[i].sprite.kill();
-		gs.displayMessage("chap2_messages", "doorSwitch", true);
-	}, this);
-	
-	this.triggers.carnivorousPlant.onEnter.add(function() {
-		gs.askQuestion("chap2_messages", "carnivorousPlant", [
-			function () {
-				gs.player.loot(that.objects.carnivorousPlant);
-				level.triggers.carnivorousPlant.onEnter.removeAll();
-			},
-			null
-		]);
-	}, this);
+	this.objects.carnivorousPlant.onEnter.add(this.pickUpPlant, this);
 	
 	this.triggers.exit.onEnter.add(function() {
 		this.goToLevel('chap3');
@@ -2386,8 +2341,52 @@ Chap2Level.prototype.render = function() {
 	'use strict';
 
 	Level.prototype.render.call(this);
+};
 
-	var gs = this.gameState;
+// TODO: Factorize these methods in Level, but require to know the chapter name...
+Chap2Level.prototype.findMessage = function(msg) {
+	'use strict';
+
+	this.gameState.displayMessage("chap2_messages", msg.name, true,
+								  msg.kill, msg);
+};
+
+Chap2Level.prototype.useDoorSwitch = function(obj) {
+	'use strict';
+
+	this.switchDoors("one");
+	this.gameState.displayMessage("chap2_messages", "doorSwitch", true);
+	obj.frame = 3;
+	obj.animations.play('switch');
+};
+
+Chap2Level.prototype.pickUpHourglassNote = function(obj) {
+	'use strict';
+
+	var suffix = this.objects.hourglass.alive? 'First': 'Last';
+	this.gameState.displayMessage("chap2_messages", "hourglassNote"+suffix, true,
+								  obj.kill, obj);
+}
+
+Chap2Level.prototype.pickUpHourglass = function(obj) {
+	'use strict';
+
+	this.switchDoors("two");
+	this.gameState.player.canPunch = true;
+	var suffix = this.objects.hourglassNote.alive? 'First': 'Last';
+	this.gameState.displayMessage("chap2_messages", "hourglass"+suffix, true,
+								  obj.kill, obj);
+}
+
+Chap2Level.prototype.pickUpPlant = function(obj) {
+	'use strict';
+
+	this.gameState.askQuestion("chap2_messages", "carnivorousPlant", [
+		function () {
+			this.gameState.player.loot(obj);
+		},
+		null
+	], this);
 };
 
 ////////////////////////////////////////////////////////////////////////////
