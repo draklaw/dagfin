@@ -1521,9 +1521,12 @@ Level.prototype.parseLevel = function(mapJson) {
 		var tri = this.triggersLayer.objects[i];
 		tri.rect = new Phaser.Rectangle(
 			tri.x, tri.y, tri.width, tri.height);
+
+		tri.onActivate = new Phaser.Signal();
 		tri.onEnter = new Phaser.Signal();
 		tri.onLeave = new Phaser.Signal();
 		tri.isInside = false;
+
 		this.triggers[tri.name] = tri;
 	}
 
@@ -1544,7 +1547,12 @@ Level.prototype.parseLevel = function(mapJson) {
 			sprite.objName = item.name;
 			sprite.anchor.set(.5, .5);
 			sprite.body.immovable = true;
+
 			sprite.onActivate = new Phaser.Signal();
+			sprite.onEnter = new Phaser.Signal();
+			sprite.onLeave = new Phaser.Signal();
+			sprite.isInside = false;
+
 			this.objects[item.name] = sprite;
 		}
 	}
@@ -1576,25 +1584,42 @@ Level.prototype.processTriggers = function() {
 
 	var gs = this.gameState;
 
+	var use = (!gs.hasMessageDisplayed() && gs.player.alive && gs.k_use.triggered);
+	var usePos = gs.player.facingPosition();
+
 	for(var id in this.triggers) {
 		var tri = this.triggers[id];
 		var inside = tri.rect.contains(gs.player.x, gs.player.y);
 
 		if(inside && !tri.isInside) {
-			tri.onEnter.dispatch();
+			tri.onEnter.dispatch(tri);
 			tri.isInside = true;
 		}
 		if(!inside && tri.isInside) {
-			tri.onLeave.dispatch();
+			tri.onLeave.dispatch(tri);
 			tri.isInside = false;
+		}
+		if(use && tri.rect.contains(usePos.x, usePos.y)) {
+			tri.onActivate.dispatch(tri);
 		}
 	}
 
-	var use = (!gs.hasMessageDisplayed() && gs.player.alive && gs.k_use.triggered);
-	var usePos = gs.player.facingPosition();
 	for(var id in this.objects) {
 		var obj = this.objects[id];
-		
+
+		if(!obj.exists) {
+			continue;
+		}
+
+		var inside = obj.body.hitTest(gs.player.x, gs.player.y);
+		if(inside && !obj.isInside) {
+			obj.onEnter.dispatch(obj);
+			obj.isInside = true;
+		}
+		if(!inside && obj.isInside) {
+			obj.onLeave.dispatch(obj);
+			obj.isInside = false;
+		}
 		if(use && obj.body.hitTest(usePos.x, usePos.y)) {
 			obj.onActivate.dispatch(obj);
 		}
@@ -1855,13 +1880,22 @@ IntroLevel.prototype.create = function() {
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
-	
+
+	////////////////////////////////////////////////////////////////////
+	// Level scripting.
+
 	gs.displayMessage("intro_messages", "intro", true);
-	
-	this.pentacleFound = false;
-	this.carpetFound = false;
-	this.found = {};
-	this.exiting = false;
+
+	this.objects.carpet.onEnter.add(this.findCarpet, this);
+
+	this.objects.pillar.body.setSize(24, 24, 0, 16);
+	this.objects.pillar.onActivate.addOnce(this.readBook, this);
+
+	this.objects.blood.onActivate.add(this.pickObject, this);
+	this.objects.femur.onActivate.add(this.pickObject, this);
+	this.objects.collar.onActivate.add(this.pickObject, this);
+
+	this.triggers.exit.onEnter.add(this.walkOnPentacle, this);
 
 	// Preload next chapter in background.
 	Chap1Level.prototype.preload.call(this);
@@ -1872,78 +1906,72 @@ IntroLevel.prototype.update = function() {
 	'use strict';
 
 	Level.prototype.update.call(this);
-
-	var that = this;
-	var gs = this.gameState;
-
-	if(!this.carpetFound &&
-	   gs.physics.arcade.overlap(gs.player, this.objects.carpet)) {
-		gs.displayMessage("intro_messages", "carpet", true, function(obj) {
-			that.objects.carpet.kill();
-		});
-		this.carpetFound = true;
-	}
-		
-	if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-		var pos = gs.player.facingPosition();
-		
-		for(var id in this.objects) {
-			var obj = this.objects[id];
-			var name = obj.objName;
-			if(!this.found[name] && obj.body.hitTest(pos.x, pos.y)) {
-				switch(name) {
-				case "blood":
-				case "femur":
-				case "collar":
-					if(this.found['pillar']) {
-						this.found[name] = true;
-						gs.displayMessage("intro_messages", name+"2", true, function(obj) {
-							gs.player.loot(obj);
-						}, this, obj);
-					}
-					else {
-						gs.displayMessage("intro_messages", name, true);
-					}
-					break;
-				case "pillar":
-					this.found[name] = true;
-					gs.displayMessage("intro_messages", 'book', true, function(obj) {
-						obj.frame = 1;
-					}, this, obj);
-					break;
-				}
-			}
-		}
-	}
-
-	var exitRect = this.triggers['exit'].rect;
-	var foundAll = this.carpetFound && this.found['pillar'] && this.found['blood']
-			&& this.found['femur'] && this.found['collar'];
-	var onPentacle = exitRect.contains(gs.player.x, gs.player.y);
-	if(!this.pentacleFound && onPentacle) {
-		this.pentacleFound = true;
-		gs.displayMessage("intro_messages", 'pentacle', true);
-	}
-	else if(foundAll && !this.exiting && onPentacle) {
-		this.exiting = true;
-		gs.displayMessage("intro_messages", 'invoc', true, function() {
-			gs.lightGroup.callAll('kill');
-			gs.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
-			gs.displayMessage("intro_messages", 'invoc2', true, function() {
-				this.goToLevel('chap1');
-			}, this);
-		}, this);
-	}
 };
 
 IntroLevel.prototype.render = function() {
 	'use strict';
 
 	Level.prototype.render.call(this);
-
-	var gs = this.gameState;
 };
 
+IntroLevel.prototype.findCarpet = function() {
+	'use strict';
+
+	this.gameState.displayMessage("intro_messages", "carpet", true,
+			this.objects.carpet.kill, this.objects.carpet);
+};
+
+IntroLevel.prototype.readBook = function() {
+	'use strict';
+
+	this.gameState.displayMessage("intro_messages", 'book', true, function() {
+		this.objects.pillar.frame = 1;
+	}, this);
+};
+
+IntroLevel.prototype.pickObject = function(obj) {
+	'use strict';
+
+	if(this.objects.pillar.frame === 1) { // book read ?
+		this.gameState.displayMessage("intro_messages", obj.objName+"2", true,
+									  this.gameState.player.loot, this.gameState.player, obj);
+	}
+	else {
+		this.gameState.displayMessage("intro_messages", obj.objName, true);
+	}
+};
+
+IntroLevel.prototype.walkOnPentacle = function() {
+	'use strict';
+
+	if(!this.pentacleFound) {
+		this.pentacleFound = true;
+		this.gameState.displayMessage("intro_messages", 'pentacle', true);
+	}
+	else {
+		var dagfin = this.gameState.dagfin;
+		var foundAll = !this.objects.carpet.alive &&
+					   dagfin.hasObject('blood') &&
+					   dagfin.hasObject('femur') &&
+					   dagfin.hasObject('collar');
+
+		if(foundAll) {
+			this.gameState.displayMessage("intro_messages", 'invoc', true,
+										  this.exitLevel, this);
+		}
+	}
+};
+
+IntroLevel.prototype.exitLevel = function() {
+	'use strict';
+
+	var exitRect = this.triggers['exit'].rect;
+
+	this.gameState.lightGroup.callAll('kill');
+	this.gameState.addLight(exitRect.centerX, exitRect.centerY, 4, 0.05, 0xb36be3, .5);
+	this.gameState.displayMessage("intro_messages", 'invoc2', true,
+								  this.goToLevel, this, 'chap1');
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Chapter I

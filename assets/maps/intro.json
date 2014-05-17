@@ -167,7 +167,8 @@
                  "properties":
                     {
                      "offset_x":"0",
-                     "offset_y":"-16"
+                     "offset_y":"-16",
+                     "solid":"true"
                     },
                  "type":"",
                  "visible":true,

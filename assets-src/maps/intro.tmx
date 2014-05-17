@@ -55,6 +55,7 @@
    <properties>
     <property name="offset_x" value="0"/>
     <property name="offset_y" value="-16"/>
+    <property name="solid" value="true"/>
    </properties>
   </object>
   <object name="carpet" gid="36" x="384" y="352"/>
