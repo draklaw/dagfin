@@ -1446,10 +1446,11 @@ Dagfin.prototype = Object.create(Dood.prototype);
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
-function Level(gameState) {
+function Level(gameState, name) {
 	'use strict';
 	
 	this.gameState = gameState;
+	this.name = name;
 	
 	this.enablePlayerLight = true;
 	this.enableNoisePass = true;
@@ -1627,6 +1628,13 @@ Level.prototype.processTriggers = function() {
 	}
 };
 
+Level.prototype.pickUpMessage = function(msg) {
+	'use strict';
+
+	this.gameState.displayMessage(this.name+"_messages", msg.name, true,
+								  msg.kill, msg);
+};
+
 Level.prototype.switchDoors = function(triggerName) {
 	'use strict';
 
@@ -1682,7 +1690,7 @@ Level.prototype.goToLevel = function(level) {
 function IntroLevel(gameState) {
 	'use strict';
 	
-	Level.call(this, gameState);
+	Level.call(this, gameState, 'intro');
 }
 
 IntroLevel.prototype = Object.create(Level.prototype);
@@ -1831,7 +1839,7 @@ IntroLevel.prototype.exitLevel = function() {
 function Chap1Level(gameState) {
 	'use strict';
 	
-	Level.call(this, gameState);
+	Level.call(this, gameState, 'chap1');
 }
 
 Chap1Level.prototype = Object.create(Level.prototype);
@@ -1899,9 +1907,9 @@ Chap1Level.prototype.create = function() {
 	
 	var level = this;
 
-	this.objects.indice1.onEnter.addOnce(this.findMessage, this);
-	this.objects.indice2.onEnter.addOnce(this.findMessage, this);
-	this.objects.indice3.onEnter.addOnce(this.findMessage, this);
+	this.objects.indice1.onEnter.addOnce(this.pickUpMessage, this);
+	this.objects.indice2.onEnter.addOnce(this.pickUpMessage, this);
+	this.objects.indice3.onEnter.addOnce(this.pickUpMessage, this);
 	
 	this.objects.mazeSwitch.animations.add('toggle', null, 30);
 	this.objects.mazeSwitch.animations.add('toggle2', [ 3, 2, 1, 0 ], 30);
@@ -1968,14 +1976,6 @@ Chap1Level.prototype.render = function() {
 	Level.prototype.render.call(this);
 
 	var gs = this.gameState;
-};
-
-// TODO: Factorize these methods in Level, but require to know the chapter name...
-Chap1Level.prototype.findMessage = function(msg) {
-	'use strict';
-
-	this.gameState.displayMessage("chap1_messages", msg.name, true,
-								  msg.kill, msg);
 };
 
 Chap1Level.prototype.toogleMazeLights = function() {
@@ -2072,7 +2072,7 @@ Chap1Level.prototype.setupAlleyLight = function(i) {
 function Chap2Level(gameState) {
 	'use strict';
 	
-	Level.call(this, gameState);
+	Level.call(this, gameState, 'chap2');
 }
 
 Chap2Level.prototype = Object.create(Level.prototype);
@@ -2148,8 +2148,8 @@ Chap2Level.prototype.create = function() {
 	this.objects.hourglassNote.onEnter.addOnce(this.pickUpHourglassNote, this);
 	this.objects.hourglass.onEnter.addOnce(this.pickUpHourglass, this);
 
-	this.objects.importantNote.onEnter.addOnce(this.findMessage, this);
-	this.objects.scaredNote.onEnter.addOnce(this.findMessage, this);
+	this.objects.importantNote.onEnter.addOnce(this.pickUpMessage, this);
+	this.objects.scaredNote.onEnter.addOnce(this.pickUpMessage, this);
 
 	// TODO: add a message telling that the switch is blocked if reactivated.
 	this.objects.doorSwitch.animations.add('toggle', null, 30);
@@ -2176,14 +2176,6 @@ Chap2Level.prototype.render = function() {
 	'use strict';
 
 	Level.prototype.render.call(this);
-};
-
-// TODO: Factorize these methods in Level, but require to know the chapter name...
-Chap2Level.prototype.findMessage = function(msg) {
-	'use strict';
-
-	this.gameState.displayMessage("chap2_messages", msg.name, true,
-								  msg.kill, msg);
 };
 
 Chap2Level.prototype.useDoorSwitch = function(obj) {
@@ -2230,7 +2222,7 @@ Chap2Level.prototype.pickUpPlant = function(obj) {
 function Chap3Level(gameState) {
 	'use strict';
 	
-	Level.call(this, gameState);
+	Level.call(this, gameState, 'chap3');
 }
 
 Chap3Level.prototype = Object.create(Level.prototype);
@@ -2406,7 +2398,7 @@ Chap3Level.prototype.render = function() {
 function BossLevel(gameState) {
 	'use strict';
 	
-	Level.call(this, gameState);
+	Level.call(this, gameState, 'boss');
 }
 
 BossLevel.prototype = Object.create(Level.prototype);
