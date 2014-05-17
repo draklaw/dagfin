@@ -1869,7 +1869,7 @@ IntroLevel.prototype.create = function() {
 
 	gs.map = gs.game.add.tilemap("intro_map");
 	gs.map.addTilesetImage("intro_tileset", "intro_tileset");
-	gs.map.setCollision([ 6, 9, 18, 24, 30 ]);
+	gs.map.setCollision([ 6, 18, 24, 30 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
