@@ -1085,7 +1085,8 @@
                  "name":"hourglass",
                  "properties":
                     {
-                     "key":"hourglass"
+                     "key":"hourglass",
+                     "solid":"true"
                     },
                  "type":"item",
                  "visible":true,
@@ -1127,7 +1128,8 @@
                  "name":"carnivorousPlant",
                  "properties":
                     {
-                     "key":"plante64"
+                     "key":"plante64",
+                     "solid":"true"
                     },
                  "type":"item",
                  "visible":true,

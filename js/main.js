@@ -1910,7 +1910,8 @@ Chap1Level.prototype.create = function() {
 	this.objects.indice1.onEnter.addOnce(this.pickUpMessage, this);
 	this.objects.indice2.onEnter.addOnce(this.pickUpMessage, this);
 	this.objects.indice3.onEnter.addOnce(this.pickUpMessage, this);
-	
+
+	this.objects.mazeSwitch.body.setSize(24, 16);
 	this.objects.mazeSwitch.animations.add('toggle', null, 30);
 	this.objects.mazeSwitch.animations.add('toggle2', [ 3, 2, 1, 0 ], 30);
 	this.objects.mazeSwitch.frame = 0
@@ -1933,7 +1934,7 @@ Chap1Level.prototype.create = function() {
 		this.setupAlleyLight(i);
 	}
 
-	this.objects.clock.onEnter.add(function() {
+	this.objects.clock.onActivate.add(function() {
 		gs.askQuestion("chap1_messages", "clock", [
 			function() {
 				gs.player.loot(this.objects.clock);
@@ -2146,17 +2147,19 @@ Chap2Level.prototype.create = function() {
 	// the last dialog when picking up the hourglass, but I'm late as a rabbit.
 
 	this.objects.hourglassNote.onEnter.addOnce(this.pickUpHourglassNote, this);
-	this.objects.hourglass.onEnter.addOnce(this.pickUpHourglass, this);
+	this.objects.hourglass.onActivate.addOnce(this.pickUpHourglass, this);
 
 	this.objects.importantNote.onEnter.addOnce(this.pickUpMessage, this);
 	this.objects.scaredNote.onEnter.addOnce(this.pickUpMessage, this);
 
 	// TODO: add a message telling that the switch is blocked if reactivated.
+	this.objects.doorSwitch.body.setSize(24, 16);
 	this.objects.doorSwitch.animations.add('toggle', null, 30);
 	this.objects.doorSwitch.onActivate.addOnce(this.useDoorSwitch, this);
-	
-	this.objects.carnivorousPlant.onEnter.add(this.pickUpPlant, this);
-	
+
+	this.objects.carnivorousPlant.body.setSize(32, 32, 0, 16);
+	this.objects.carnivorousPlant.onActivate.add(this.pickUpPlant, this);
+
 	this.triggers.exit.onEnter.add(function() {
 		this.goToLevel('chap3');
 	}, this);

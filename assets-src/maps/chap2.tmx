@@ -471,6 +471,7 @@
   <object name="hourglass" type="item" gid="22" x="192" y="1408">
    <properties>
     <property name="key" value="hourglass"/>
+    <property name="solid" value="true"/>
    </properties>
   </object>
   <object name="exit" type="item" gid="22" x="704" y="128">
@@ -486,6 +487,7 @@
   <object name="carnivorousPlant" type="item" gid="22" x="160" y="1152">
    <properties>
     <property name="key" value="plante64"/>
+    <property name="solid" value="true"/>
    </properties>
   </object>
   <object name="importantNote" type="item" gid="22" x="800" y="864">

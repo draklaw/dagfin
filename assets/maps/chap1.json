@@ -1260,7 +1260,8 @@
                  "name":"clock",
                  "properties":
                     {
-                     "key":"clock"
+                     "key":"clock",
+                     "solid":"true"
                     },
                  "type":"item",
                  "visible":true,
