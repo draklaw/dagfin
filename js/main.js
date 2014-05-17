@@ -1544,7 +1544,8 @@ Level.prototype.parseLevel = function(mapJson) {
 										 item.y + offset_y - 16,
 										 key, 0, parent);
 			gs.game.physics.arcade.enable(sprite);
-			sprite.objName = item.name;
+			sprite.name = item.name;
+			sprite.objName = item.name;	// TODO: replace this by name !
 			sprite.anchor.set(.5, .5);
 			sprite.body.immovable = true;
 
@@ -2047,27 +2048,10 @@ Chap1Level.prototype.create = function() {
 	
 	var level = this;
 
-	this.triggers.indice1.onEnter.add(function() {
-		level.triggers.indice1.onEnter.removeAll();
-		gs.displayMessage("chap1_messages", "indice1", true, function() {
-			that.objects.indice1.kill();
-		});
-	}, this);
+	this.objects.indice1.onEnter.addOnce(this.findMessage, this);
+	this.objects.indice2.onEnter.addOnce(this.findMessage, this);
+	this.objects.indice3.onEnter.addOnce(this.findMessage, this);
 	
-	this.triggers.indice2.onEnter.add(function() {
-		level.triggers.indice2.onEnter.removeAll();
-		gs.displayMessage("chap1_messages", "indice2", true, function() {
-			that.objects.indice2.kill();
-		});
-	}, this);
-	
-	this.triggers.indice3.onEnter.add(function() {
-		level.triggers.indice3.onEnter.removeAll();
-		gs.displayMessage("chap1_messages", "indice3", true, function() {
-			that.objects.indice3.kill();
-		});
-	}, this);
-
 	this.objects.mazeSwitch.animations.add('toggle', null, 30);
 	this.objects.mazeSwitch.animations.add('toggle2', [ 3, 2, 1, 0 ], 30);
 	this.objects.mazeSwitch.frame = 0
@@ -2076,20 +2060,13 @@ Chap1Level.prototype.create = function() {
 	this.infectedTiles = [];
 
 	this.crumbleStep = 0;
-	this.triggers.lava_fail.onEnter.add(function() {
-		level.triggers.lava_fail.onEnter.removeAll();
-		level.infectedTiles = [ [ 6, 22 ] ];
-		level.crumbleTimer = gs.time.events.loop(
-			200, level.stepCrumbleBridge, level);
-	}, this);
+	this.triggers.lava_fail.onEnter.addOnce(this.startCrumbleBridge, this);
 	
-	this.triggers.secret_tip.onEnter.add(function() {
-		level.triggers.secret_tip.onEnter.removeAll();
+	this.triggers.secret_tip.onEnter.addOnce(function() {
 		gs.displayMessage("chap1_messages", "secret", true);
 	}, this);
 
-	this.triggers.reveal_secret.onEnter.add(function() {
-		level.triggers.reveal_secret.onEnter.removeAll();
+	this.triggers.reveal_secret.onEnter.addOnce(function() {
 		gs.ceiling.remove(gs.secretLayer);
 	}, this);
 
@@ -2097,15 +2074,13 @@ Chap1Level.prototype.create = function() {
 		this.setupAlleyLight(i);
 	}
 
-	this.triggers.clock.onEnter.add(function() {
+	this.objects.clock.onEnter.add(function() {
 		gs.askQuestion("chap1_messages", "clock", [
 			function() {
-				gs.player.loot(that.objects.clock);
-				level.triggers.clock.onEnter.removeAll();
+				gs.player.loot(this.objects.clock);
 			},
-			function() {
-			}
-		]);
+			null
+		], this);
 	}, this);
 
 	this.triggers.exit.onEnter.add(function() {
@@ -2144,6 +2119,13 @@ Chap1Level.prototype.render = function() {
 	var gs = this.gameState;
 };
 
+Chap1Level.prototype.findMessage = function(msg) {
+	'use strict';
+
+	this.gameState.displayMessage("chap1_messages", msg.name, true,
+								  msg.kill, msg);
+};
+
 Chap1Level.prototype.toogleMazeLights = function() {
 	'use strict';
 
@@ -2160,6 +2142,14 @@ Chap1Level.prototype.toogleMazeLights = function() {
 	}
 	
 	// TODO: Add switch sound !
+};
+
+Chap1Level.prototype.startCrumbleBridge = function() {
+	'use strict';
+
+	this.infectedTiles = [ [ 6, 22 ] ];
+	this.crumbleTimer = this.gameState.time.events.loop(
+		250, this.stepCrumbleBridge, this);
 };
 
 Chap1Level.prototype.stepCrumbleBridge = function() {
