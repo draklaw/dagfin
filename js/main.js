@@ -1400,9 +1400,6 @@ function Dagfin(game, x, y) {
 	this.ritualItemPlaced = 0;
 	this.lastZombieSpawn = 0;
 
-	this.events.onKilled.add(function(){
-		//TODO : death sound, death music, win screen
-	});
 	dagfin.lastTime = (new Date()).getTime();
 	this.onUpdateBehavior = function(){
 		if(!dagfin.activate) return;
@@ -2403,6 +2400,7 @@ BossLevel.prototype.preload = function() {
 	gs.dagfin.load('spritesheet', "slot", "assets/sprites/pillar_end.png", 32, 64);
 
 	gs.dagfin.load('spritesheet', "dagfin", "assets/sprites/dagfin.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
+	gs.dagfin.load('spritesheet', "dagfin_warp", "assets/sprites/dagfin_warp.png", DAGFIN_WIDTH, DAGFIN_DISPLAY_HEIGHT);
 	gs.dagfin.load('spritesheet', "matt", "assets/sprites/matt.png", 32, 48);
 };
 
@@ -2456,8 +2454,14 @@ BossLevel.prototype.create = function() {
 	this.placed = {};
 
 	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*8.9);
+	
+	this.dagfinWarp = gs.add.sprite(0, 0, 'dagfin_warp', 0);
+	this.dagfinWarp.anchor.set(.5, .6666667);
+	this.dagfinWarpOut = this.dagfinWarp.animations.add('warpOut', null, 20);
+	this.dagfinWarpIn = this.dagfinWarp.animations.add('warpIn', [ 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ], 20);
+	this.dagfinWarp.kill();
 
-	this.triggers.boss.onEnter.add(this.welcomeDialog, this);
+	this.triggers.boss.onEnter.addOnce(this.welcomeDialog, this);
 	this.triggers.matt.onEnter.add(this.mattDialog, this);
 };
 
@@ -2482,20 +2486,42 @@ BossLevel.prototype.render = function() {
 BossLevel.prototype.welcomeDialog = function() {
 	'use strict';
 
-	var that = this;
-	var gs = this.gameState;
+	var startWarpIn = function() {
+		this.dagfinDood.y = 22*32;
+		this.dagfinWarp.y = this.dagfinDood.y;
+		
+		this.dagfinWarpIn.onComplete.addOnce(function() {
+			this.dagfinDood.revive();
+			this.dagfinDood.activate = true;
+			
+			this.dagfinWarp.kill();
+		}, this);
+		var anim = this.dagfinWarp.animations.play('warpIn');
+	};
 
-	gs.askQuestion("boss_messages", "welcome", [
+	var startWarpOut = function() {
+		this.warpDagfinOut(startWarpIn, this);
+	};
+
+	this.gameState.askQuestion("boss_messages", "welcome", [
+		startWarpOut,
 		function() {
-			that.dagfinDood.activate = true;
-			that.dagfinDood.y = 22*32;
-		},
-		function() {
-			gs.player.kill();
+			this.gameState.player.kill();
 		}
-	]);
+	], this);
+}
 
-	this.triggers.boss.onEnter.removeAll();
+BossLevel.prototype.warpDagfinOut = function(callback, context) {
+	'use strict';
+
+	this.dagfinDood.kill();
+
+	this.dagfinWarp.x = this.dagfinDood.x;
+	this.dagfinWarp.y = this.dagfinDood.y;
+	this.dagfinWarp.revive();
+
+	this.dagfinWarpOut.onComplete.addOnce(callback, context);
+	this.dagfinWarp.animations.play('warpOut');
 }
 
 BossLevel.prototype.activateSlot = function(obj) {
@@ -2534,7 +2560,9 @@ BossLevel.prototype.checkVictory = function() {
 			}
 		});
 		this.state = this.STATE_WIN;
-		gs.displayMessage("boss_messages", "win", true, this.dagfinDood.kill, this.dagfinDood);
+		gs.displayMessage("boss_messages", "win", true, function() {
+			this.warpDagfinOut(this.dagfinWarp.kill, this.dagfinWarp);
+		}, this);
 	}
 }
 
