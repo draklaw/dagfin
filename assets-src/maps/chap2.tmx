@@ -59,7 +59,7 @@
 1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,2,9,2,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-1,1,1,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,4,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,2,9,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,9,2,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,2,2,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -471,6 +471,7 @@
   <object name="hourglass" type="item" gid="22" x="192" y="1408">
    <properties>
     <property name="key" value="hourglass"/>
+    <property name="solid" value="true"/>
    </properties>
   </object>
   <object name="exit" type="item" gid="22" x="704" y="128">
@@ -486,6 +487,7 @@
   <object name="carnivorousPlant" type="item" gid="22" x="160" y="1152">
    <properties>
     <property name="key" value="plante64"/>
+    <property name="solid" value="true"/>
    </properties>
   </object>
   <object name="importantNote" type="item" gid="22" x="800" y="864">
@@ -493,16 +495,16 @@
     <property name="key" value="note"/>
    </properties>
   </object>
+  <object name="doorSwitch" type="item" gid="22" x="1472" y="1664">
+   <properties>
+    <property name="key" value="switch"/>
+    <property name="solid" value="true"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup name="triggers" width="64" height="64">
   <object name="dialog1" x="96" y="1856" width="96" height="32"/>
   <object name="dialog2" x="672" y="1600" width="32" height="96"/>
-  <object name="doorSwitch" x="1472" y="1632" width="32" height="32"/>
-  <object name="hourglassNote" x="1216" y="1376" width="32" height="32"/>
-  <object name="hourglass" x="192" y="1376" width="32" height="32"/>
-  <object name="carnivorousPlant" x="160" y="1120" width="32" height="32"/>
-  <object name="importantNote" x="800" y="832" width="32" height="32"/>
-  <object name="scaredNote" x="1248" y="1120" width="32" height="32"/>
   <object name="exit" x="672" y="64" width="96" height="96"/>
  </objectgroup>
 </map>

@@ -478,7 +478,8 @@
                  "name":"flame",
                  "properties":
                     {
-                     "key":"flame"
+                     "key":"flame",
+                     "solid":"true"
                     },
                  "type":"item",
                  "visible":true,
@@ -492,7 +493,8 @@
                  "name":"chair",
                  "properties":
                     {
-                     "key":"chair"
+                     "key":"chair",
+                     "solid":"true"
                     },
                  "type":"item",
                  "visible":true,
@@ -555,71 +557,6 @@
          "objects":[
                 {
                  "height":32,
-                 "name":"flame",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":672,
-                 "y":288
-                }, 
-                {
-                 "height":32,
-                 "name":"chair",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1696,
-                 "y":1888
-                }, 
-                {
-                 "height":32,
-                 "name":"indice1",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1088,
-                 "y":352
-                }, 
-                {
-                 "height":32,
-                 "name":"indice2",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1152,
-                 "y":928
-                }, 
-                {
-                 "height":32,
-                 "name":"indice3",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1664,
-                 "y":1568
-                }, 
-                {
-                 "height":32,
                  "name":"exit",
                  "properties":
                     {
@@ -634,121 +571,6 @@
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":80,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "height":64,
-         "name":"crystals",
-         "objects":[
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":96,
-                 "x":992,
-                 "y":288
-                }, 
-                {
-                 "height":96,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1024,
-                 "y":256
-                }, 
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1184,
-                 "y":864
-                }, 
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1952,
-                 "y":608
-                }, 
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1952,
-                 "y":1120
-                }, 
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1440,
-                 "y":864
-                }, 
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":672,
-                 "y":1120
-                }, 
-                {
-                 "height":32,
-                 "name":"",
-                 "properties":
-                    {
-
-                    },
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":1440,
-                 "y":1888
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":false,
          "width":80,
          "x":0,
          "y":0
