@@ -520,7 +520,11 @@ GameState.prototype.create = function () {
 	
 	// Cap at 30fps to try to avoid people going through walls.
 	this.time.deltaCap = 0.033333;
-	
+
+	// A clock moving at real-time pace (without slow-down) but taking
+	// pauses into account.
+	this.fastClock = new Phaser.Clock(this.game);
+
 	this.game.physics.startSystem(Phaser.Physics.ARCADE);
 	
 	
@@ -651,7 +655,7 @@ GameState.prototype.create = function () {
 		this.playerLight.kill();
 	}
 
-	this.time.realTimeClock.events.loop(LIGHT_DELAY, function() {
+	this.fastClock.events.loop(LIGHT_DELAY, function() {
 		this.lightGroup.forEach(function(light) {
 			var scale = light.lightSize * this.rnd.realInRange(
 				1. - light.lightSizeWooble,
@@ -707,6 +711,9 @@ GameState.prototype.updateInjector = function (injectedFunction) {
 
 GameState.prototype.update = function () {
 	'use strict';
+
+	this.fastClock.update(this.time.elapsed);
+
 	var gs = this;
 	this.updateTasks.forEach(function(injectedFunction){
 		injectedFunction(gs);
