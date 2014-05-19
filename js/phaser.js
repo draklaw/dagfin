@@ -7,7 +7,7 @@
 *
 * Phaser - http://phaser.io
 *
-* v2.0.5 "Tanchico" - Built: Mon May 19 2014 22:36:30
+* v2.0.5 "Tanchico" - Built: Tue May 20 2014 01:03:22
 *
 * By Richard Davey http://www.photonstorm.com @photonstorm
 *
@@ -9790,7 +9790,7 @@ PIXI.RenderTexture.tempMatrix = new PIXI.Matrix();
 *
 * Phaser - http://phaser.io
 *
-* v2.0.5 "Tanchico" - Built: Mon May 19 2014 22:36:30
+* v2.0.5 "Tanchico" - Built: Tue May 20 2014 01:03:22
 *
 * By Richard Davey http://www.photonstorm.com @photonstorm
 *
@@ -39309,6 +39309,12 @@ Phaser.Clock = function (game) {
     this.now = 0;
 
     /**
+    * @property {number} elapsed - The amount of time elapsed this frame for this clock (in ms).
+    * @readonly
+    */
+    this.elapsed = 0;
+
+    /**
     * @property {number} timeScale - Allow to accelerate or slow-down a clock. Time represented by this clock will go timeScale faster than normal.
     */
     this.timeScale = 1;
@@ -39384,7 +39390,8 @@ Phaser.Clock.prototype = {
     update: function (elapsed) {
 
         if (!this.paused) {
-            this.now += elapsed * this.timeScale;
+			this.elapsed = elapsed * this.timeScale;
+            this.now += this.elapsed;
 
             //  Our internal Phaser.Timer
             this.events.update();
