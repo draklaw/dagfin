@@ -13,6 +13,10 @@ var DOWN  = 0;
 var UP    = 1;
 var RIGHT = 2;
 var LEFT  = 3;
+var DOWN_FLAG  = 1;
+var UP_FLAG    = 2;
+var RIGHT_FLAG = 4;
+var LEFT_FLAG  = 8;
 
 var USE_DIST = 24;
 
@@ -526,8 +530,7 @@ GameState.prototype.create = function () {
 	this.fastClock = new Phaser.Clock(this.game);
 
 	this.game.physics.startSystem(Phaser.Physics.ARCADE);
-	
-	
+
 	// Some settings...
 	this.debugMode = false;
 	this.enableLighting = true;
@@ -541,7 +544,7 @@ GameState.prototype.create = function () {
 	this.blocPlayerWhileMsg = true;
 	this.messageCallback = null;
 	this.nextMessage();
-	
+
 	// Keyboard controls.
 	this.k_up = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
 	this.k_down = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
@@ -568,31 +571,23 @@ GameState.prototype.create = function () {
 	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
 	this.gameOver.kill();
 
+	// Player.
+	this.player = new Player(this.game, 0, 0);
+	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
+
+	this.entities = [ this.player ];
+
 	// Map.
 	this.level.create();
-		
+
+	var rawPlayerData = this.map.objects.doods[0];
+	this.player.x = rawPlayerData.x + 16;
+	this.player.y = rawPlayerData.y - 16;
+
 	// Add groups after level
 	this.world.add(this.objectsGroup);
 	this.world.add(this.depthGroup);
 	this.world.add(this.ceiling);
-
-	// People.
-	var rawPlayerData = this.map.objects.doods[0];
-	this.player = new Player(this.game, rawPlayerData.x, rawPlayerData.y);
-
-	this.player.animations.add('walk_down',  [0,  1, 0,  2], 8, true);
-	this.player.animations.add('walk_up',    [3,  4, 3,  5], 8, true);
-	this.player.animations.add('walk_right', [6,  7, 6,  8], 8, true);
-	this.player.animations.add('walk_left',  [9, 10, 9, 11], 8, true);
-	this.playerAnims = [];
-	this.playerAnims[DOWN]  = 'walk_down';
-	this.playerAnims[UP]    = 'walk_up';
-	this.playerAnims[RIGHT] = 'walk_right';
-	this.playerAnims[LEFT]  = 'walk_left';
-	
-	this.deadPlayer = this.add.sprite(0, 0, 'dead_player', 0, this.objectGroup);
-	this.deadPlayer.anchor.set(.5, .5);
-	this.deadPlayer.kill(); // Kill the dead !
 
 	// Zombies
 	this.mobs = [];
@@ -709,10 +704,34 @@ GameState.prototype.updateInjector = function (injectedFunction) {
 	this.updateTasks.push(injectedFunction);
 };
 
+GameState.prototype.updateEntities = function(entity) {
+	'use strict';
+
+	if(Array.isArray(entity)) {
+		entity.forEach(this.updateEntities, this);
+	}
+	else if(typeof entity.update === 'function') {
+		entity.update();
+	}
+	else {
+		console.warn("Invalid entity:", entity);
+	}
+}
+
 GameState.prototype.update = function () {
 	'use strict';
 
 	this.fastClock.update(this.time.elapsed);
+
+	// Do collisions first to avoid weird behaviors...
+	this.physics.arcade.collide(this.depthGroup, this.mapLayer);
+	// Tests the collisions among the group itself, but avoid zombie vs player collisions.
+	// TODO: Somthig wiser (collisions between zombies and dagfin...
+	this.physics.arcade.collide(this.depthGroup, undefined, null, function(a, b) {
+		return !(a instanceof Dood && b instanceof Dood);
+	});
+
+	this.updateEntities(this.entities);
 
 	var gs = this;
 	this.updateTasks.forEach(function(injectedFunction){
@@ -733,31 +752,10 @@ GameState.prototype.update = function () {
 	
 	// Hack use key !
 	this.k_use.triggered = this.k_use.justPressed(1);
-	
-	var player = this.player;
-	
-	// React to controls.
-	player.body.velocity.set(0, 0);
-	if(!this.blocPlayerWhileMsg && this.player.alive) {
-		if (this.k_down.isDown) {
-			player.body.velocity.y = 1;
-			player.facing = DOWN;
-		}
-		if (this.k_up.isDown) {
-			player.body.velocity.y = -1;
-			player.facing = UP;
-		}
-		if (this.k_right.isDown) {
-			player.body.velocity.x = 1;
-			player.facing = RIGHT;
-		}
-		if (this.k_left.isDown) {
-			player.body.velocity.x = -1;
-			player.facing = LEFT;
-		}
-		player.body.velocity.setMagnitude(player.speed());
-	}
 
+	var player = this.player;
+
+	// TODO: move this in an event handler ?
 	if(this.k_use.triggered && this.hasMessageDisplayed() && this.player.alive) {
 		this.k_use.triggered = false;
 		this.nextMessage();
@@ -820,26 +818,6 @@ GameState.prototype.update = function () {
 	}
 
 	this.level.update();
-
-	this.physics.arcade.collide(this.depthGroup, this.mapLayer);
-	// Tests the collisions among the group itself, but avoid zombie vs player collisions.
-	// TODO: What about Dagfin ?
-	this.physics.arcade.collide(this.depthGroup, undefined, null, function(a, b) {
-		return !((a instanceof Player && b instanceof Zombie) ||
-				 (a instanceof Zombie && b instanceof Player));
-	});
-
-	// Walk animations and sound must be after collisions.
-	if(Math.abs(player.body.prev.x - player.body.position.x) > 1
-	   || Math.abs(player.body.prev.y - player.body.position.y) > 1
-	  ){
-		player.sfx.play('playerFootStep', 0, 1, false, false);
-		player.animations.play(this.playerAnims[player.facing]);
-	}
-	else {
-		player.animations.stop();
-		player.frame = (player.behavior*4 + player.facing)*3;
-	}
 
 	this.depthGroup.sort('y', Phaser.Group.SORT_ASCENDING);
 	
@@ -1107,7 +1085,7 @@ function Dood(game, x, y, spritesheet, group) {
 	Phaser.Sprite.call(this, game, x+DOOD_OFFSET_X, y+DOOD_OFFSET_Y, spritesheet, 0);
 
 	game.physics.arcade.enable(this);
-	this.body.setSize(28, 20, 0, 14);
+	this.body.setSize(28, 14, 0, 11);
 
 	this.anchor.set(.5, .6666667);
 	this.revive();
@@ -1116,8 +1094,8 @@ function Dood(game, x, y, spritesheet, group) {
 	this.facing = DOWN;
 	this.hitCooldown = false;
 
-	this.gs = game.state.getCurrentState(); // gs easy acces for Doods childs classes
-	var gs = this.gs;
+	this.gameState = game.state.getCurrentState(); // gs easy acces for Doods childs classes
+	var gs = this.gameState;
 	gs.addSfx(this);
 
 	if (!group) group = gs.depthGroup;
@@ -1164,14 +1142,12 @@ function Dood(game, x, y, spritesheet, group) {
 		));
 		return intensity;
 	};
-
-	this.speed = function(){
-		console.warn('override this method to let your dood move');
-		return 0;
-	};
 }
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
+
+Dood.prototype.update = function() {
+};
 
 Dood.prototype.facingPosition = function() {
 	'use strict';
@@ -1194,7 +1170,7 @@ Dood.prototype.facingPosition = function() {
 	}
 	
 	return pos;
-}
+};
 
 /**
 * kill overload to ensure onKilled is called only once.
@@ -1206,7 +1182,56 @@ Dood.prototype.kill = function() {
 		this.health = 0;
 		Phaser.Sprite.prototype.kill.call(this);
 	}
-}
+};
+
+Dood.prototype.speed = function() {
+	'use strict';
+
+	console.warn('override this method to let your dood move');
+	return 0;
+};
+
+Dood.prototype.move = function(direction) {
+	'use strict';
+
+	this.body.velocity.set(0, 0);
+	if(direction & DOWN_FLAG) {
+		this.body.velocity.y = 1;
+		this.facing = DOWN;
+	}
+	if(direction & UP_FLAG) {
+		this.body.velocity.y = -1;
+		this.facing = UP;
+	}
+	if(direction & RIGHT_FLAG) {
+		this.body.velocity.x = 1;
+		this.facing = RIGHT;
+	}
+	if(direction & LEFT_FLAG) {
+		this.body.velocity.x = -1;
+		this.facing = LEFT;
+	}
+	this.body.velocity.setMagnitude(this.speed());
+
+	// Walk animations and sound must be after collisions.
+	if(Math.abs(this.body.prev.x - this.body.position.x) > 1
+	   || Math.abs(this.body.prev.y - this.body.position.y) > 1
+	  ){
+		this.sfx.play('playerFootStep', 0, 1, false, false);
+		if(this.walkAnims) {
+			this.animations.play(this.walkAnims[this.facing]);
+		}
+	}
+	else {
+		if(this.walkAnims) {
+			this.animations.stop();
+			this.frame = (this.behavior*4 + this.facing)*3;
+		}
+		else {
+			this.frame = this.behavior*4 + this.facing;
+		}
+	}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1216,72 +1241,108 @@ function Player(game, x, y) {
 	'use strict';
 	Dood.call(this, game, x, y, "player");
 
-	var player = this;
-	var gs = this.gs;
+	var gs = this.gameState;
 
-	gs.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
+	this.animations.add('walk_down',  [0,  1, 0,  2], 8, true);
+	this.animations.add('walk_up',    [3,  4, 3,  5], 8, true);
+	this.animations.add('walk_right', [6,  7, 6,  8], 8, true);
+	this.animations.add('walk_left',  [9, 10, 9, 11], 8, true);
+	this.walkAnims = [];
+	this.walkAnims[DOWN]  = 'walk_down';
+	this.walkAnims[UP]    = 'walk_up';
+	this.walkAnims[RIGHT] = 'walk_right';
+	this.walkAnims[LEFT]  = 'walk_left';
 
-	player.health = PLAYER_MAX_LIFE;
-	player.canPunch = true;
+	this.deadSprite = gs.add.sprite(0, 0, 'dead_player', 0, gs.objectGroup);
+	this.deadSprite.anchor.set(.5, .5);
+	this.deadSprite.kill(); // Kill the dead !
 
-	player.inventory = gs.dagfin.inventory;
+	this.health = PLAYER_MAX_LIFE;
+	this.canPunch = true;
 
+	this.events.onKilled.add(this.killPlayer, this);
 
-	this.onUpdateBehavior = function(){
-		player.regenerate();
-
-		gs.damageSprite.alpha = 1 - player.abilityRate();
-		if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
-		else gs.damageSprite.revive();
-	};
-	gs.updateInjector(player.onUpdateBehavior);
-
-	player.events.onKilled.add(function(){
-		gs.deadPlayer.revive();
-		gs.deadPlayer.x = this.x;
-		gs.deadPlayer.y = this.y;
-
-		gs.gameOver.revive();
-		gs.gameOver.alpha = 0;
-		var tween = gs.add.tween(gs.gameOver);
-		tween.onComplete.add(function() {
-			gs.gameOverText.text = "You disapeard deep beneath the surface...";
-			//		console.log("Humanity lost you beneath the surface !");
-			gs.time.clock.events.add(2000, function() {
-				gs.dagfin.reloadLastSave();
-			}, this);
-		}, this);
-		tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, true, 500);
-		//TODO : death sound, death music
-	}, this);
-	
-	player.lastTime = gs.time.clock.now;
-	player.regenerate = function(){
-		player.now = gs.time.clock.now;
-		if(player.alive && PLAYER_FULL_LIFE_RECOVERY_TIME)
-			player.health = Math.min(
-				PLAYER_MAX_LIFE, 
-				player.health + ( 
-					( player.now - player.lastTime ) * PLAYER_MAX_LIFE /
-					( 1000 * PLAYER_FULL_LIFE_RECOVERY_TIME )
-				)
-			);
-		player.lastTime = player.now;
-	};
-	player.abilityRate = function(){
-		return Math.sqrt(player.health / PLAYER_MAX_LIFE);
-	};
-	player.speed = function(){
-		if(SLOW_PLAYER_WHEN_DAMAGED) return PLAYER_VELOCITY * player.abilityRate();
-		else return PLAYER_VELOCITY;
-	};
-	player.loot = function(item){
-		gs.dagfin.inventory.push(item.objName);
-		item.kill();
-	};
+	this.lastRegen = gs.time.clock.now;
 }
 
 Player.prototype = Object.create(Dood.prototype);
+
+Player.prototype.update = function() {
+	'use strict';
+
+	Dood.prototype.update.call(this);
+
+	var gs = this.gameState;
+
+	// React to controls.
+	var moveDir = 0;
+	if(!gs.blocPlayerWhileMsg && this.alive) {
+		if(gs.k_down.isDown)  { moveDir |= DOWN_FLAG;  }
+		if(gs.k_up.isDown)    { moveDir |= UP_FLAG;    }
+		if(gs.k_right.isDown) { moveDir |= RIGHT_FLAG; }
+		if(gs.k_left.isDown)  { moveDir |= LEFT_FLAG;  }
+	}
+	this.move(moveDir);
+
+	this.regenerate();
+
+	// TODO: Move to gamestat.update ?
+	gs.damageSprite.alpha = 1 - this.abilityRate();
+	if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
+	else gs.damageSprite.revive();
+};
+
+Player.prototype.killPlayer = function() {
+	'use strict';
+
+	var gs = this.gameState;
+
+	this.deadSprite.revive();
+	this.deadSprite.x = this.x;
+	this.deadSprite.y = this.y;
+
+	gs.gameOver.revive();
+	gs.gameOver.alpha = 0;
+	var tween = gs.add.tween(gs.gameOver);
+	tween.onComplete.add(function() {
+		gs.gameOverText.text = "You disapeard deep beneath the surface...";
+		gs.time.clock.events.add(2000, function() {
+			gs.dagfin.reloadLastSave();
+		}, this);
+	}, this);
+	tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, true, 500);
+	//TODO : death sound, death music
+};
+
+Player.prototype.regenerate = function() {
+	'use strict';
+
+	var now = this.gameState.time.clock.now;
+	if(this.alive && PLAYER_FULL_LIFE_RECOVERY_TIME)
+		this.health = Math.min(
+			PLAYER_MAX_LIFE,
+			this.health + (
+				( now - this.lastRegen ) * PLAYER_MAX_LIFE /
+				( 1000 * PLAYER_FULL_LIFE_RECOVERY_TIME )
+			)
+		);
+	this.lastRegen = now;
+};
+
+Player.prototype.abilityRate = function() {
+	'use strict';
+
+	return Math.sqrt(this.health / PLAYER_MAX_LIFE);
+};
+
+Player.prototype.speed = function() {
+	'use strict';
+
+	if(SLOW_PLAYER_WHEN_DAMAGED) {
+		return PLAYER_VELOCITY * this.abilityRate();
+	}
+	return PLAYER_VELOCITY;
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1292,7 +1353,7 @@ function Zombie(game, x, y) {
 	Dood.call(this, game, x, y, "zombie");
 
 	var zombie = this;
-	var gs = this.gs;
+	var gs = this.gameState;
 
 	this.onUpdateBehavior = function(){
 		zombie.stumbleAgainstWall();
@@ -1395,7 +1456,7 @@ function Dagfin(game, x, y) {
 	Dood.call(this, game, x, y, "dagfin");
 
 	var dagfin = this;
-	var gs = this.gs;
+	var gs = this.gameState;
 	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
 	this.animations.add("move", null, 16, true);
 	this.animations.play("move");
@@ -1687,6 +1748,13 @@ Level.prototype.goToLevel = function(level) {
 	}, this);
 };
 
+Level.prototype.loot = function(item) {
+	'use strict';
+
+	this.gameState.dagfin.inventory.push(item.name);
+	item.kill();
+};
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Intro
@@ -1798,7 +1866,7 @@ IntroLevel.prototype.pickObject = function(obj) {
 
 	if(this.objects.pillar.frame === 1) { // book read ?
 		this.gameState.displayMessage("intro_messages", obj.objName+"2", true,
-									  this.gameState.player.loot, this.gameState.player, obj);
+									  this.loot, this.gameState.player, obj);
 	}
 	else {
 		this.gameState.displayMessage("intro_messages", obj.objName, true);
@@ -1941,7 +2009,7 @@ Chap1Level.prototype.create = function() {
 	this.objects.clock.onActivate.add(function() {
 		gs.askQuestion("chap1_messages", "clock", [
 			function() {
-				gs.player.loot(this.objects.clock);
+				this.loot(this.objects.clock);
 			},
 			null
 		], this);
@@ -2217,7 +2285,7 @@ Chap2Level.prototype.pickUpPlant = function(obj) {
 
 	this.gameState.askQuestion("chap2_messages", "carnivorousPlant", [
 		function () {
-			this.gameState.player.loot(obj);
+			this.loot(obj);
 		},
 		null
 	], this);
@@ -2373,7 +2441,7 @@ Chap3Level.prototype.pickUpChair = function(obj) {
 
 	this.gameState.askQuestion("chap3_messages", "chair", [
 		function() {
-			this.gameState.player.loot(obj);
+			this.loot(obj);
 		},
 		null
 	], this);
