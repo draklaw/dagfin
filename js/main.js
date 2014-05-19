@@ -651,7 +651,7 @@ GameState.prototype.create = function () {
 		this.playerLight.kill();
 	}
 
-	this.time.events.loop(LIGHT_DELAY, function() {
+	this.time.realTimeClock.events.loop(LIGHT_DELAY, function() {
 		this.lightGroup.forEach(function(light) {
 			var scale = light.lightSize * this.rnd.realInRange(
 				1. - light.lightSizeWooble,
@@ -774,7 +774,7 @@ GameState.prototype.update = function () {
 		// Player stun zombie
 		punch = true;
 		player.hitCooldown = true;
-		this.time.events.add(HIT_COOLDOWN, function () { player.hitCooldown = false; }, this);
+		this.time.clock.events.add(HIT_COOLDOWN, function () { player.hitCooldown = false; }, this);
 		player.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
 	}
 	
@@ -790,7 +790,7 @@ GameState.prototype.update = function () {
 			if(punch) {
 				zombie.behavior = STUNNED;
 				zombie.body.velocity.set(0, 0);
-				this.time.events.add(
+				this.time.clock.events.add(
 					ZOMBIE_STUN_DELAY,
 					function () {
 						zombie.behavior = NORMAL;
@@ -799,7 +799,7 @@ GameState.prototype.update = function () {
 				zombie.behavior = AGGRO;
 				zombie.body.velocity.set(0, 0);
 				zombie.hitCooldown = true;
-				this.time.events.add(
+				this.time.clock.events.add(
 					HIT_COOLDOWN,
 					function () {
 						zombie.hitCooldown = false;
@@ -1240,7 +1240,7 @@ function Player(game, x, y) {
 		tween.onComplete.add(function() {
 			gs.gameOverText.text = "You disapeard deep beneath the surface...";
 			//		console.log("Humanity lost you beneath the surface !");
-			gs.time.events.add(2000, function() {
+			gs.time.clock.events.add(2000, function() {
 				gs.dagfin.reloadLastSave();
 			}, this);
 		}, this);
@@ -1248,9 +1248,9 @@ function Player(game, x, y) {
 		//TODO : death sound, death music
 	}, this);
 	
-	player.lastTime = (new Date()).getTime();
+	player.lastTime = gs.time.clock.now;
 	player.regenerate = function(){
-		player.now = (new Date()).getTime();
+		player.now = gs.time.clock.now;
 		if(player.alive && PLAYER_FULL_LIFE_RECOVERY_TIME)
 			player.health = Math.min(
 				PLAYER_MAX_LIFE, 
@@ -1345,8 +1345,8 @@ function Zombie(game, x, y) {
 		}
 	};
 
-	gs.time.events.loop(ZOMBIE_IDEA_DELAY, zombie.shamble, gs);
-	gs.time.events.loop(ZOMBIE_SPOTTING_DELAY, zombie.spot, gs);
+	gs.time.clock.events.loop(ZOMBIE_IDEA_DELAY, zombie.shamble, gs);
+	gs.time.clock.events.loop(ZOMBIE_SPOTTING_DELAY, zombie.spot, gs);
 }
 
 Zombie.prototype = Object.create(Dood.prototype);
@@ -1400,11 +1400,11 @@ function Dagfin(game, x, y) {
 	this.ritualItemPlaced = 0;
 	this.lastZombieSpawn = 0;
 
-	dagfin.lastTime = (new Date()).getTime();
+	dagfin.lastTime = gs.time.clock.now;
 	this.onUpdateBehavior = function(){
 		if(!dagfin.activate) return;
 
-		dagfin.now = (new Date()).getTime();
+		dagfin.now = gs.time.clock.now;
 
 		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
 
@@ -1998,7 +1998,7 @@ Chap1Level.prototype.startCrumbleBridge = function() {
 	'use strict';
 
 	this.infectedTiles = [ [ 6, 22 ] ];
-	this.crumbleTimer = this.gameState.time.events.loop(
+	this.crumbleTimer = this.gameState.time.clock.events.loop(
 		250, this.stepCrumbleBridge, this);
 };
 
@@ -2049,7 +2049,7 @@ Chap1Level.prototype.stepCrumbleBridge = function() {
 
 	this.infectedTiles = newlyInfected;
 	if(this.infectedTiles.length === 0) {
-		gs.time.events.remove(this.crumbleTimer);
+		gs.time.clock.events.remove(this.crumbleTimer);
 	}
 };
 
@@ -2311,7 +2311,7 @@ Chap3Level.prototype.update = function() {
 	var gs = this.gameState;
 
 	if(!this.objects.flame.alive) {
-		gs.playerLight.normalLightSize -= gs.time.elapsed / 12000;
+		gs.playerLight.normalLightSize -= gs.time.clock.elapsed / 12000;
 		if(gs.playerLight.normalLightSize<1) {
 			gs.playerLight.normalLightSize = 1;
 		}
