@@ -262,6 +262,7 @@ LoadingState.prototype.preload = function() {
 	'use strict';
 
 	this.dagfin.initState();
+	document.getElementById('game').firstChild.style.opacity = 1;
 
 	// Loaded by the 'Boot' state.
 	this.add.sprite(0, 0, 'splash');
