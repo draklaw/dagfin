@@ -1,34 +1,34 @@
 {
 	"intro" : [
-		"Chapter Three : The realm of Yl'her\n\nThe realm of The Odd One was profoundly nested in the other\nrealms. It had no light nor darkness, and the wreckeds lied still.",
-		"Once again, the Chaos was called, and once again the Chaos\nchanged the realm. From the Th'liy's realm he borrowed the light,\nand from the one of Cas'sacor the deep darkness.\n\nThe two did not melt, and never stop fighting one other.",
-		"The Chaos took also life from the Earth, and the wrecked gained\nthe Motion. When the Odd One checked the work of the Chaos, he\nwas pelased, and the Chaos and him reigned together on Yl'her."
+		"Chapitre trois : Le royaume d'Yl'her\n\nLe royaume de l'Étrange était profondément enfouit dans les autres\nroyaumes. Il ne possédait ni lumière ni ténèbres, et les Naufragés\nrestaient immobiles.",
+		"\nEncore un fois, le Chaos fut apellé, et encore un fois le Chaos\nchanga le royaume. Il prit la lumière au royaume de Th'liy, et les\nsombres ténèbres à Cas'sacor.\n\nElles ne se mélangère pas et ne cessèrent jamais de se battre.",
+		"\nLe Chaos prit aussi la vie à la Terre, et les Naufragés eurent\nle mouvement. Quand l'Étrange prit connaissance du travail du\nChaos, il fût satisfait, et le Chaos et lui reignèrent ensemble\nsur Yl'her."
 	],
 	
 	"indice1" :[
-	"Bite hurts. Yl'her moving under my feets."
+		"Note de Matt :\nLa morsure me fait souffrir. Yl'her bouge sous mes pieds."
 	],
 	
 	"indice2" :[
-	"Sand everywhere. Shiny, Shiny little sand."
-	],	
+		"Note de Matt :\nDu sable partout. Du sable très, très brillant."
+	],
 
 	"indice3" :[
-	"If I fit, I sit."
+		"Note de Matt :\nSi je peux, je m'assois."
 	],
 	
 	"flame": [
-		"This crystal flame glows a deep bleu. I finaly found my own sun !"
+		"Andrew :\nCette flame en crystal brille d'un bleu profond. J'ai finalement\ntrouvé mon propre soleil !"
 	],
 	
 	"chair" : {
-		"question": "I found a... chair ? Who would leave a chair here ? Should I take it ?",
+		"question": "Andrew :\nJ'ai trouvé une... chaise ? Qui pourrait laisser une chaise\ndans un endroit pareil ? Dois-je la prendre ?",
 		"choices": [
-			{ "ans": "Yes",
-			  "message": [ "Nice, it fit in my pocket.\n\nWait. A chair fit in my pocket ?\nThis world is wierd."]
+			{ "ans": "Oui",
+			  "message": [ "Andrew :\nBien, elle tient dans ma poche.\n\nAttend. Une chaise tient dans ma poche ? Ce monde est bizarre."]
 			},
-			{ "ans": "No",
-			  "message": [ "It's too big for me, I can't take it !" ]
+			{ "ans": "Non",
+			  "message": [ "Andrew :\nC'est trop encombrant, je ne peux pas la prendre !" ]
 			}
 		]
 	}

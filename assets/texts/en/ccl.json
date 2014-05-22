@@ -38,7 +38,7 @@
 			"Matt:\nOh, it's you Andrew !\nYou too were tired of this forsaken world ?",
 			"Andrew:\nDon't worry Matt, I'll take you back home !",
 			"Matt:\nBut we're together home, now...",
-			"Dagfin: MAy I intErUpt yoU ? I sEE You hAVe mY cEnTEr.\nGive it to me." ],
+			"Dagfin:\nMAy I intErUpt yoU ? I sEE You hAVe mY cEnTEr.\nGive it to me." ],
 		"choices": [
 			{ "ans": "Give the bone to Dagfin",
 			  "message": [
@@ -63,9 +63,9 @@
 		"Dagfin:\nWiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
 	],
 	
-	"matt_advice": [ "Do something !" ],
+	"matt_advice": [ "Matt:\nDo something !" ],
 	
-	"matt_return": [ "Go back find what is missing." ],
+	"matt_return": [ "Matt:\nGo back find what is missing." ],
 	
 	"matt" : {
 		"question": [

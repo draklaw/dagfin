@@ -1,63 +1,63 @@
 {
 	"intro": [
-		"Cela fait deux ans que Matt à disparu.\nLa police a classé l'affaire depuis bien longtemps,\n mais pas moi.",
-		"Je viens enfin d'avoir l'autorisation de fouiller sa maison.\nJe n'ai pas beaucoup d'espoir, mais...",
-		"Je n'abandonnerai pas."
+		"Andrew :\nCela fait deux ans que Matt à disparu.\nLa police a classé l'affaire depuis bien longtemps,\nmais pas moi.",
+		"Andrew :\nJe viens enfin d'avoir l'autorisation de fouiller sa maison.\nJe n'ai pas beaucoup d'espoir, mais...",
+		"Andrew :\nJe n'abandonnerai pas."
 	],
 	"room": [
-		"Voici la pièce où Matt faisait ses recherches.\nJe ne l'imaginais pas comme ça.\nC'est assez peu habituel chez un physicien.",
-		"Je devrais commencer à chercher..."
+		"Andrew :\nVoici la pièce où Matt faisait ses recherches.\nJe ne l'imaginais pas comme ça.\nC'est assez peu habituel chez un physicien.",
+		"Andrew :\nJe devrais commencer à chercher..."
 	],
 
 	"book": [
-		"Le livre semble ancient et précieux.\nJe ne peux pas lire le titre en entier,\nJe lis seulement \"Dagfin\"",
-		"\"Aidez moi, s'il vous plait !\"",
-		"C'est l'écriture de Matt !\nC'est daté d'hier !\nJe savais que Matt était toujours vivant !",
-		"Il y a aussi... une recette ?",
-		"Deep blood of a Wrecked\nOeil d'une diseuse de bonne aventure\nCenter of the One",
-		"Je devrais me mettre à la recherche de ces objets."
+		"Andrew :\nLe livre semble ancient et précieux.\nJe ne peux pas lire le titre en entier,\nLe seul mot lisible est \"Dagfin\"",
+		"\n\"Aidez moi, s'il vous plait !\"",
+		"Andrew :\nC'est l'écriture de Matt !\nC'est daté d'hier !\nJe savais que Matt était toujours vivant !",
+		"Andrew :\nIl y a aussi... une recette ?",
+		"Andrew :\nLe sang profond d'un Naufragé\nOeil du diseur de bonne aventure\nLe centre de l'Étrange",
+		"Andrew :\nJe devrais me mettre à la recherche de ces objets."
 	],
 
 	"blood": [
-		"L'odeur... beurk! On dirait du sang.",
-		"C'est toujours liquide, curieusement."
+		"Andrew :\nL'odeur... beurk! On dirait du sang.",
+		"Andrew :\nIl est toujours liquide, curieusement."
 	],
 
 	"blood2": [
-		"Je ne sais toujours pas ce qu'est un(e) Wrecked, mais ça a l'air d'être du sang."
+		"Andrew :\nJe ne sais pas ce qu'est un Naufragé, mais ça a l'air d'être du\nsang."
 	],
 
 	"femur": [
-		"Ce n'est même pas humain !"
+		"Andrew :\nCe n'est même pas humain !"
 	],
 
 	"femur2": [
-		"Je ne voudrais pas croiser le chemin de la bête qui avait de tels os.."
+		"Andrew :\nJe ne voudrais pas croiser le chemin de la bête qui avait de tels os..."
 	],
 
 	"collar": [
-		"La pierre luit d'une lumière étrange..."
+		"Andrew :\nLa pierre luit d'une lumière étrange..."
 	],
 
 	"collar2": [
-		"Au moins, celui-ci n'est pas aussi tordu."
+		"Andrew :\nAu moins, cet objet n'est pas trop bizarre."
 	],
 
 	"carpet": [
-		"Ce tapis ne colle pas avec la chambre.\nMatt avait toujours des goûts étranges.",
-		"On dirait qu'il y a quelque chose sur le sol, sous cet horrible tapis !"
+		"Andrew :\nCe tapis ne colle pas avec la chambre.\nMatt avait toujours des goûts étranges.",
+		"Andrew :\nOn dirait qu'il y a quelque chose sur le sol, sous cet horrible tapis !"
 	],
 
 	"pentacle": [
-		"Je ne sais pas ce qu'on a utilisé pour peindre ceci.\n ça a l'air d'avoir été peint récemment."
+		"Andrew :\nJe ne sais pas ce qu'on a utilisé pour peindre ceci.\nÇa a l'air d'avoir été peint récemment."
 	],
 
 	"invoc": [
-		" Il y a quelque chose d'autre écrit au bas de la première page...\nVoyons ça!",
-		" \"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
+		"Andrew :\nIl y a quelque chose d'autre écrit au bas de la première page...\nVoyons ça!",
+		"\n\"Ni'eht gnirebmuls ytic fo Yl'her, Dagfin pli sa'nds meard\""
 	],
 
 	"invoc2": [
-		"Qu'est ce que !..."
+		"Andrew :\nQu'est ce que !..."
 	]
 }

@@ -1,60 +1,61 @@
 {
 	"intro" : [
-		"Chaptitre 2 : Les Destructeurs\n\nLa réalité de Yl'her était vide, et Dagfin s'en lassait.\nIl rappela le Chaos, et une fois encore le Chaos fut modelé.\nIl obéit au Grand Ancien, et les Destructeurs apparurent.\nMais le Chaos ne pouvait pas créer quelque chose à partir de rien.",
-		"\nLe Grand Ancien passa un pacte avec Brims, Celui des profondeurs.\nMais Celui des profondeurs envoya ses morts à Dagfin.\nLe chaos ne pouvait pas créer de la vie à partir des morts.\nEt les destructeurs apparurent."
+		"Chaptitre 2 : Les Naufragés\n\nLe royaume d'Yl'her était vide, et Dagfin s'en lassait.\nIl rappela le Chaos, et une fois encore le Chaos fut modelé.\nIl obéit a l'Étrange, et les Naufragés apparurent.\nMais le Chaos ne pouvait pas créer à partir de rien.",
+		"\nL'Étrange passa un pacte avec Brims, la Déliquécente.\nMais la Déliquécente envoya ses morts à Dagfin.\nLe chaos ne pouvait pas créer de la vie à partir des morts.\nEt les Naufragés naquirent."
 	],
 	
 	"dialog1" : [
-		"J'éspère que ces dessins effrayants que j'ai apperçu dans le livre\nont juste été ajouté pour le show..."
+		"Andrew :\nJ'éspère que ces dessins effrayants que j'ai apperçu dans le livre\nont juste été ajouté pour le show..."
 	],
 	
 	"dialog2" : [
-		"Oh mince... leur dents n'étaient *PAS* à l'échelle !"
+		"Andrew :\nOh mince... Leurs dents n'étaient *PAS* à l'échelle !"
 	],
 	
 	"doorSwitch" : [
-		" On dirait qu'une porte vient de s'ouvrir.\nJe ne suis pas sur que ce soit une bonne chose...\n\nSi la créature que j'ai vu est en liberté maintenant,\nJe devrait essayer de rester hors de sa vue."
+		"Andrew :\nOn dirait qu'une porte vient de s'ouvrir.\nJe ne suis pas sur que ce soit une bonne chose...",
+		"Andrew :\nSi la créature que j'ai vu est en liberté maintenant,\nje devrait essayer de rester hors de sa vue."
 	],
 	
 	"hourglassNoteFirst" : [
-		"note de Matt: J'ai été mordu par un Wrecked, et ça fait très mal!\nJ'éspère qu'ils ne sont pas venimeux ou autre...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
-		"Well, let's hope I'll have more luck finding it than Matt."
+		"Note de Matt :\nJ'ai été mordu par un Naufragé, et ça fait très mal !\nJ'éspère qu'ils ne sont pas venimeux ou autre...\nLe livre suggère que le Sablier porrait les retarder quelques instants,\nmais je ne parviens à le trouver nul part...",
+		"Andrew :\nEt bien, espérons que j'ai plus de chances que Matt pour le trouver."
 	],
 	
 	"hourglassNoteLast" : [
-		"Matt's note: I just got bitten by a Wrecked, and it hurts a lot!\nI hope they're not poisonous or something...\nThe book suggests that the Hourglass might delay them for a while,\nbut I can't seem to find it anywhere...",
-		"He must be talking about that hourglass I've picked up.\nI can use it against these creatures !",
-		"[Press SPACE to defend yourself.\nMonsters will be frozen... momentarily.]"
+		"Note de Matt :\nJ'ai été mordu par un Naufragé, et ça fait très mal !\nJ'éspère qu'ils ne sont pas venimeux ou autre...\nLe livre suggère que le Sablier porrait les retarder quelques instants,\nmais je ne parviens à le trouver nul part...",
+		"Andrew :\nIl doit parler du sablier que je viens de ramasser.\nJe dois pouvoir l'utiliser contre ces créatures !",
+		"[Appuyez sur ESPACE pour vous défendre.]\nLes monstres seront immobilisés... temporairement."
 	],
 	
 	"hourglassFirst" : [
-		"There's a shiny hourglass here.\nWell... I'll just pick it up.",
-		"Say, was that the sound of a door opening ?"
+		"Andrew :\nIl y a un sablier brillant ici...\nJe ferais mieux de le prendre.",
+		"Andrew :\nDis, c'était pas le bruit d'une porte qui s'ouvre ?"
 	],
 	
 	"hourglassLast" : [
-		"Here's the Hourglass that Matt mentionned.\nI hope I won't actually have to use it.",
-		"[Press SPACE to defend yourself.\nMonsters will be frozen... momentarily.]",
-		"I heard the sound of a door opening... now to find which one."
+		"Andrew :\nVoici le Sablier dont parlait Matt.\nJ'espère que je n'aurais pas à m'en servir.",
+		"[Appuyez sur ESPACE pour vous défendre.]\nLes monstres seront immobilisés... temporairement.",
+		"Andrew :\nJ'ai entendu une porte s'ouvrir... Reste à trouver laquelle."
 	],
 	
 	"importantNote" : [
-		"Matt's note: The Path That Goes Deeper is straight ahead...\nthough I feel there is something else to be found in this Chapter.\nNo matter. The Path is ahead. I must pursue my Descent..."
+		"Note de Matt :\nLe chemin qui décend dans les profondeurs est droit devant...\nJ'ai le sentiment qu'il y ait quelque chose d'autre à trouver à cet\nétage. Peu importe. La route est droite. Je doit continuer ma\ndécente..."
 	],
 	
 	"scaredNote" : [
-		"???'s note: Oh Lord, the foul spawn of the Odd One is everywhere !\nYet, I must complete this unholy quest I undertook.\nI shall just lay there a while, till the creature I hear\nchooses to leave the room next to mine...",
-		"I can make off weird, worn out stains on that note...\n\nwait, what did I just stepped on ? Is that a bone ?"
+		"Note de ??? :\nOh seigneur, la folle décendance de l'Étrange est partout !\nPourtant, je dois terminer cette quête impie que j'ai entreprise.\nJe vais juste me reposer un peu ici en attendant que\nles créatures que j'entend quittent la pièce d'à côté...",
+		"Andrew :\nIl y a d'étranges tâches délavées sur cette note...\nUn instant, sur quoi ai-je marché ? Est-ce un os ?"
 	],
 	
 	"carnivorousPlant" : {
-		"question": "There's a carnivorous flower, but it doesn't seem dangerous.\n\nShould I take it ?",
+		"question": "Andrew :\nIl y a une plante carnivore, mais elle n'a pas l'air dangeureuse.\nDois-je la prendre ?",
 		"choices": [
-			{ "ans": "Yes",
-				"message": [ "Hope it won't bite my sandwich.\n\nOh, nevermind, I didn't take a sandwich." ]
+			{ "ans": "Oui",
+				"message": [ "Andrew :\nJ'espère qu'elle ne mangera pas mon sandwitch. Oh, c'est vrai, je\nn'ai pas pris de sandwitch." ]
 			},
-			{ "ans": "No",
-				"message": [ "I don't want to pet a flower." ]
+			{ "ans": "Non",
+				"message": [ "Andrew :\nJ'ai pas envie de m'occuper d'une plante." ]
 			}
 		]
 	}

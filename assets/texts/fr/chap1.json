@@ -1,37 +1,37 @@
 {
 	"intro" : [
-		"Chapitre 1 : Le Grand Ancien\n\nAu commencement il n'y avait rien,et rien était tout.\nLes élèments restaient immobiles.",
-		"Puis le Grand Ancien vint, et le Grand Ancien ammena le Chaos.\nLe Chaos crea le mouvement, et les éléments fondirent.\nCelà plut au Grand Ancien et le Grand Ancien modela le Chaos.\nLa terre et les autres réalités furent crées.",
-		"Le Grand Ancien se choisit une réalité pour son usage, et laissa les autres réalités\naux autres.\nLe Grand Ancien s'appelait Dagfin, et sa réalité Yl'her."
+		"Chapitre 1 : L'Étrange\n\nAu commencement il n'y avait rien, et rien était tout.\nLes élèments restaient immobiles.",
+		"\nPuis l'Étrange vint, et l'Étrange ammena le Chaos.\nLe Chaos crea le mouvement, et les éléments fondirent.\nCelà plut a l'Étrange et l'Étrange modela le Chaos.\nLa terre et les autres royaumes furent crées.",
+		"\nL'Étrange se choisit un royaume pour lui-même, et laissa les autres\nroyaumes aux autres.\nL'Étrange s'appelait Dagfin, et son royaume Yl'her."
 	],
 	
 	"indice1" : [
-		"C'est fascinant.\nJe n'en revient pas d'être vraiment là."
+		"Note de Matt :\nC'est fascinant.\nJe n'en revient pas d'être vraiment là."
 	],
 	
 	"indice2" : [
-		"J'aurais du prendre mon porte-bonheur.\nCa aurait pu être utile."
-	],	
+		"Note de Matt :\nJ'aurais du prendre mon porte-bonheur.\nIl aurait pu m'être utile."
+	],
 	
 	"indice3" : [
-		"je dois avancer plus loin."
+		"Note de Matt :\nJe dois aller plus profond."
 	],
 	
 	"clock" : {
-		"question": "On dirait une horloge rouillée. Dois-je la prendre ?",
+		"question": "Andrew :\nOn dirait une horloge rouillée. Dois-je la prendre ?",
 		"choices": [
 			{
 				"ans": "Oui",
-				"message": [ "Ca marche toujours, mais dans une direction normale... Et la vitesse n'est pas\nconstante." ]
+				"message": [ "Andrew :\nElle marche toujours, mais en sens inverse... Et la vitesse n'est pas constante." ]
 			},
 			{
 				"ans": "Non",
-				"message": [ "Je n'ai ni beurre ni confiture pour la réparer." ]
+				"message": [ "Andrew :\nJe n'ai ni beurre ni confiture pour la réparer." ]
 			}
 		]
 	},
 	
 	"secret" : [
-		"La distance entre ces deux torches est d'exactement 9m 3/4..."
+		"Andrew :\nLa distance entre ces deux torches est d'exactement 9m 3/4..."
 	]
 }

@@ -1,48 +1,92 @@
 {
-	"aaarg" : [
-		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
-		"Matt : Oh, it's you Andrew !\nYou too were tired of this forsaken world ?",
-		"Andrew: Don't worry Matt, I'll take you back home !",
-		"Matt : But we're together home, now...",
-		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
+	"blood_missing" : [
+		"Andrew :\nOn dirait un emplacement pour une bouteille de sang, mais je n'en ai pas !",
+		"Matt :\nAndrew ! Viens ici !"
 	],
 	
-	"d1" : [
-		"Dagfin : YoU HuMan SHall noT be hERe !\nHoW DArE yOu ?",
-		"Matt : Oh, it's you Andrew !\nYou too were tired of this forsaken world ?",
-		"Andrew: Don't worry Matt, I'll take you back home !",
-		"Matt : But we're together home, now...\nDagfin : MAy I intErUpt yoU ? I sEE You hAVe mY cEnTEr.\nGive it to me.",
-		"> Give the bone to Dagfin\n> Don't do it."
+	"clock_missing" : [
+		"Andrew :\nOn dirait un emplacement pour une horloge, mais je n'en ai pas !",
+		"Matt :\nAndrew ! Viens ici !"
 	],
 	
-	"d2" : [
-		"Dagfin : GoOd ! LeT The fUN beGIN !"
+	"carnivorousPlant_missing" : [
+		"Andrew :\nOn dirait un emplacement pour une plante, mais je n'en ai pas !",
+		"Matt :\nAndrew ! Viens ici !"
 	],
 	
-	"d3" : [
-		"Dagfin : YoU LiEd To mE.\nGiVE yOUr wIlL tO The ChaOS."
+	"collar_missing" : [
+		"Andrew :\nOn dirait un emplacement pour un pendentif, mais je n'en ai pas !",
+		"Matt :\nAndrew ! Viens ici !"
 	],
 	
-	"d4" : [
-		"Dagfin : I aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
+	"chair_missing" : [
+		"Andrew :\nOn dirait un emplacement pour une chaise, mais je n'en ai pas !",
+		"Matt :\nAndrew ! Viens ici !"
+	],
+	
+	"welcome" : {
+		"question": [
+			"Dagfin :\nToI, HuMaiN, nE dEvrAiS PaS ÊtrE iCI ! CoMMeNt oSE-tU ?",
+			"Matt :\nOh, c'est toi Andrew !\nToi aussi tu t'es lassé de ce monde oublié ?",
+			"Andrew :\nNe t'inquiète pas Matt, je vais te ramenner à la maison !",
+			"Matt :\nMais nous y sommes ensemble maintenant...",
+			"Dagfin :\nPuiS-Je voUS iNtéRoMPrE ? jE voiS QuE vOUs AVeZ\nMoN ceNTrE. DonNeZ-lE MoI." ],
+		"choices": [
+			{ "ans": "Donner l'os à Dagfin",
+			  "message": [
+				  "Dagfin :\nBieN ! QuE lA FÊte CoMMenCe !"
+			  ]
+			},
+			{ "ans": "Ne pas lui donner.",
+			  "message": [
+				"Dagfin :\nTu m'As MenTIs.\nDoNnE toN âMe AU ChaOS."
+			  ]
+			}
+		]
+	},
+	
+	"death" : [
+		"Dagfin :\nI aM tHE heRdMaN of The bRIdgeS,\naND nOw tHe raBID bELlS BaRk At YoU.\nCoME tO ME, hUmAn"
 	],
 	
 	
-	"d5" : [
-		"Dagfin : I CaNNot DiE ! You wIN thIs onE, HumaN.\nBut doN'T foRgET:\nI Am thE pUpIL oF yOUr EyE\nI aM tHe iNexTIngUiSHablE rED-hAiReD tORch\nI am The StAR oF ChAoS.\n",
-		"Dagfin : WiThOUt mE, YouR lIFe iS A pAintiNG In A dark mUsEum.\nI wILl bE herE anD I wAs Here EtERnalY."
+	"win" : [
+		"Dagfin :\nJe nE PeUX paS MoURriR ! TU as gAGnÉ cEttE ManCHe huMaIn.\nMAiS n'OuBliS Pas :\nJe sUIs lA PupILle dE TeS YeUX\nJE sUiS LA toRcHE rOuSSe IneXTiNGUible\njE SuiS l'ÉToIle dU ChAOs.",
+		"Dagfin :\nSAnS mOI, tA viE N'EsT qU'Une PeINTurE Au foND d'UN\nSoMBre MuSée.\nJe FuS et JE rESteRaIs lÀ à ToUT jaMaIS."
 	],
 	
-	"d6" : [
-		"Matt : Andrew ? I had a strange dream. Or maybe not.\nDo you still hear them ?\nAndrew : Hear what ?\n Matt : ...never mind.",
-		"Andrew : We have to find how to go back. ?\nMatt : Go back ? Where ? We're fine here, aren't we ?\nAndrew : To our world, Matt. I could come because I found your note, with the reciepe for the formula.",
-		"Matt : Me ? I've never wrote anything like this, nor a reciepe.\nYou didn't read the whole book before coming ?\nThe last chapter contains the return formula.\nDon't tell to me that you didn't wrote it down before coming.",
-		"Andrew : So, you had it all the time ?\nMatt : It would have been foolish to come here without it !",
-		"Andrew : Why wouldn't you come back ?\nMatt : Oh, you know... stuff... shiny sand... But you're here.\nWill you stay with me ?",
-		">Let's stay here\n>Let's go home together",
-		"Andrew : Ok, let's stay here a little longer. \nMatt : Wonderful  :D !",
-		"Andrew : I'd rather go home with you.\nMatt : Oh... I'm a bit decived, but ok. Here's the formula."
-	]
+	"matt_advice": [ "Matt :\nFais quelque chose !" ],
 	
+	"matt_return": [ "Matt :\nRetourne chercher ce qu'il manque." ],
 	
+	"matt" : {
+		"question": [
+			"Matt :\nAndrew ? J'ai fait un rêve étrange. Ou peut-être pas.\nLes entends-tu toujours ?",
+			"Andrew :\nEntendre quoi ?",
+			"Matt :\n... laisse tomber.",
+			"Andrew :\nOn doit trouver comment rentrer. ?",
+			"Matt :\nRentrer ? Où ça ? On est bien ici, n'est-ce pas ?",
+			"Andrew :\nDans notre monde, Matt. J'ai pu venir grâce à ta note,\navec la recette pour la formule.",
+			"Matt :\nMoi ? Je n'ai jamais rien écris de tel, ou une recette.\nTu n'as pas lu le livre en entier avant de venit ?\nLe dernier chapitre contiens la formule de retour.\nNe me dis pas que tu est décendu sans la noter au préalable.",
+			"Andrew :\nDonc, tu l'as toujours eu ?",
+			"Matt :\nJ'aurais été bête de venir ici sans !",
+			"Andrew :\nEt pourquoi ne pas rentrer ?",
+			"Matt :\nOh, tu sais... des choses... le sable brillant... Mais tu es là.\nComptes-tu rester avec moi ?"
+		],
+		"choices": [
+			{ "ans": "Restons ici.",
+			  "message": [
+				"Andrew :\nOk, on peut rester un peu plus longtemps.",
+				"Matt :\nMerveilleux  :D !"
+			  ]
+			},
+			{ "ans": "Rentrons ensemble à la maison.",
+			  "message": [
+				"Andrew :\nJe préfèrerais rentrer avec toi.",
+				"Matt :\nOh... Je suis un peu déçu, mais d'accord. Voici la formule.."
+			  ]
+			}
+		]
+	}
+
 }

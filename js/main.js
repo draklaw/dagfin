@@ -302,6 +302,7 @@ LoadingState.prototype.preload = function() {
 	this.dagfin.load('image', 'menu_continue', 'assets/sprites/'+lang+'/continue.png');
 	
 	// Message stuff
+	this.dagfin.load('json', "common_texts", "assets/texts/"+lang+"/common.json");
 	this.dagfin.load('image', "message_bg", "assets/message_bg.png");
 	this.dagfin.load('bitmapFont', "message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
@@ -464,7 +465,7 @@ CreditsState.prototype.create = function() {
 	this.dagfin.initState();
 
 	this.credits = this.add.text(400, 800,
-		"Programming, graphics & game desing\n\nAlia Zanetsu\nDoc\nDraKlaW\nGammaNu\n\n-----\n\nThank you for playing !",
+		this.cache.getJSON("common_texts")["credits"],
 		{ font: "32px Arial", fill: "#ffffff", align: "center" });
 	this.credits.anchor.set(.5, .5);
 
@@ -1339,7 +1340,7 @@ Player.prototype.killPlayer = function() {
 	gs.gameOver.alpha = 0;
 	var tween = gs.add.tween(gs.gameOver);
 	tween.onComplete.add(function() {
-		gs.gameOverText.text = "You disapeard deep beneath the surface...";
+		gs.gameOverText.text = gs.cache.getJSON("common_texts")["game_over"];
 		gs.time.clock.events.add(2000, function() {
 			gs.dagfin.reloadLastSave();
 		}, this);
