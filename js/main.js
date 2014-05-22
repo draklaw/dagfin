@@ -31,10 +31,12 @@ var ZOMBIE_SHAMBLE_VELOCITY = 40;
 var ZOMBIE_CHARGE_VELOCITY = 400;
 var ZOMBIE_STUNNED_VELOCITY = 0;
 var ZOMBIE_SPOTTING_RANGE = TILE_SIZE*5;
-var ZOMBIE_SPOTTING_ANGLE = Math.sin(Math.PI / 6); // Don't ask.
+var ZOMBIE_SPOTTING_ANGLE = 60 * Math.PI/180; // Don't ask.
 var ZOMBIE_SPOTTING_DELAY = 50;
 var ZOMBIE_STUN_DELAY = 1000;
-var ZOMBIE_IDEA_DELAY = 5000;
+var ZOMBIE_IDEA_DELAY = 4000;
+var ZOMBIE_IDEA_DELAY_RAND = 2000;
+var ZOMBIE_THINKING_PROBA = .1;
 var FULL_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*1;
 var FAR_SOUND_RANGE = ZOMBIE_SPOTTING_RANGE*2;
 
@@ -44,7 +46,7 @@ var DAGFIN_COLLISION_HEIGHT = 2*TILE_SIZE;
 var DAGFIN_SPOTTING_RANGE = 10*TILE_SIZE;
 var DAGFIN_BASE_VELOCITY = 50;
 var DAGFIN_RITUAL_VELOCITY_BOOST = 15;
-var DAGFIN_ZOMBIE_SPAWN_FREQUENCY = 60; // in seconds, 0 for no spawn over time
+var DAGFIN_ZOMBIE_SPAWN_DELAY = 20; // in seconds, 0 for no spawn over time
 
 var NORMAL  = 0;
 var STUNNED = 1;
@@ -55,6 +57,17 @@ var FLOOR_CRUMBLING_DELAY = 500;
 var LIGHT_DELAY = 80;
 var LIGHT_RAND = .01;
 var LIGHT_COLOR_RAND = .2;
+
+function soundFalloff(distance) {
+	var intensity = Math.max(0,Math.min(1,
+			1 - (
+			( distance - FULL_SOUND_RANGE )
+			/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
+			)
+	));
+	return intensity;
+};
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -571,11 +584,12 @@ GameState.prototype.create = function () {
 	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
 	this.gameOver.kill();
 
+	// Entities
+	this.entities = [];
+
 	// Player.
 	this.player = new Player(this.game, 0, 0);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
-
-	this.entities = [ this.player ];
 
 	// Map.
 	this.level.create();
@@ -591,11 +605,10 @@ GameState.prototype.create = function () {
 
 	// Zombies
 	this.mobs = [];
+	this.entities.push(this.mobs);
 	var zombieList = gs.map.objects.doods;
 	for (var i = 1 ; i < zombieList.length ; i++)
-		gs.mobs.push(new Zombie(gs.game, zombieList[i].x, zombieList[i].y));
-
-
+		new Zombie(gs.game, zombieList[i].x, zombieList[i].y);
 
 	this.postProcessGroup = this.add.group();
 	
@@ -607,7 +620,7 @@ GameState.prototype.create = function () {
 	this.lightLayer = this.add.sprite(-margin, -margin, this.lightmap, 0, this.postProcessGroup);
 	this.lightLayer.blendMode = PIXI.blendModes.MULTIPLY;
 
-	// Contains all the stuff renderer to the lightmap.
+	// Contains all the stuff to render to the lightmap.
 	this.lightLayerGroup = this.make.group();
 
 	this.lightClear = this.add.sprite(0, 0, "black", 0, this.lightLayerGroup);
@@ -711,7 +724,7 @@ GameState.prototype.updateEntities = function(entity) {
 		entity.forEach(this.updateEntities, this);
 	}
 	else if(typeof entity.update === 'function') {
-		entity.update();
+		entity.entityUpdate();
 	}
 	else {
 		console.warn("Invalid entity:", entity);
@@ -772,55 +785,11 @@ GameState.prototype.update = function () {
 			this.updateQuestionText();
 		}
 	}
-	
-	var punch = false;
-	if (this.k_punch.isDown && !player.hitCooldown && player.canPunch)
-	{
-		// Player stun zombie
-		punch = true;
-		player.hitCooldown = true;
-		this.time.clock.events.add(HIT_COOLDOWN, function () { player.hitCooldown = false; }, this);
-		player.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie
-	}
-	
-	// Everyday I'm shambling.
-	for (var i = 0 ; i < this.mobs.length ; i++)
-	{
-		var zombie = this.mobs[i];
-
-		// EXTERMINATE ! EXTERMINATE !
-		if (zombie.behavior != STUNNED && zombie.body.hitTest(this.player.x, this.player.y))
-		{
-			player.body.velocity.set(0, 0);
-			if(punch) {
-				zombie.behavior = STUNNED;
-				zombie.body.velocity.set(0, 0);
-				this.time.clock.events.add(
-					ZOMBIE_STUN_DELAY,
-					function () {
-						zombie.behavior = NORMAL;
-					}, this);
-			} else if (!zombie.hitCooldown) {
-				zombie.behavior = AGGRO;
-				zombie.body.velocity.set(0, 0);
-				zombie.hitCooldown = true;
-				this.time.clock.events.add(
-					HIT_COOLDOWN,
-					function () {
-						zombie.hitCooldown = false;
-					}, this);
-				zombie.sfx.play('zombieHit',0,1,false,true); //hit by zombie
-				player.damage(1);
-			}
-		}
-		else if (zombie.behavior == AGGRO && !this.lineOfSight(zombie, this.player))
-			zombie.behavior = NORMAL;
-	}
 
 	this.level.update();
 
 	this.depthGroup.sort('y', Phaser.Group.SORT_ASCENDING);
-	
+
 	// Move full-screen sprite with the camera.
 	this.camera.update();
 	this.postProcessGroup.x = this.camera.x;
@@ -840,6 +809,12 @@ GameState.prototype.update = function () {
 	else {
 		this.lightLayer.kill();
 	}
+
+	// Update damage sprite
+	gs.damageSprite.alpha = 1 - this.player.abilityRate();
+	if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
+	else gs.damageSprite.revive();
+
 };
 
 
@@ -1074,6 +1049,7 @@ GameState.prototype.lineOfSight = function(stalker, target) {
 		&& Math.abs(Math.sin(staring_angle)) < ZOMBIE_SPOTTING_ANGLE;
 };
 
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 // DOODS !
@@ -1085,14 +1061,24 @@ function Dood(game, x, y, spritesheet, group) {
 	Phaser.Sprite.call(this, game, x+DOOD_OFFSET_X, y+DOOD_OFFSET_Y, spritesheet, 0);
 
 	game.physics.arcade.enable(this);
-	this.body.setSize(28, 14, 0, 11);
+	this.body.setSize(28, 16, 0, 9);
 
-	this.anchor.set(.5, .6666667);
+	this.anchor.set(.5, .8);
 	this.revive();
 
 	this.behavior = NORMAL;
 	this.facing = DOWN;
-	this.hitCooldown = false;
+
+	// Is the dood moving ?
+	this.moving = false;
+	this.wasMoving = false;
+
+	// Is there something restricting dood mooves ?
+	this.hitWall = false;
+
+	this.blockThisFrame = false;
+	this.prevVelocity = new Phaser.Point(0, 0);
+	this.tmpVec = new Phaser.Point();
 
 	this.gameState = game.state.getCurrentState(); // gs easy acces for Doods childs classes
 	var gs = this.gameState;
@@ -1102,74 +1088,77 @@ function Dood(game, x, y, spritesheet, group) {
 	group.add(this);
 
 	var dood = this;
-
-	this.aggroPlayer = function (aggroRange, aggroFrontConeAngle, aggroThroughWall) {
-		if ( 		( !aggroRange || this.isTargetInRange(gs.player,aggroRange) )
-				&& 	( aggroThroughWall || this.isDirectPathObstructed(gs.player) )
-				&& 	(!aggroFrontConeAngle || this.isInFrontCone(gs.player,aggroFrontConeAngle) )
-			) {
-				this.behavior = AGGRO;
-				game.physics.arcade.moveToObject(this, gs.player, this.speed());
-				this.triggerAggroSoundEffect();
-				return true;
-		}
-		return false;
-	};
-	this.isTargetInRange = function(target, range) {
-		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
-		return line2Target.length < range;
-	};
-	this.isDirectPathObstructed = function(target) {
-		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
-		return !gs.obstructed(line2Target);
-	};
-	this.isInFrontCone = function(target, frontConeAngle) {
-		var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
-		var staring_angle = (line2Target.angle+3*Math.PI/2)-(2*Math.PI-this.body.angle);
-		return Math.cos(staring_angle) > 0
-			&& Math.abs(Math.sin(staring_angle)) < frontConeAngle;
-	};
-	this.triggerAggroSoundEffect = function(){
-		this.sfx.play('aggro',0,1,false,false);
-	};
-	this.intensityDistanceDependant = function(){
-		var distance = gs.game.physics.arcade.distanceBetween(gs.player, dood);
-		var intensity = Math.max(0,Math.min(1,
-				1 - (
-				( distance - FULL_SOUND_RANGE )
-				/ 	( FAR_SOUND_RANGE - FULL_SOUND_RANGE )
-				)
-		));
-		return intensity;
-	};
 }
 
 Dood.prototype = Object.create(Phaser.Sprite.prototype);
 
-Dood.prototype.update = function() {
-};
-
-Dood.prototype.facingPosition = function() {
+Dood.prototype.entityUpdate = function() {
 	'use strict';
 
-	var pos = new Phaser.Point(this.x, this.y+8);
+};
 
+Dood.prototype.block = function() {
+	'use strict';
+
+	this.blockThisFrame = true;
+}
+
+Dood.prototype.isTargetInRange = function(target, range) {
+	'use strict';
+
+	var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
+	return line2Target.length < range;
+};
+
+Dood.prototype.isDirectPathObstructed = function(target) {
+	'use strict';
+
+	var line2Target = new Phaser.Line(this.x, this.y, target.x, target.y);
+	return this.gameState.obstructed(line2Target);
+};
+
+Dood.prototype.isInFrontCone = function(target, frontConeAngle) {
+	'use strict';
+
+	// SO much better !!!
+	var lookDir = this.facingOrientation(1, this.tmpVec);
+	var targetDir = Phaser.Point.subtract(target.world, this.world).normalize();
+	return lookDir.dot(targetDir) > Math.cos(frontConeAngle/2);
+};
+
+Dood.prototype.isInView = function(target, viewRange, frontConeAngle, viewThroughWalls) {
+	'use strict';
+
+	return	( !viewRange || this.isTargetInRange(target, viewRange) )
+		&& 	( viewThroughWalls || !this.isDirectPathObstructed(target) )
+		&& 	(!frontConeAngle || this.isInFrontCone(target, frontConeAngle));
+};
+
+Dood.prototype.facingOrientation = function(length, point) {
+	'use strict';
+
+	length = length || 1;
+	if(typeof point === 'undefined') point = new Phaser.Point();
+
+	point.set(0, 0);
 	switch(this.facing) {
-		case DOWN:
-			pos.y += USE_DIST;
-			break;
-		case UP:
-			pos.y -= USE_DIST;
-			break;
-		case RIGHT:
-			pos.x += USE_DIST;
-			break;
-		case LEFT:
-			pos.x -= USE_DIST;
-			break;
+		case DOWN:  point.y =  length; break;
+		case UP:    point.y = -length; break;
+		case RIGHT: point.x =  length; break;
+		case LEFT:  point.x = -length; break;
 	}
-	
-	return pos;
+	return point;
+};
+
+Dood.prototype.facingPosition = function(dist, point) {
+	'use strict';
+
+	dist = dist || 1;
+
+	var point = this.facingOrientation(dist, point);
+	point = Phaser.Point.add(point, this.world);
+
+	return point;
 };
 
 /**
@@ -1191,46 +1180,78 @@ Dood.prototype.speed = function() {
 	return 0;
 };
 
+Dood.prototype.directionFlagsToVector = function(direction, vector) {
+	'use strict';
+
+	if(typeof vector === 'undefined') { vector = new Phaser.Point(); }
+
+	vector.set(0, 0);
+	if(direction & DOWN_FLAG)  { vector.y =  1; }
+	if(direction & UP_FLAG)    { vector.y = -1; }
+	if(direction & RIGHT_FLAG) { vector.x =  1; }
+	if(direction & LEFT_FLAG)  { vector.x = -1; }
+
+	return vector;
+};
+
 Dood.prototype.move = function(direction) {
 	'use strict';
 
-	this.body.velocity.set(0, 0);
-	if(direction & DOWN_FLAG) {
-		this.body.velocity.y = 1;
-		this.facing = DOWN;
+	var velocity = this.body.velocity;
+	if(this.blockThisFrame) {
+		this.blockThisFrame = false;
+		velocity.set(0, 0);
 	}
-	if(direction & UP_FLAG) {
-		this.body.velocity.y = -1;
-		this.facing = UP;
+	else if(typeof direction === 'number') {
+		velocity = this.directionFlagsToVector(direction, this.body.velocity);
 	}
-	if(direction & RIGHT_FLAG) {
-		this.body.velocity.x = 1;
-		this.facing = RIGHT;
+	else {
+		velocity.copyFrom(direction);
 	}
-	if(direction & LEFT_FLAG) {
-		this.body.velocity.x = -1;
-		this.facing = LEFT;
-	}
-	this.body.velocity.setMagnitude(this.speed());
 
-	// Walk animations and sound must be after collisions.
-	if(Math.abs(this.body.prev.x - this.body.position.x) > 1
-	   || Math.abs(this.body.prev.y - this.body.position.y) > 1
-	  ){
-		this.sfx.play('playerFootStep', 0, 1, false, false);
+	if(velocity.getMagnitudeSq() > 0.001) {
+		velocity.setMagnitude(this.speed());
+	}
+
+	var newFacing = DOWN;
+	var maxDirSpeed = velocity.y;
+	if(-velocity.y > maxDirSpeed) { newFacing = UP;    maxDirSpeed = -velocity.y; }
+	if( velocity.x > maxDirSpeed) { newFacing = RIGHT; maxDirSpeed =  velocity.x; }
+	if(-velocity.x > maxDirSpeed) { newFacing = LEFT;  maxDirSpeed = -velocity.x; }
+
+	// Seems to bug if collisions are done after. This is why they are
+	//  the first thing in GameSatae.update().
+	this.wasMoving = this.moving;
+	this.moving = maxDirSpeed > 0.01 &&
+	   (Math.abs(this.body.prev.x - this.body.position.x) > .1
+	    || Math.abs(this.body.prev.y - this.body.position.y) > .1);
+
+	this.prevVelocity.normalize();
+	var lastMove = Phaser.Point.subtract(this.body.position, this.body.prev, this.tmpVec).normalize();
+	this.hitWall = Phaser.Point.distance(this.prevVelocity, lastMove) > 0.01;
+
+	if(direction) {
+		this.facing = newFacing;
+	}
+	if(this.moving) {
+		var distance = Phaser.Point.distance(this.gameState.player.world, this.world);
+		this.sfx.play('playerFootStep', 0,
+					  soundFalloff(distance),
+					  false, false);
 		if(this.walkAnims) {
 			this.animations.play(this.walkAnims[this.facing]);
 		}
 	}
-	else {
-		if(this.walkAnims) {
-			this.animations.stop();
-			this.frame = (this.behavior*4 + this.facing)*3;
-		}
-		else {
-			this.frame = this.behavior*4 + this.facing;
-		}
+	else if(this.walkAnims) {
+		this.animations.stop();
+		this.frame = (this.behavior*4 + this.facing)*3;
 	}
+
+	if(!this.walkAnims) {
+		this.frame = this.behavior*4 + this.facing;
+	}
+
+	this.prevVelocity.copyFrom(this.body.velocity.clone());
 };
 
 
@@ -1239,9 +1260,11 @@ Dood.prototype.move = function(direction) {
 
 function Player(game, x, y) {
 	'use strict';
+
 	Dood.call(this, game, x, y, "player");
 
 	var gs = this.gameState;
+	gs.entities.push(this);
 
 	this.animations.add('walk_down',  [0,  1, 0,  2], 8, true);
 	this.animations.add('walk_up',    [3,  4, 3,  5], 8, true);
@@ -1253,12 +1276,13 @@ function Player(game, x, y) {
 	this.walkAnims[RIGHT] = 'walk_right';
 	this.walkAnims[LEFT]  = 'walk_left';
 
-	this.deadSprite = gs.add.sprite(0, 0, 'dead_player', 0, gs.objectGroup);
+	this.deadSprite = gs.add.sprite(0, 0, 'dead_player', 0, gs.objectsGroup);
 	this.deadSprite.anchor.set(.5, .5);
 	this.deadSprite.kill(); // Kill the dead !
 
 	this.health = PLAYER_MAX_LIFE;
 	this.canPunch = true;
+	this.nextHit = 0;
 
 	this.events.onKilled.add(this.killPlayer, this);
 
@@ -1267,12 +1291,13 @@ function Player(game, x, y) {
 
 Player.prototype = Object.create(Dood.prototype);
 
-Player.prototype.update = function() {
+Player.prototype.entityUpdate = function() {
 	'use strict';
 
 	Dood.prototype.update.call(this);
 
 	var gs = this.gameState;
+	var now = gs.time.clock.now;
 
 	// React to controls.
 	var moveDir = 0;
@@ -1284,12 +1309,21 @@ Player.prototype.update = function() {
 	}
 	this.move(moveDir);
 
-	this.regenerate();
+	if(gs.k_punch.isDown && this.canPunch && this.alive && this.nextHit <= now) {
+		// Player stun zombie
+		for(var i=0; i<gs.mobs.length; ++i) {
+			var zombie = gs.mobs[i];
+			if(zombie.state !== Zombie.updateStun &&
+					gs.physics.arcade.overlap(this, zombie)) {
+				zombie.stun();
+				break;
+			}
+		}
+		this.nextHit = now + HIT_COOLDOWN;
+		this.sfx.play('playerHit',0,1,false,true); //FIXME : different sound when you hit zombie and when you are hit by zombie and when you hit nothing
+	}
 
-	// TODO: Move to gamestat.update ?
-	gs.damageSprite.alpha = 1 - this.abilityRate();
-	if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
-	else gs.damageSprite.revive();
+	this.regenerate();
 };
 
 Player.prototype.killPlayer = function() {
@@ -1350,101 +1384,224 @@ Player.prototype.speed = function() {
 
 function Zombie(game, x, y) {
 	'use strict';
+
 	Dood.call(this, game, x, y, "zombie");
+	this.gameState.mobs.push(this);
 
-	var zombie = this;
-	var gs = this.gameState;
+	this.behavior = NORMAL;
+	this.state = this.updateNormal;
 
-	this.onUpdateBehavior = function(){
-		zombie.stumbleAgainstWall();
-		zombie.footNoise();
-	};
-	gs.updateInjector(zombie.onUpdateBehavior);
+	this.nextIdea = 0;
+	this.nextSpoting = 0;
+	this.nextAttack = 0;
+	this.nextWakeUp = 0;
 
-	this.stumbleAgainstWall = function(){
-		var zblock = zombie.body.blocked;
-		if (zblock.up || zblock.down || zblock.left || zblock.right)
-			zombie.shamble();
-		zombie.frame = zombie.behavior*4 + zombie.facing;
-	};
-	this.shamble = function () {
-		if (zombie.behavior == STUNNED)
-			return;
-		zombie.facing = gs.rnd.integer()%4;
-		switch (zombie.facing) {
-			case DOWN:
-				zombie.body.velocity.x = 0;
-				zombie.body.velocity.y = zombie.speed();
-				break;
-			case UP:
-				zombie.body.velocity.x = 0;
-				zombie.body.velocity.y = -zombie.speed();
-				break;
-			case RIGHT:
-				zombie.body.velocity.y = 0;
-				zombie.body.velocity.x = zombie.speed();
-				break;
-			case LEFT:
-				zombie.body.velocity.y = 0;
-				zombie.body.velocity.x = -zombie.speed();
-				break;
-		}
-	};
-	this.footNoise = function(){
-		if(zombie.body.velocity.x || zombie.body.velocity.y) {
-			zombie.sfx.play(
-				'zombieFootStep',0,
-				this.intensityDistanceDependant(),
-				false,false);
-		}
-	};
-	this.spot = function () {
-		if (zombie.behavior == NORMAL){
-			zombie.aggroPlayer(ZOMBIE_SPOTTING_RANGE,ZOMBIE_SPOTTING_ANGLE);
-		}
-	};
-	this.speed = function(){
-		switch (zombie.behavior){
-			case AGGRO: return ZOMBIE_CHARGE_VELOCITY;
-			case STUNNED: return ZOMBIE_STUNNED_VELOCITY;
-			case NORMAL:
-			default:
-				return ZOMBIE_SHAMBLE_VELOCITY;
-		}
-	};
+	this.walking = true;
+	this.chargeDir = null;
 
-	gs.time.clock.events.loop(ZOMBIE_IDEA_DELAY, zombie.shamble, gs);
-	gs.time.clock.events.loop(ZOMBIE_SPOTTING_DELAY, zombie.spot, gs);
+	this.wakeUp();
 }
 
 Zombie.prototype = Object.create(Dood.prototype);
 
+Zombie.prototype.entityUpdate = function() {
+	'use strict';
 
+	this.state();
+};
 
+Zombie.prototype.updateNormal = function() {
+	'use strict';
 
+	// EXTERMINATE ! EXTERMINATE !
+	if(this.isOnPlayer()) {
+		this.attack();
+	}
+	else {
+		var now = this.gameState.time.clock.now;
 
+		// Everyday I'm shambling.
+		if(this.nextIdea <= now) { this.shamble(); }
 
+		this.stumbleAgainstWall();
 
+		// Look around
+		if(this.nextSpoting <= now) { this.spot(); }
 
+		var moveDir = 0;
+		if(this.walking) { moveDir = 1 << this.facing; }
 
+		this.move(moveDir);
+	}
+};
 
+Zombie.prototype.updateStun = function() {
+	'use strict';
 
+	var now = this.gameState.time.clock.now;
 
+	if(this.nextWakeUp <= now) {
+		this.wakeUp();
+	}
+	this.move(0);
+};
 
+Zombie.prototype.updateCharge = function() {
+	'use strict';
 
+	var now = this.gameState.time.clock.now;
 
+	if(this.isOnPlayer()) {
+		this.attack();
+	}
+	else {
+		// Everyday I'm shambling.
+		if(this.nextIdea <= now) { this.shamble(); }
 
+		if(this.hitWall) {
+			if(this.seePlayer()) {
+				this.aggroPlayer();
+			}
+			else {
+				this.wakeUp();
+			}
+		}
+	}
 
+	this.move(this.chargeDir);
+};
 
+Zombie.prototype.updateAttack = function() {
+	'use strict';
 
+	var now = this.gameState.time.clock.now;
 
+	this.gameState.player.block();
+	if(!this.isOnPlayer()) {
+		this.wakeUp();
+	}
+	else if(this.nextAttack <= now) {
+		this.hit(this.gameState.player);
+	}
 
+	this.move(0);
+};
 
+Zombie.prototype.wakeUp = function(delay) {
+	'use strict';
 
+	if(typeof delay === 'undefined') { delay = 0 };
 
+	var now = this.gameState.time.clock.now;
 
+	if(this.state != this.updateNormal) {
+		this.behavior = NORMAL;
+		this.state = this.updateNormal;
+		this.nextIdea = Math.max(this.nextIdea,
+			this.gameState.time.clock.now + ZOMBIE_IDEA_DELAY
+			+ this.gameState.rnd.integerInRange(-ZOMBIE_IDEA_DELAY_RAND, ZOMBIE_IDEA_DELAY_RAND));
+		this.nextSpoting = now;
+	}
+};
 
+Zombie.prototype.stun = function(delay) {
+	'use strict';
 
+	if(typeof delay === 'undefined') delay = ZOMBIE_STUN_DELAY;
+
+	var now = this.gameState.time.clock.now;
+
+	if(this.state !== this.updateStun) {
+		this.behavior = STUNNED;
+		this.state = this.updateStun;
+		this.nextWakeUp = now + delay;
+	}
+};
+
+Zombie.prototype.attack = function() {
+	'use strict';
+
+	var now = this.gameState.time.clock.now;
+
+	this.behavior = AGGRO;
+	this.state = this.updateAttack;
+	this.gameState.player.body.velocity.set(0, 0);
+	this.nextAttack =  now + HIT_COOLDOWN/2;
+};
+
+Zombie.prototype.aggroPlayer = function() {
+	'use strict';
+
+	this.behavior = AGGRO;
+	this.state = this.updateCharge;
+	this.chargeDir = Phaser.Point.subtract(this.gameState.player.world, this.world);
+
+	this.sfx.play('aggro',0,1,false,false);
+};
+
+Zombie.prototype.seePlayer = function() {
+	'use strict';
+
+	return this.isInView(this.gameState.player, ZOMBIE_SPOTTING_RANGE, ZOMBIE_SPOTTING_ANGLE);
+};
+
+Zombie.prototype.isOnPlayer = function() {
+	'use strict';
+
+	return this.gameState.physics.arcade.overlap(this, this.gameState.player);
+};
+
+Zombie.prototype.stumbleAgainstWall = function() {
+	'use strict';
+
+	if(!this.moving && this.wasMoving && this.walking) {
+		this.nextIdea = Math.min(this.nextIdea, this.gameState.time.clock.now + 250);
+	}
+};
+
+Zombie.prototype.shamble = function() {
+	'use strict';
+
+	// Zombies can't think AND walk.
+	this.walking = this.gameState.rnd.frac() > ZOMBIE_THINKING_PROBA;
+	if(this.walking) {
+		var newFacing = this.gameState.rnd.integer()%4;
+		this.facing = newFacing;
+	}
+
+	this.nextIdea = this.gameState.time.clock.now + ZOMBIE_IDEA_DELAY
+		+ this.gameState.rnd.integerInRange(-ZOMBIE_IDEA_DELAY_RAND, ZOMBIE_IDEA_DELAY_RAND);
+};
+
+Zombie.prototype.spot = function() {
+	'use strict';
+
+	if(this.seePlayer()) { this.aggroPlayer(); }
+
+	this.nextSpoting = this.gameState.time.clock.now + ZOMBIE_SPOTTING_DELAY;
+};
+
+Zombie.prototype.speed = function() {
+	'use strict';
+
+	switch (this.behavior){
+		case AGGRO: return ZOMBIE_CHARGE_VELOCITY;
+		case STUNNED: return ZOMBIE_STUNNED_VELOCITY;
+		case NORMAL:
+		default:
+			return ZOMBIE_SHAMBLE_VELOCITY;
+	}
+};
+
+Zombie.prototype.hit = function(target) {
+	'use strict';
+
+	var now = this.gameState.time.clock.now;
+
+	this.nextAttack =  now + HIT_COOLDOWN;
+	this.sfx.play('zombieHit', 0, 1, false, true); //hit by zombie
+	this.gameState.player.damage(1);
+};
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1453,57 +1610,74 @@ Zombie.prototype = Object.create(Dood.prototype);
 
 function Dagfin(game, x, y) {
 	'use strict';
-	Dood.call(this, game, x, y, "dagfin");
 
-	var dagfin = this;
-	var gs = this.gameState;
-	this.body.setSize(DAGFIN_WIDTH, DAGFIN_COLLISION_HEIGHT, 0, DAGFIN_COLLISION_HEIGHT/2);
+	Dood.call(this, game, x, y, "dagfin");
+	this.gameState.entities.push(this);
+
+	this.body.setSize(110, 36, 0, 13);
 	this.animations.add("move", null, 16, true);
 	this.animations.play("move");
 
-	this.revive();
-
-	game.physics.arcade.enable(this);
+	this.WAITING = 0;
+	this.AGGRO = 1;
+	this.state = this.WAITING;
 
 	this.ritualItemPlaced = 0;
-	this.lastZombieSpawn = 0;
-
-	dagfin.lastTime = gs.time.clock.now;
-	this.onUpdateBehavior = function(){
-		if(!dagfin.activate) return;
-
-		dagfin.now = gs.time.clock.now;
-
-		dagfin.aggroPlayer(DAGFIN_SPOTTING_RANGE);
-
-		// when aggro, spawn zombie over time
-		if(dagfin.behavior == AGGRO && dagfin.lastZombieSpawn + DAGFIN_ZOMBIE_SPAWN_FREQUENCY*1000 < dagfin.now){
-			dagfin.spawnZombie();
-			dagfin.lastZombieSpawn = dagfin.now;
-		}
-
-		dagfin.lastTime = dagfin.now;
-
-		// kill player if contact
-		if(dagfin.body.hitTest(gs.player.x, gs.player.y)){
-			gs.player.kill();
-		}
-	};
-	gs.updateInjector(dagfin.onUpdateBehavior);
-
-	this.ritualStepBehavior = function(){
-		dagfin.ritualItemPlaced++; // will increase Speed
-		dagfin.spawnZombie();
-	};
-	this.spawnZombie = function(){
-		gs.mobs.push(new Zombie(gs.game, dagfin.x, dagfin.y));
-	};
-	this.speed = function(){
-		return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
-	};
+	this.nextZombieSpawn = 0;
 }
 
 Dagfin.prototype = Object.create(Dood.prototype);
+
+Dagfin.prototype.entityUpdate = function() {
+	'use strict';
+
+	if(this.state === this.WAITING) {
+		this.move(0);
+		return;
+	}
+
+	var player = this.gameState.player;
+	var now = this.gameState.time.clock.now;
+
+	this.attack();
+
+	// when aggro, spawn zombie over time
+	if(this.newZombieSpawn < this.now){
+		this.spawnZombie();
+		this.lastZombieSpawn = this.now + DAGFIN_ZOMBIE_SPAWN_DELAY*1000;
+	}
+
+	// kill player if contact
+	if(this.body.hitTest(player.x, player.y)){
+		player.kill();
+	}
+};
+
+Dagfin.prototype.attack = function() {
+	'use strict';
+
+	// FIXME: change walking sound for dagfin.
+	this.move(Phaser.Point.subtract(this.gameState.player.world, this.world));
+};
+
+Dagfin.prototype.ritualStepBehavior = function() {
+	'use strict';
+
+	this.ritualItemPlaced++; // will increase Speed
+	this.spawnZombie();
+};
+
+Dagfin.prototype.spawnZombie = function() {
+	'use strict';
+
+	this.gameState.mobs.push(new Zombie(this.gameState.game, this.x, this.y));
+};
+
+Dagfin.prototype.speed = function() {
+	'use strict';
+
+	return DAGFIN_BASE_VELOCITY + this.ritualItemPlaced*DAGFIN_RITUAL_VELOCITY_BOOST;
+};
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -1652,7 +1826,7 @@ Level.prototype.processTriggers = function() {
 	var gs = this.gameState;
 
 	var use = (!gs.hasMessageDisplayed() && gs.player.alive && gs.k_use.triggered);
-	var usePos = gs.player.facingPosition();
+	var usePos = gs.player.facingPosition(USE_DIST);
 
 	for(var id in this.triggers) {
 		var tri = this.triggers[id];
@@ -2198,13 +2372,12 @@ Chap2Level.prototype.create = function() {
 	
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
-	
+
 	gs.displayMessage("chap2_messages", "intro", true);
-	
+
 	var level = this;
-	
-	//FIXME: Ugly hack. Disables punching when there will be a player.
-	gs.time.events.add(0, function () {gs.player.canPunch = false;}, this);
+
+	gs.player.canPunch = false;
 
 	this.triggers.dialog1.onEnter.addOnce(function() {
 		gs.displayMessage("chap2_messages", "dialog1", true);
@@ -2403,7 +2576,7 @@ Chap3Level.prototype.update = function() {
 		}
 
 		if(gs.messageQueue.length === 0 && gs.k_use.triggered) {
-			var pos = gs.player.facingPosition();
+			var pos = gs.player.facingPosition(USE_DIST);
 
 			if(gs.map.getTileWorldXY(pos.x, pos.y, 32, 32, gs.mapLayer).index === 10) {
 				this.restoreFlame();
@@ -2528,10 +2701,10 @@ BossLevel.prototype.create = function() {
 
 	this.placed = {};
 
-	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*8.9);
+	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.5);
 	
 	this.dagfinWarp = gs.add.sprite(0, 0, 'dagfin_warp', 0);
-	this.dagfinWarp.anchor.set(.5, .6666667);
+	this.dagfinWarp.anchor.copyFrom(this.dagfinDood.anchor);
 	this.dagfinWarpOut = this.dagfinWarp.animations.add('warpOut', null, 20);
 	this.dagfinWarpIn = this.dagfinWarp.animations.add('warpIn', [ 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ], 20);
 	this.dagfinWarp.kill();
@@ -2555,7 +2728,7 @@ BossLevel.prototype.render = function() {
 //	gs.depthGroup.forEach(function(body) {
 //		gs.game.debug.body(body);
 //	}, this);
-//	gs.game.debug.geom(gs.player.facingPosition(), 'rgb(255, 0, 0)');
+//	gs.game.debug.geom(gs.player.facingPosition(USE_DIST), 'rgb(255, 0, 0)');
 };
 
 BossLevel.prototype.welcomeDialog = function() {
@@ -2567,7 +2740,7 @@ BossLevel.prototype.welcomeDialog = function() {
 		
 		this.dagfinWarpIn.onComplete.addOnce(function() {
 			this.dagfinDood.revive();
-			this.dagfinDood.activate = true;
+			this.dagfinDood.state = this.dagfinDood.AGGRO;
 			
 			this.dagfinWarp.kill();
 		}, this);
@@ -2604,7 +2777,7 @@ BossLevel.prototype.activateSlot = function(obj) {
 
 	var gs = this.gameState;
 
-	if(!this.dagfinDood.activate || this.placed[obj.objName]) {
+	if(this.dagfinDood.state === this.dagfinDood.WAITING || this.placed[obj.objName]) {
 		return;
 	}
 
@@ -2627,13 +2800,14 @@ BossLevel.prototype.checkVictory = function() {
 
 	if(this.placed.blood && this.placed.clock && this.placed.carnivorousPlant
 			&& this.placed.collar && this.placed.chair) {
-		this.dagfinDood.activate = false;
+		this.dagfinDood.state = this.dagfinDood.WAITING;
 		this.dagfinDood.body.velocity.set(0, 0);
 		gs.depthGroup.forEach(function(dood) {
 			if(dood instanceof Zombie) {
 				dood.kill();
 			}
 		});
+		gs.mobs.length = 0;
 		this.state = this.STATE_WIN;
 		gs.displayMessage("boss_messages", "win", true, function() {
 			this.warpDagfinOut(this.dagfinWarp.kill, this.dagfinWarp);
