@@ -1067,6 +1067,7 @@ function Dood(game, x, y, spritesheet, group) {
 	this.anchor.set(.5, .8);
 	this.revive();
 
+	this.animateMove = true;
 	this.behavior = NORMAL;
 	this.facing = DOWN;
 
@@ -1234,6 +1235,7 @@ Dood.prototype.move = function(direction) {
 	if(direction) {
 		this.facing = newFacing;
 	}
+
 	if(this.moving) {
 		var distance = Phaser.Point.distance(this.gameState.player.world, this.world);
 		this.sfx.play('playerFootStep', 0,
@@ -1248,7 +1250,7 @@ Dood.prototype.move = function(direction) {
 		this.frame = (this.behavior*4 + this.facing)*3;
 	}
 
-	if(!this.walkAnims) {
+	if(!this.walkAnims && this.animateMove) {
 		this.frame = this.behavior*4 + this.facing;
 	}
 
@@ -1618,6 +1620,8 @@ function Dagfin(game, x, y) {
 	this.body.setSize(110, 36, 0, 13);
 	this.animations.add("move", null, 16, true);
 	this.animations.play("move");
+
+	this.animateMove = false;
 
 	this.WAITING = 0;
 	this.AGGRO = 1;
