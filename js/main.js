@@ -592,6 +592,10 @@ GameState.prototype.create = function () {
 	this.player = new Player(this.game, 0, 0);
 	this.camera.follow(this.player, Phaser.Camera.FOLLOW_TOPDOWN);
 
+	// This stores the zombies.
+	this.mobs = [];
+	this.entities.push(this.mobs);
+
 	// Map.
 	this.level.create();
 
@@ -603,13 +607,6 @@ GameState.prototype.create = function () {
 	this.world.add(this.objectsGroup);
 	this.world.add(this.depthGroup);
 	this.world.add(this.ceiling);
-
-	// Zombies
-	this.mobs = [];
-	this.entities.push(this.mobs);
-	var zombieList = gs.map.objects.doods;
-	for (var i = 1 ; i < zombieList.length ; i++)
-		new Zombie(gs.game, zombieList[i].x, zombieList[i].y);
 
 	this.postProcessGroup = this.add.group();
 	
@@ -1413,6 +1410,12 @@ Zombie.prototype.entityUpdate = function() {
 	this.state();
 };
 
+Zombie.prototype.updateIdle = function() {
+	'use strict';
+
+	this.move(0);
+}
+
 Zombie.prototype.updateNormal = function() {
 	'use strict';
 
@@ -1489,6 +1492,13 @@ Zombie.prototype.updateAttack = function() {
 
 	this.move(0);
 };
+
+Zombie.prototype.idle = function(delay) {
+	'use strict';
+
+		this.behavior = NORMAL;
+		this.state = this.updateIdle;
+}
 
 Zombie.prototype.wakeUp = function(delay) {
 	'use strict';
@@ -1822,6 +1832,13 @@ Level.prototype.parseLevel = function(mapJson) {
 			door.sprite = sprite;
 			this.doors.push(door);
 		}
+	}
+
+	// Zombies
+	if(this.mapLayers.doods) {
+		var zombieList = this.mapLayers.doods.objects;
+		for (var i = 1 ; i < zombieList.length ; i++)
+			new Zombie(gs.game, zombieList[i].x, zombieList[i].y);
 	}
 };
 
@@ -2380,16 +2397,16 @@ Chap2Level.prototype.create = function() {
 
 	gs.displayMessage("chap2_messages", "intro", true);
 
-	var level = this;
-
 	gs.player.canPunch = false;
 
+	gs.mobs[0].idle();
 	this.triggers.dialog1.onEnter.addOnce(function() {
 		gs.displayMessage("chap2_messages", "dialog1", true);
 	}, this);
 
 	this.triggers.dialog2.onEnter.addOnce(function() {
 		gs.displayMessage("chap2_messages", "dialog2", true);
+		gs.mobs[0].aggroPlayer();
 	}, this);
 
 	//FIXME: Some part of the dialogs can be factorized in the JSON file.
