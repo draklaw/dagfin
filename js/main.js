@@ -226,6 +226,12 @@ DagfinGame.prototype.load = function(loadMethod, key) {
 			Array.prototype.slice.call(arguments, 1));
 }
 
+DagfinGame.prototype.playMusic = function(loadMethod, key) {
+	'use strict';
+
+	if(!this.music) this.music = this.game.add.audio('music');
+	this.music.play('', 0, 0.2);
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -329,6 +335,8 @@ LoadingState.prototype.preload = function() {
 
 LoadingState.prototype.create = function() {
 	'use strict';
+
+	this.dagfin.playMusic();
 
 	var level = location.href.split('level=')[1]
 	if(level) {
@@ -2004,14 +2012,13 @@ IntroLevel.prototype.create = function() {
 	gs.mapLayer.resizeWorld();
 //	gs.mapLayer.debug = true;
 
-	gs.music = gs.game.add.audio('music');
-	gs.music.play('', 0, 0.2);
-
 	this.enablePlayerLight = false;
 	this.enableNoisePass = false;
 
 	////////////////////////////////////////////////////////////////////
 	// Level scripting.
+
+	// TODO: add missing intro dialog. Black screen intro ?
 
 	gs.displayMessage("intro_messages", "intro", true);
 
@@ -2164,10 +2171,6 @@ Chap1Level.prototype.create = function() {
 									   	gs.ceiling);
 	
 	this.LAVA_TILE = 7;
-	
-	
-   	gs.music = gs.game.add.audio('music');
-	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -2389,10 +2392,7 @@ Chap2Level.prototype.create = function() {
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
-	
-	gs.music = gs.game.add.audio('music');
-    gs.music.play('', 0, 0.2);
-	
+
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
@@ -2543,9 +2543,6 @@ Chap3Level.prototype.create = function() {
 	// gs.mapLayer.debug = true;
 
 	gs.overlayLayer = gs.map.createLayer("overlay");
-
-	gs.music = gs.game.add.audio('music');
-	gs.music.play('', 0, 0.2);
 
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
@@ -2702,10 +2699,6 @@ BossLevel.prototype.create = function() {
 
 	gs.overlayLayer = gs.map.createLayer("overlay", undefined, undefined, this.layersGroup);
 
-
-	gs.music = gs.game.add.audio('music');
-	gs.music.play('', 0, 0.2);
-
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
@@ -2723,6 +2716,8 @@ BossLevel.prototype.create = function() {
 	}
 
 	this.placed = {};
+
+	// TODO: special death dialog.
 
 	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.5);
 	
