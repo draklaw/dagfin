@@ -1643,9 +1643,9 @@ Dagfin.prototype.entityUpdate = function() {
 	this.attack();
 
 	// when aggro, spawn zombie over time
-	if(this.newZombieSpawn < this.now){
+	if(this.nextZombieSpawn < now){
 		this.spawnZombie();
-		this.lastZombieSpawn = this.now + DAGFIN_ZOMBIE_SPAWN_DELAY*1000;
+		this.nextZombieSpawn = now + DAGFIN_ZOMBIE_SPAWN_DELAY*1000;
 	}
 
 	// kill player if contact
