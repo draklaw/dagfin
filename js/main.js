@@ -768,7 +768,7 @@ GameState.prototype.update = function () {
 	var player = this.player;
 
 	// TODO: move this in an event handler ?
-	if(this.k_use.triggered && this.hasMessageDisplayed() && this.player.alive) {
+	if(this.k_use.triggered && this.hasMessageDisplayed()) {
 		this.k_use.triggered = false;
 		this.nextMessage();
 	}
@@ -1267,6 +1267,8 @@ function Player(game, x, y) {
 	var gs = this.gameState;
 	gs.entities.push(this);
 
+	this.onDeath(gs.level.displayDeathScreen, gs.level);
+
 	this.animations.add('walk_down',  [0,  1, 0,  2], 8, true);
 	this.animations.add('walk_up',    [3,  4, 3,  5], 8, true);
 	this.animations.add('walk_right', [6,  7, 6,  8], 8, true);
@@ -1330,27 +1332,20 @@ Player.prototype.entityUpdate = function() {
 Player.prototype.killPlayer = function() {
 	'use strict';
 
-	var gs = this.gameState;
-
 	this.deadSprite.revive();
 	this.deadSprite.x = this.x;
 	this.deadSprite.y = this.y;
 
-	gs.messageBg.kill();
-	gs.message.text = "";
-
-	gs.gameOver.revive();
-	gs.gameOver.alpha = 0;
-	var tween = gs.add.tween(gs.gameOver);
-	tween.onComplete.add(function() {
-		gs.gameOverText.text = gs.cache.getJSON("common_texts")["game_over"];
-		gs.time.clock.events.add(2000, function() {
-			gs.dagfin.reloadLastSave();
-		}, this);
-	}, this);
-	tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, true, 500);
+	this._deathCallback.call(this._deathCallbackContext);
 	//TODO : death sound, death music
 };
+
+Player.prototype.onDeath = function(callback, context) {
+	'use strict';
+
+	this._deathCallback = callback;
+	this._deathCallbackContext = context;
+}
 
 Player.prototype.regenerate = function() {
 	'use strict';
@@ -1915,6 +1910,26 @@ Level.prototype.switchDoors = function(triggerName) {
 		}
 	}
 };
+
+Level.prototype.displayDeathScreen = function() {
+	'use strict';
+
+	var gs = this.gameState;
+
+	gs.messageBg.kill();
+	gs.message.text = "";
+
+	gs.gameOver.revive();
+	gs.gameOver.alpha = 0;
+	var tween = gs.add.tween(gs.gameOver);
+	tween.onComplete.add(function() {
+		gs.gameOverText.text = gs.cache.getJSON("common_texts")["game_over"];
+		gs.time.clock.events.add(2000, function() {
+			gs.dagfin.reloadLastSave();
+		}, this);
+	}, this);
+	tween.to({ alpha: 1}, 1500, Phaser.Easing.Linear.None, true, 500);
+}
 
 Level.prototype.setBlackScreen = function(turnOn) {
 	'use strict';
@@ -2733,8 +2748,6 @@ BossLevel.prototype.create = function() {
 
 	this.fade(true);
 
-	// TODO: special death dialog.
-
 	this.dagfinDood = new Dagfin(gs.game, TILE_SIZE*32, TILE_SIZE*9.5);
 	
 	this.dagfinWarp = gs.add.sprite(0, 0, 'dagfin_warp', 0);
@@ -2782,6 +2795,10 @@ BossLevel.prototype.welcomeDialog = function() {
 	};
 
 	var startWarpOut = function() {
+		this.gameState.player.onDeath(function() {
+			this.gameState.displayMessage("boss_messages", "death", true, this.displayDeathScreen, this);
+		}, this);
+
 		this.warpDagfinOut(startWarpIn, this);
 	};
 
