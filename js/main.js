@@ -590,9 +590,9 @@ GameState.prototype.create = function () {
 	this.ceiling = this.make.group();
 
 	// Used by Level.create().
-	this.gameOver = this.make.sprite(0, 0, "black");
-	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
-	this.gameOver.kill();
+	this.blackScreen = this.make.sprite(0, 0, "black");
+	this.blackScreen.scale.set(MAX_WIDTH, MAX_HEIGHT);
+	this.blackScreen.kill();
 
 	// Entities
 	this.entities = [];
@@ -684,6 +684,8 @@ GameState.prototype.create = function () {
 		}, this);
 	}, this);
 
+	this.postProcessGroup.add(this.blackScreen);
+
 	// Add Message box
 	this.postProcessGroup.add(this.messageGroup);
 
@@ -692,7 +694,9 @@ GameState.prototype.create = function () {
 	this.damageSprite.scale.set(8, 8);
 
 	// Game Over
-	this.postProcessGroup.add(this.gameOver);
+	this.gameOver = this.add.sprite(0, 0, "black", 0, this.postProcessGroup);
+	this.gameOver.scale.set(MAX_WIDTH, MAX_HEIGHT);
+	this.gameOver.kill();
 	this.gameOverText = this.add.text(400, 300,
 						"", { font: "32px Arial", fill: "#c00000", align: "center" }, this.postProcessGroup);
 	this.gameOverText.anchor.set(.5, .5);
@@ -1344,6 +1348,9 @@ Player.prototype.killPlayer = function() {
 	this.deadSprite.x = this.x;
 	this.deadSprite.y = this.y;
 
+	gs.messageBg.kill();
+	gs.message.text = "";
+
 	gs.gameOver.revive();
 	gs.gameOver.alpha = 0;
 	var tween = gs.add.tween(gs.gameOver);
@@ -1743,7 +1750,7 @@ Level.prototype.create = function(mapJson) {
 
 	this.loadScreen.callAll('kill');
 
-	this.fade(true);
+	this.setBlackScreen(true);
 }
 
 Level.prototype.update = function(mapJson) {
@@ -1921,22 +1928,31 @@ Level.prototype.switchDoors = function(triggerName) {
 	}
 };
 
+Level.prototype.setBlackScreen = function(turnOn) {
+	'use strict';
+
+	// gameOver is a fullscreen black sprite, so it does the job.
+	if(turnOn) { this.gameState.blackScreen.revive(); }
+	else { this.gameState.blackScreen.kill(); }
+	this.gameState.blackScreen.alpha = 1;
+}
+
 Level.prototype.fade = function(fadeIn, delay) {
 	'use strict';
 
 	fadeIn = fadeIn? 1: 0;
 	delay = delay || 1000;
 
-	// gameOver is a fullscreen black sprinte, so it does the job.
-	this.gameState.gameOver.revive();
-	this.gameState.gameOver.alpha = fadeIn;
+	// gameOver is a fullscreen black sprite, so it does the job.
+	this.gameState.blackScreen.revive();
+	this.gameState.blackScreen.alpha = fadeIn;
 
-	var fadeTween = this.gameState.add.tween(this.gameState.gameOver);
+	var fadeTween = this.gameState.add.tween(this.gameState.blackScreen);
 	fadeTween.onComplete.add(function() {
 		// May cause a minor bug if player dies before the end.
 		// But this won't happen, right ?
-		this.gameState.gameOver.kill();
-		this.gameState.gameOver.alpha = 1;
+		this.gameState.blackScreen.kill();
+		this.gameState.blackScreen.alpha = 1;
 	}, this);
 	fadeTween.to({ alpha: 1-fadeIn }, delay);
 	fadeTween.start();
@@ -2018,9 +2034,13 @@ IntroLevel.prototype.create = function() {
 	////////////////////////////////////////////////////////////////////
 	// Level scripting.
 
-	// TODO: add missing intro dialog. Black screen intro ?
+	gs.displayMessage("intro_messages", "intro", true, function() {
+		this.fade(true);
+	}, this);
 
-	gs.displayMessage("intro_messages", "intro", true);
+	this.triggers.room.onEnter.add(function() {
+		gs.displayMessage("intro_messages", "room", true);
+	}, this);
 
 	this.objects.carpet.onEnter.add(this.findCarpet, this);
 
@@ -2175,7 +2195,9 @@ Chap1Level.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 	
-	gs.displayMessage("chap1_messages", "intro", true);
+	gs.displayMessage("chap1_messages", "intro", true, function() {
+		this.fade(true);
+	}, this);
 	
 	var level = this;
 
@@ -2396,7 +2418,9 @@ Chap2Level.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
-	gs.displayMessage("chap2_messages", "intro", true);
+	gs.displayMessage("chap2_messages", "intro", true, function() {
+		this.fade(true);
+	}, this);
 
 	gs.player.canPunch = false;
 
@@ -2547,7 +2571,9 @@ Chap3Level.prototype.create = function() {
 	this.enablePlayerLight = false;
 	this.enableNoisePass = true;
 
-	gs.displayMessage("chap3_messages", "intro", true);
+	gs.displayMessage("chap3_messages", "intro", true, function() {
+		this.fade(true);
+	}, this);
 
 	var that = this;
 
@@ -2716,6 +2742,8 @@ BossLevel.prototype.create = function() {
 	}
 
 	this.placed = {};
+
+	this.fade(true);
 
 	// TODO: special death dialog.
 
