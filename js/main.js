@@ -510,8 +510,6 @@ GameState.prototype = Object.create(Phaser.State.prototype);
 GameState.prototype.init = function(levelId) {
 	'use strict';
 
-	this.updateTasks = [];
-
 	levelId = levelId || 'intro';
 
 	this.levelId = levelId;
@@ -723,11 +721,6 @@ GameState.prototype.create = function () {
 ////////////////////////////////////////////////////////////////////////////
 // Update
 
-GameState.prototype.updateInjector = function (injectedFunction) {
-	'use strict';
-	this.updateTasks.push(injectedFunction);
-};
-
 GameState.prototype.updateEntities = function(entity) {
 	'use strict';
 
@@ -756,11 +749,6 @@ GameState.prototype.update = function () {
 	});
 
 	this.updateEntities(this.entities);
-
-	var gs = this;
-	this.updateTasks.forEach(function(injectedFunction){
-		injectedFunction(gs);
-	});
 
 	// Debug cheats !
 	if(this.debugMode) {
@@ -822,9 +810,9 @@ GameState.prototype.update = function () {
 	}
 
 	// Update damage sprite
-	gs.damageSprite.alpha = 1 - this.player.abilityRate();
-	if(gs.damageSprite.alpha == 0) gs.damageSprite.kill();
-	else gs.damageSprite.revive();
+	this.damageSprite.alpha = 1 - this.player.abilityRate();
+	if(this.damageSprite.alpha == 0) this.damageSprite.kill();
+	else this.damageSprite.revive();
 
 };
 
