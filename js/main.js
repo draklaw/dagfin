@@ -313,6 +313,12 @@ LoadingState.prototype.preload = function() {
 	this.dagfin.load('bitmapFont', "message_font", "assets/fonts/font.png",
 						 "assets/fonts/font.fnt");
 
+	// Map stuff
+	this.dagfin.load('image', "basic_tileset", "assets/tilesets/basic.png");
+
+	this.dagfin.load('image', "spawn", "assets/tilesets/spawn.png");
+	this.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
+
 	// Characters
 	this.dagfin.load('spritesheet', "zombie", "assets/sprites/zombie.png", DOOD_WIDTH, DOOD_HEIGHT);
 //	this.dagfin.load('spritesheet', "player", "assets/sprites/player.png", DOOD_WIDTH, DOOD_HEIGHT);
@@ -2152,10 +2158,8 @@ Chap1Level.prototype.preload = function() {
 
 	gs.dagfin.load('json', "chap1_map_json", "assets/maps/chap1.json");
 	gs.dagfin.load('json', "chap1_messages", "assets/texts/"+lang+"/chap1.json");
-	
-	gs.dagfin.load('image', "chap1_tileset", "assets/tilesets/basic.png");
-	gs.dagfin.load('image', "spawn", "assets/tilesets/spawn.png");
-	gs.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
+
+	gs.dagfin.load('image', "crumbling_tile", "assets/sprites/crumbling.png");
 
 	gs.dagfin.load('image', "note", "assets/sprites/note.png");
 	gs.dagfin.load('image', "clock", "assets/sprites/clock.png");
@@ -2178,21 +2182,13 @@ Chap1Level.prototype.create = function() {
 	this.parseLevel(this.mapJson);
 
 	gs.map = gs.game.add.tilemap("chap1_map");
-	gs.map.addTilesetImage("basic", "chap1_tileset");
-	gs.map.addTilesetImage("spawn", "spawn");
-	gs.map.addTilesetImage("spawn2", "spawn2");
+	gs.map.addTilesetImage("basic", "basic_tileset");
 	gs.map.setCollision([ 1, 8 ]);
 
 	gs.mapLayer = gs.map.createLayer("map");
 	gs.mapLayer.resizeWorld();
 	// gs.mapLayer.debug = true;
-	
-	gs.overlayLayer = gs.map.createLayer("overlay");
-	gs.bridgeLayer = gs.map.createLayer("lava_bridge");
-	gs.secretLayer = gs.map.createLayer("secret_passage",
-										undefined, undefined,
-									   	gs.ceiling);
-	
+
 	this.LAVA_TILE = 7;
 
 	this.enablePlayerLight = false;
@@ -2214,7 +2210,22 @@ Chap1Level.prototype.create = function() {
 	this.objects.mazeSwitch.frame = 0
 	this.objects.mazeSwitch.onActivate.add(this.toogleMazeLights, this);
 
+	// We avoid using mapLayer because it seems sloooooooow.
+	this.crumbleTiles = {};
+	this.crumbleGroup = gs.add.group(gs.objectsGroup);
+	for(var y=0; y<gs.map.height; ++y) {
+		for(var x=0; x<gs.map.width; ++x) {
+			if(gs.map.layers[1].data[y][x].index != -1) {
+				if(typeof this.crumbleTiles[y] === 'undefined') {
+					this.crumbleTiles[y] = {};
+				}
+				this.crumbleTiles[y][x] =
+					gs.add.sprite(x*32, y*32, 'crumbling_tile', 0, this.crumbleGroup);
+			}
+		}
+	}
 	this.infectedTiles = [];
+	this.oldInfectedTiles = [];
 
 	this.crumbleStep = 0;
 	this.triggers.lava_fail.onEnter.addOnce(this.startCrumbleBridge, this);
@@ -2223,8 +2234,17 @@ Chap1Level.prototype.create = function() {
 		gs.displayMessage("chap1_messages", "secret", true);
 	}, this);
 
+	this.secretGroup = gs.add.group(gs.ceiling);
+	for(var y=0; y<gs.map.height; ++y) {
+		for(var x=0; x<gs.map.width; ++x) {
+			if(gs.map.layers[2].data[y][x].index != -1) {
+				var s = gs.add.sprite(x*32, y*32, 'black', 0, this.secretGroup);
+				s.scale.set(32, 32);
+			}
+		}
+	}
 	this.triggers.reveal_secret.onEnter.addOnce(function() {
-		gs.ceiling.remove(gs.secretLayer);
+		gs.ceiling.remove(this.secretGroup);
 	}, this);
 
 	for(var i=1; i<6; ++i) {
@@ -2258,12 +2278,12 @@ Chap1Level.prototype.update = function() {
 
 	var mapTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
 										undefined, undefined, gs.mapLayer);
-	if(mapTile.index == this.LAVA_TILE) {
-		var bridgeTile = gs.map.getTileWorldXY(gs.player.x, gs.player.y,
-											   undefined, undefined, gs.bridgeLayer);
-		if(bridgeTile === null) {
-			gs.player.damage(1);
-			
+	if(mapTile.index === this.LAVA_TILE) {
+		var x = Math.floor(gs.player.x/32);
+		var y = Math.floor(gs.player.y/32);
+		var bridgeTile = this.getBridgeTile(x, y);
+		if(!bridgeTile || !bridgeTile.alive) {
+			gs.player.damage(.5);
 		}
 	}
 };
@@ -2294,42 +2314,52 @@ Chap1Level.prototype.toogleMazeLights = function() {
 	// TODO: Add switch sound !
 };
 
+Chap1Level.prototype.getBridgeTile = function(x, y) {
+	'use strict';
+
+	var tile = this.crumbleTiles[y] && this.crumbleTiles[y][x];
+	return tile || null;
+}
+
 Chap1Level.prototype.startCrumbleBridge = function() {
 	'use strict';
 
-	this.infectedTiles = [ [ 6, 22 ] ];
+	this.crumbleTile(6, 22);
 	this.crumbleTimer = this.gameState.time.clock.events.loop(
-		250, this.stepCrumbleBridge, this);
+		225, this.stepCrumbleBridge, this);
 };
+
+Chap1Level.prototype.crumbleTile = function(x, y) {
+	'use strict';
+
+	var tile = this.getBridgeTile(x, y);
+	if(tile && tile.alive && !tile.crumling) {
+		this.infectedTiles.push([x, y]);
+		tile.crumling = true;
+	}
+}
 
 Chap1Level.prototype.stepCrumbleBridge = function() {
 	'use strict';
 
 	var gs = this.gameState;
 
-	var newlyInfected = [];
+	var tmp = this.oldInfectedTiles;
+	this.oldInfectedTiles = this.infectedTiles;
+	this.infectedTiles = tmp;
+	this.infectedTiles.length = 0;
 
-	for (var i = 0 ; i < this.infectedTiles.length ; i++)
+	for (var i = 0 ; i < this.oldInfectedTiles.length ; i++)
 	{
-		var coord = this.infectedTiles[i];
+		var coord = this.oldInfectedTiles[i];
 		var x = coord[0];
 		var y = coord[1];
-		gs.map.removeTile(x, y, gs.bridgeLayer);
+		this.getBridgeTile(x, y).kill();
 
-		var neighbours = [
-			[ x - 1, y ],
-			[ x + 1, y ],
-			[ x, y - 1 ],
-			[ x, y + 1 ]
-		];
-		for (var j = 0 ; j < 4 ; j++) {
-			var nb = neighbours[j];
-			var tile = gs.map.getTile(nb[0], nb[1], gs.bridgeLayer);
-			if(tile !== null && !tile.isMarked) {
-				newlyInfected.push(nb);
-				tile.isMarked = true;
-			}
-		}
+		this.crumbleTile(x - 1, y);
+		this.crumbleTile(x + 1, y);
+		this.crumbleTile(x, y - 1);
+		this.crumbleTile(x, y + 1);
 	}
 
 	++this.crumbleStep;
@@ -2347,7 +2377,6 @@ Chap1Level.prototype.stepCrumbleBridge = function() {
 		}
 	}
 
-	this.infectedTiles = newlyInfected;
 	if(this.infectedTiles.length === 0) {
 		gs.time.clock.events.remove(this.crumbleTimer);
 	}
@@ -2384,11 +2413,9 @@ Chap2Level.prototype.preload = function() {
 
 	gs.dagfin.load('json', "chap2_map_json", "assets/maps/chap2.json");
 	gs.dagfin.load('json', "chap2_messages", "assets/texts/"+lang+"/chap2.json");
-	
+
 	gs.dagfin.load('image', "chap2_tileset", "assets/tilesets/basic.png");
-	gs.dagfin.load('image', "spawn", "assets/tilesets/spawn.png");
-	gs.dagfin.load('image', "spawn2", "assets/tilesets/spawn2.png");
-	
+
 	gs.dagfin.load('image', "note", "assets/sprites/note.png");
 	gs.dagfin.load('image', "hourglass", "assets/sprites/sablier.png");
 	gs.dagfin.load('image', "plante64", "assets/sprites/plante64.png");
